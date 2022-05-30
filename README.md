@@ -1,6 +1,15 @@
-Coagulopathy and thromboembolic events among people vaccinated against COVID-19
+Natural History and Survival extrapolation of different cancers
 ========================================================================================================================================================
 
+## Introduction
+This study is focussing on determining the usefulness of real world data to determine and predict cancer survival for specific cancers. We will focus on the following cancers:
+* Breast
+* Colorectal
+* Lung
+* Liver
+* Stomach
+* Head/neck
+* Prostate
 
 ## Running the analysis
 1) Download this entire repository (you can download as a zip folder using Code -> Download ZIP, or you can use GitHub Desktop). 
