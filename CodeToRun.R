@@ -90,7 +90,7 @@ results_database_schema<-"....."
 
 # Tables to be created in your results schema for this analysis will be named using this as the stem 
 # Note, any existing tables in your results schema with the same names will be overwritten
-cohortTableStem<-"CoagulopathyInVaccinated"
+cohortTableStem<-"CancerSurvivalExtrapolation"
 
 # Check database connections -----
 # to check whether the OHDSI DatabaseConnector worked, uncomment and run the below three lines
