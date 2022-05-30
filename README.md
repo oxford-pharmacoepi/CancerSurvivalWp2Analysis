@@ -11,7 +11,7 @@ This study is focussing on determining the usefulness of real world data to dete
 * Head/neck
 * Prostate
 
-## THIS IS UNDER DEVELOPEMENT DO NOT RUN THESE STEPS ## if you are looking for demo code it can be found in the analysis folder
+## THIS IS UNDER DEVELOPEMENT DO NOT RUN THESE STEPS BELOW - if you are looking for demo code it can be found in the 2_Analysis folder
 
 ## Running the analysis
 1) Download this entire repository (you can download as a zip folder using Code -> Download ZIP, or you can use GitHub Desktop). 
