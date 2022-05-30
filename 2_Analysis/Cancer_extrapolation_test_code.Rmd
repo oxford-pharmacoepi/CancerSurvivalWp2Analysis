@@ -366,20 +366,22 @@ list_extrap_results <- list()               # Create empty list
 
 for(i in 1:length(extrapolations)) {   # Head of for-loop
   
+  #carry out models for different parametic methods
   model<-flexsurvreg(Surv(time, status)~1, data=data, dist=extrapolations[i])
   model_out <-summary(model,t=t)[[1]] # extract the data
   model_out$Method <- extrapolations_formatted[i]
   list_extrap_results[[i]] <- model_out   # Store output in list
   print(paste0(extrapolations_formatted[i]," ", Sys.time(), " completed"))
+  
 }
 
-# get observed data plot
-kmsurvival <- survfit (Surv(time, status) ~ 1, data=lung)
-km_data <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
-colnames(km_data) <- c("time", "est", "lcl", "ucl")
-km_data$Method <- "Observed"
+  # carry out the for the observed data using km -----
+  kmsurvival <- survfit (Surv(time, status) ~ 1, data=data)
+  km_data <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
+  colnames(km_data) <- c("time", "est", "lcl", "ucl")
+  km_data$Method <- "Observed"
 
-#get some colours
+#get some colours for plots
 cols <- c("#00468BFF", #dark blue
          "#ED0000FF", # red
          "#42B540FF", #green

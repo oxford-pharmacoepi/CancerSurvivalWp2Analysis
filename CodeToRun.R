@@ -32,6 +32,9 @@ library(rms)
 library(glue)
 library(readr)
 library(log4r)
+library(survival)
+library(flexsurv)
+library(tictoc)
 
 # Set output folder location -----
 # the path to a folder where the results from this analysis will be saved
@@ -74,7 +77,7 @@ db <- dbConnect("...")
 # Set database details -----
 
 # your sql dialect used with the OHDSI SqlRender package
-# eg “postgresql”, “redshift”, etc
+# eg postgresql, redshift etc
 # see https://ohdsi.github.io/SqlRender/articles/UsingSqlRender.html for more details
 targetDialect <-"....."  
 
