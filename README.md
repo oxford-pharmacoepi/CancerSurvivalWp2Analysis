@@ -11,6 +11,8 @@ This study is focussing on determining the usefulness of real world data to dete
 * Head/neck
 * Prostate
 
+## THIS IS UNDER DEVELOPEMENT DO NOT RUN THESE STEPS ## if you are looking for demo code it can be found in the analysis folder
+
 ## Running the analysis
 1) Download this entire repository (you can download as a zip folder using Code -> Download ZIP, or you can use GitHub Desktop). 
 2) Open the project <i>CoagulopathyInVaccinated.Rproj</i> in RStudio (when inside the project, you will see its name on the top-right of your RStudio session)
