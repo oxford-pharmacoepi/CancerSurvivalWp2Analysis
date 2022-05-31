@@ -1,13 +1,49 @@
+# Load packages ------ these will be in another script but for now are here (codetorun.r)
+# load r packages
+library(SqlRender)
+library(DatabaseConnector)
+library(FeatureExtraction)
+library(here)
+library(lubridate)
+library(stringr)
+library(ggplot2)
+library(DBI)
+library(dbplyr)
+library(dplyr)
+library(tidyr)
+library(kableExtra)
+library(RSQLite)
+library(rmarkdown)
+library(tableone)
+library(scales)
+library(forcats)
+library(epiR)
+library(RPostgres)
+library(cmprsk)
+library(mstate)
+library(broom)
+library(rms)
+library(glue)
+library(readr)
+library(log4r)
+library(survival)
+library(flexsurv)
+library(tictoc)
+library(purrr)
 
-# Initiate lists to store output ----
-Patient.characteristcis<-list() 
-Survival.summary<-list() 
+# Initiate lists to store output ---- will have to make folders for each cancer and loop
+list_extrap_results <- list() # Create empty list for extrapolations
+list_observed_results <- list() # create an empty list for observed data
+gof_results <- list() # required to assess goodness of fit (AIC/BIC)
+cumhaz_results <- list() #required for cumhaz plots
 
 # Bring in data (this will be removed when we have data) -----
 data(cancer, package="survival")
 lung
 
-# set up inputs ----- at the moment one dataset but will do it so it runs multiple cancers
+# set up inputs ----- at the moment one dataset and alot of these settings will be in other scripts
+output.folder<-here("lung")
+db.name<-"CPRD"
 data <- lung
 time <- "time"
 status <- "status"
@@ -15,12 +51,6 @@ extrapolations <- c("gompertz", "weibull", "exp", "llogis", "lnorm", "gengamma")
 extrapolations_formatted <- c("Gompertz", "Weibull", "Exponential", "Log-logistic", "Log-normal", "Generalised Gamma")
 timeinyrs <- 10
 t <- seq(0, timeinyrs*10, by=1) # calculates the extrapolation for 10 years
-
-
-# for each function use flexsurvreg to model and then extract the output and goodness of fit ----
-list_extrap_results <- list() # Create empty list
-gof_results <- list() # required to assess goodness of fit (AIC/BIC)
-cumhaz_results <- list() #required for cumhaz plots
 
 # function to carry out extrapolation produces survival data, cum hazard and goodness of fit
 for(i in 1:length(extrapolations)) {   # Head of for-loop
@@ -33,6 +63,7 @@ for(i in 1:length(extrapolations)) {   # Head of for-loop
   
   #carry out models for different parametric methods cumhaz
   model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
+  model_out2$Method <- extrapolations_formatted[i]
   cumhaz_results[[i]] <- model_out2   # Store output in list
   
   #get the goodness of fit for each model
@@ -43,14 +74,48 @@ for(i in 1:length(extrapolations)) {   # Head of for-loop
 
 }
 
-# carry out the for the observed data using km survival -----
+#get the observed data and output the results survival
 kmsurvival <- survfit (Surv(time, status) ~ 1, data=data)
-km_data <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
-colnames(km_data) <- c("time", "est", "lcl", "ucl")
-km_data$Method <- "Observed"
+km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
+colnames(km_result) <- c("time", "est", "lcl", "ucl")
+km_result$Method <- "Observed"
 
 # carry out the for the observed data using km cum hazard -----
+#tbc
 
+#save the results in the output ----- so people can create their own plots for each cancer
+Survival.summary_all <- list_extrap_results %>%
+  map(as_tibble) %>%
+  reduce(bind_rows) %>% 
+  bind_rows(km_result) %>% 
+  collect()
+
+#save gof outputs (need to add names) -------
+Survival.gof_all <- gof_results %>%
+  map(as_tibble) %>%
+  reduce(bind_rows) %>% 
+  mutate(Method = extrapolations_formatted,
+         .before=logLik) %>%
+  collect()
+
+#save cumhaz outputs ------
+CumHaz.summary_all <- cumhaz_results %>%
+  map(as_tibble) %>%
+  reduce(bind_rows) %>% 
+  collect()
+
+
+#save in output files ----------
+#first check if there is a folder
+if (!file.exists(output.folder))
+  dir.create(output.folder, recursive = TRUE)
+
+#write out the results extrapolation results, cumulative hazard and gof plots
+write.csv(Survival.summary_all, file=paste0(output.folder, "/Survival_extrapolations_", db.name, "_ALL.csv"), row.names = FALSE)
+write.csv(Survival.gof_all, file=paste0(output.folder, "/GOF_", db.name, "_ALL.csv"), row.names = FALSE)
+write.csv(CumHaz.summary_all, file=paste0(output.folder, "/CumHaz_", db.name, "_ALL.csv"), row.names = FALSE)
+
+## plots ------
 
 # get some colours for plots --------
 cols <- c("#00468BFF", #dark blue
@@ -73,12 +138,14 @@ for(i in 1:length(extrapolations)) {
   # for each extrapolation method rbind with each observed and create a plot
   extrap_results <- list_extrap_results[[i]]
   
+  km_data <-  list_observed_results[[1]]
+  
   #rbind the observed results to the extrapolated ones
   extrap_results1 <- rbind(km_data, extrap_results)
   
   extrap_results1$Method <- factor(extrap_results1$Method, levels=c('Observed', extrap_results1$Method[nrow(extrap_results1)] ))
   
-  # might need to convert days to years
+  # convert days to years
   extrap_results1 <- extrap_results1 %>% 
     mutate(Years = round(time/365.25, digit=5))
   
@@ -90,12 +157,22 @@ for(i in 1:length(extrapolations)) {
     scale_fill_manual(values = my_colors) +
     theme_bw() + 
     theme( legend.position = 'top', legend.direction = "horizontal") +
-    scale_x_continuous(limits = c(0,max(combined_data$Years)), expand =c(0,0) ,
-                       breaks = seq(0,max(combined_data$Years), by = 2 ) ) +
+    scale_x_continuous(limits = c(0,max(extrap_results1$Years)), expand =c(0,0) ,
+                       breaks = seq(0,max(extrap_results1$Years), by = 2 ) ) +
     scale_y_continuous(limits = c(0,1.02), expand =c(0.01,0)) 
   
-  ggsave(plot_km1, file= here(paste0("plot_survival", extrapolations_formatted[i],".png"))
+  
+  #name plot
+  plotname <- paste0("plot_survival_", extrapolations_formatted[i],".png")
+  
+  # ggsave(plot_km1, file= here("Github", "CancerSurvivalExtrapolation","3_ExamplePlots", plotname)
+  #        , width = 14, height = 10, units = "cm")
+  
+  ggsave(plot_km1, file= here("Github", "CancerSurvivalExtrapolation","3_ExamplePlots", plotname)
          , width = 14, height = 10, units = "cm")
+  
+  
+  
   
 }
 

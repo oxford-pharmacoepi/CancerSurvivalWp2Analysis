@@ -35,15 +35,16 @@ library(log4r)
 library(survival)
 library(flexsurv)
 library(tictoc)
+library(purrr)
 
 # Set output folder location -----
 # the path to a folder where the results from this analysis will be saved
-# to set the location within the project with folder called "ouput, we can use: here("output")
+# to set the location within the project with folder called "lung", we can use: here("lung")
 # but this file path could be set to somewhere else
-output.folder<-here("output")
+output.folder<-here("lung")
 
 # Set the name/ acronym for your database (to be used in the titles of reports, etc) -----
-db.name<-"....."
+db.name<-"CPRD"
 
 # Specify OHDSI DatabaseConnector connection details  ------
 # set up the createConnectionDetails to connect to the database
