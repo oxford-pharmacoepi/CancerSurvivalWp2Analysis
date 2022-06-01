@@ -91,7 +91,7 @@ Survival.summary_all <- list_extrap_results %>%
   bind_rows(km_result) %>% 
   collect()
 
-#save gof outputs (need to add names) -------
+#save gof outputs -------
 Survival.gof_all <- gof_results %>%
   map(as_tibble) %>%
   reduce(bind_rows) %>% 
