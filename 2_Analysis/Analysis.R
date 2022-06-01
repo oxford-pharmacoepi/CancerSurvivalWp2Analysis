@@ -50,10 +50,11 @@ status <- "status"
 extrapolations <- c("gompertz", "weibull", "exp", "llogis", "lnorm", "gengamma") # will include flex ones in later
 extrapolations_formatted <- c("Gompertz", "Weibull", "Exponential", "Log-logistic", "Log-normal", "Generalised Gamma")
 timeinyrs <- 10
-t <- seq(0, timeinyrs*10, by=1) # calculates the extrapolation for 10 years
+t <- seq(0, timeinyrs*365.25, by=1) # calculates the extrapolation for 10 years
 
 # function to carry out extrapolation produces survival data, cum hazard and goodness of fit
 for(i in 1:length(extrapolations)) {   # Head of for-loop
+
   
   #carry out models for different parametic methods survival
   model<-flexsurvreg(Surv(time, status)~1, data=data, dist=extrapolations[i])
@@ -138,7 +139,7 @@ for(i in 1:length(extrapolations)) {
   # for each extrapolation method rbind with each observed and create a plot
   extrap_results <- list_extrap_results[[i]]
   
-  km_data <-  list_observed_results[[1]]
+  km_data <-  km_result
   
   #rbind the observed results to the extrapolated ones
   extrap_results1 <- rbind(km_data, extrap_results)
@@ -168,10 +169,8 @@ for(i in 1:length(extrapolations)) {
   # ggsave(plot_km1, file= here("Github", "CancerSurvivalExtrapolation","3_ExamplePlots", plotname)
   #        , width = 14, height = 10, units = "cm")
   
-  ggsave(plot_km1, file= here("Github", "CancerSurvivalExtrapolation","3_ExamplePlots", plotname)
+  ggsave(plot_km1, file= paste0(output.folder,"/", plotname)
          , width = 14, height = 10, units = "cm")
-  
-  
   
   
 }
