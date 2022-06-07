@@ -1,5 +1,6 @@
 # Load packages ------ these will be in another script but for now are here (codetorun.r)
 # load r packages
+rm(list = ls()) # clear environment (needs removing)
 library(SqlRender)
 library(DatabaseConnector)
 library(FeatureExtraction)
@@ -176,6 +177,7 @@ cols <- c("#00468BFF", #dark blue
 
 #  carry out basic plots
 
+#survival extrapolations
 for(i in 1:length(extrapolations)) { 
   
   my_colors <- c("darkgrey", cols[i])
@@ -220,3 +222,44 @@ for(i in 1:length(extrapolations)) {
 }
 
 
+# cumulative hazard
+for(i in 1:length(extrapolations)) { 
+  
+  my_colors <- c("darkgrey", cols[i])
+  
+  # for each extrapolation method rbind with each observed and create a plot
+  extrap_results <- cumhaz_results[[i]]
+  
+  km_data <-  km_result_cumhaz
+  
+  #rbind the observed results to the extrapolated ones
+  extrap_results1 <- rbind(km_data, extrap_results)
+  
+  extrap_results1$Method <- factor(extrap_results1$Method, levels=c('Observed', extrap_results1$Method[nrow(extrap_results1)] ))
+  
+  # convert days to years
+  extrap_results1 <- extrap_results1 %>% 
+    mutate(Years = round(time/365.25, digit=5))
+  
+  plot_km1 <- ggplot(extrap_results1, aes(x = Years, y = est, colour = Method)) + 
+    xlab("Years") + ylab("Survival Probability") +
+    geom_line() +
+    geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Method), linetype = 2, alpha = 0.1) +
+    scale_color_manual(values = my_colors) +
+    scale_fill_manual(values = my_colors) +
+    theme_bw() + 
+    theme( legend.position = 'top', legend.direction = "horizontal") +
+    scale_x_continuous(limits = c(0,max(extrap_results1$Years)), expand =c(0,0) ,
+                       breaks = seq(0,max(extrap_results1$Years), by = 2 ) ) +
+    scale_y_continuous(limits = c(0,max(extrap_results1$ucl)), expand =c(0.01,0)) 
+  
+  
+  #name plot
+  plotname <- paste0("plot_cum_haz_", extrapolations_formatted[i],".png")
+  
+  
+  ggsave(plot_km1, file= paste0(output.folder,"/", plotname)
+         , width = 14, height = 10, units = "cm")
+  
+  
+}
