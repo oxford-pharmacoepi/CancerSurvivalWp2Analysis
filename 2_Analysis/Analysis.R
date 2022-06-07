@@ -120,8 +120,12 @@ km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lo
 colnames(km_result) <- c("time", "est", "lcl", "ucl")
 km_result$Method <- "Observed"
 
-# carry out the for the observed data using km cum hazard -----
-#tbc
+# carry out the for the observed data using km cum hazard # cumulative hazard is y -log(y) -----
+km_result_cumhaz <- km_result %>%
+  mutate(lcl = -log(lcl),
+         ucl = -log(ucl),
+         est = -log(est))
+
 
 #save the results in the output ----- so people can create their own plots for each cancer
 Survival.summary_all <- list_extrap_results %>%
@@ -142,6 +146,7 @@ Survival.gof_all <- gof_results %>%
 CumHaz.summary_all <- cumhaz_results %>%
   map(as_tibble) %>%
   reduce(bind_rows) %>% 
+  bind_rows(km_result_cumhaz) %>% 
   collect()
 
 
