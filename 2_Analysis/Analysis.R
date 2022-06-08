@@ -34,7 +34,6 @@ library(purrr)
 
 # Initiate lists to store output ---- will have to make folders for each cancer and loop
 list_extrap_results <- list() # Create empty list for extrapolations
-list_observed_results <- list() # create an empty list for observed data
 gof_results <- list() # required to assess goodness of fit (AIC/BIC)
 cumhaz_results <- list() #required for cumhaz plots
 
@@ -48,9 +47,10 @@ db.name<-"CPRD"
 data <- lung
 time <- "time"
 status <- "status"
-# extrapolations <- c("gompertz", "weibull", "exp", "llogis", "lnorm", "gengamma") # will include flex ones in later
-# extrapolations_formatted <- c("Gompertz", "Weibull", "Exponential", "Log-logistic", "Log-normal", "Generalised Gamma")
-extrapolations <- c("gompertz", "weibull", "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3") # will include flex ones in later
+sex <- "gender"
+age <- "age" # or are we doing age bands?
+
+extrapolations <- c("gompertz", "weibull", "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3") 
 extrapolations_formatted <- c("Gompertz", "Weibull", "Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 Knot)", "Spline (3 knots)")
 timeinyrs <- 10
 t <- seq(0, timeinyrs*365.25, by=1) # calculates the extrapolation for 10 years
@@ -156,7 +156,7 @@ CumHaz.summary_all <- cumhaz_results %>%
 if (!file.exists(output.folder))
   dir.create(output.folder, recursive = TRUE)
 
-#write out the results extrapolation results, cumulative hazard and gof plots
+#write out the results extrapolation results, cumulative hazard and gof plots ALL POPULATION
 write.csv(Survival.summary_all, file=paste0(output.folder, "/Survival_extrapolations_", db.name, "_ALL.csv"), row.names = FALSE)
 write.csv(Survival.gof_all, file=paste0(output.folder, "/GOF_", db.name, "_ALL.csv"), row.names = FALSE)
 write.csv(CumHaz.summary_all, file=paste0(output.folder, "/CumHaz_", db.name, "_ALL.csv"), row.names = FALSE)
@@ -176,7 +176,6 @@ cols <- c("#00468BFF", #dark blue
           ) # dark red
 
 #  carry out basic plots
-
 #survival extrapolations
 for(i in 1:length(extrapolations)) { 
   
@@ -317,3 +316,77 @@ for(i in 1:length(extrapolations)) {
   
   
 }
+
+# stratification
+# Initiate lists to store output ---- 
+list_extrap_results_strat <- list() # Create empty list for extrapolations
+gof_results_strat <- list() # required to assess goodness of fit (AIC/BIC)
+
+# structure of list [[strata]] >> [[results]]: strata is gender, age, gender*age
+# function to carry out extrapolation produces survival data, cum hazard and goodness of fit
+for(i in 1:length(extrapolations)) {   # Head of for-loop
+  
+  if(extrapolations[i] == "spline1") {
+    
+    # 1knotspline
+    model <- flexsurvspline(formula=Surv(time,status-1)~1,data=lung,k = 1, scale = "hazard")
+    model_out <-summary(model,t=t)[[1]] # extract the data
+    model_out$Method <- extrapolations_formatted[i]
+    list_extrap_results[[i]] <- model_out   # Store output in list
+    
+    #carry out models for different parametric methods cumhaz
+    model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
+    model_out2$Method <- extrapolations_formatted[i]
+    cumhaz_results[[i]] <- model_out2   # Store output in list
+    
+    #get the goodness of fit for each model
+    gof_results[[i]] <- round(glance(model)[,c(6:8)],2)
+    
+    #print out progress               
+    print(paste0(extrapolations_formatted[i]," ", Sys.time(), " completed"))
+    
+  } else if(extrapolations[i] == "spline3") {
+    # 3knotspline
+    model <- flexsurvspline(formula=Surv(time,status-1)~1,data=lung,k = 3, scale = "hazard")
+    model_out <-summary(model,t=t)[[1]] # extract the data
+    model_out$Method <- extrapolations_formatted[i]
+    list_extrap_results[[i]] <- model_out   # Store output in list
+    
+    #carry out models for different parametric methods cumhaz
+    model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
+    model_out2$Method <- extrapolations_formatted[i]
+    cumhaz_results[[i]] <- model_out2   # Store output in list
+    
+    #get the goodness of fit for each model
+    gof_results[[i]] <- round(glance(model)[,c(6:8)],2)
+    
+    #print out progress               
+    print(paste0(extrapolations_formatted[i]," ", Sys.time(), " completed"))
+    
+  } else {
+    #carry out models for different parametic methods survival
+    model<-flexsurvreg(Surv(time, status)~gender, data=data, dist=extrapolations[i])
+    model_out <-summary(model,t=t)[[1]] # extract the data
+    model_out$Method <- extrapolations_formatted[i]
+    list_extrap_results[[i]] <- model_out   # Store output in list
+    
+    #carry out models for different parametric methods cumhaz
+    model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
+    model_out2$Method <- extrapolations_formatted[i]
+    cumhaz_results[[i]] <- model_out2   # Store output in list
+    
+    #get the goodness of fit for each model
+    gof_results[[i]] <- round(glance(model)[,c(6:8)],2)
+    
+    #print out progress               
+    print(paste0(extrapolations_formatted[i]," ", Sys.time(), " completed"))
+  }
+}
+
+#get the observed data and output the results survival
+kmsurvival <- survfit (Surv(time, status) ~ 1, data=data)
+km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
+colnames(km_result) <- c("time", "est", "lcl", "ucl")
+km_result$Method <- "Observed"
+
+
