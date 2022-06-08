@@ -436,8 +436,8 @@ km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lo
 colnames(km_result) <- c("time", "est", "lcl", "ucl")
 km_result$Method <- "Observed"
 # add in gender strata terms
-km_result$strata <- c(rep(1, kmsurvival$n[1]),
-rep(2, kmsurvival$n[2]) ) # doesnt work
+km_result$strata <- c(rep(1, kmsurvival$strata[1]),
+rep(2, kmsurvival$strata[2]) )
 
 
 
