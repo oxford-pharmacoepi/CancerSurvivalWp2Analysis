@@ -49,7 +49,6 @@ time <- "time"
 status <- "status"
 sex <- "gender"
 age <- "age" # or are we doing age bands?
-
 extrapolations <- c("gompertz", "weibull", "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3") 
 extrapolations_formatted <- c("Gompertz", "Weibull", "Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 Knot)", "Spline (3 knots)")
 timeinyrs <- 10
@@ -322,6 +321,12 @@ for(i in 1:length(extrapolations)) {
 list_extrap_results_strat <- list() # Create empty list for extrapolations
 gof_results_strat <- list() # required to assess goodness of fit (AIC/BIC)
 
+# need to check the variable for stratification are factors if not then turn them into factor
+data <- data %>%
+  mutate_at(vars(sex), 
+            list(factor))
+
+
 # structure of list [[strata]] >> [[results]]: strata is gender, age, gender*age
 # function to carry out extrapolation produces survival data, cum hazard and goodness of fit
 for(i in 1:length(extrapolations)) {   # Head of for-loop
@@ -365,15 +370,27 @@ for(i in 1:length(extrapolations)) {   # Head of for-loop
     
   } else {
     #carry out models for different parametic methods survival
-    model<-flexsurvreg(Surv(time, status)~gender, data=data, dist=extrapolations[i])
-    model_out <-summary(model,t=t)[[1]] # extract the data
+    model<-flexsurvreg(Surv(time, status)~sex, data=data, dist=extrapolations[i])
+    model_out1 <-summary(model,t=t)[[1]] # extract the data
+    model_out2 <-summary(model,t=t)[[2]] # extract the data
+    #add names of strata
+    model_out1$strata <- levels(data$sex)[1]
+    model_out2$strata <- levels(data$sex)[2]
+    #bind the results
+    model_out <- rbind(model_out1, model_out2)
+    #add in the method name
     model_out$Method <- extrapolations_formatted[i]
     list_extrap_results[[i]] <- model_out   # Store output in list
     
     #carry out models for different parametric methods cumhaz
-    model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
-    model_out2$Method <- extrapolations_formatted[i]
-    cumhaz_results[[i]] <- model_out2   # Store output in list
+    model_out3 <- summary(model, t=t , type = "cumhaz")[[1]]
+    model_out4 <- summary(model, t=t , type = "cumhaz")[[2]]
+    #add names of strata
+    model_out3$strata <- levels(data$sex)[1]
+    model_out4$strata <- levels(data$sex)[2]
+    model_out5 <- rbind(model_out3, model_out4)
+    model_out5$Method <- extrapolations_formatted[i]
+    cumhaz_results[[i]] <- model_out5   # Store output in list
     
     #get the goodness of fit for each model
     gof_results[[i]] <- round(glance(model)[,c(6:8)],2)
