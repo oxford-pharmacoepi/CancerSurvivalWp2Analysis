@@ -435,8 +435,9 @@ kmsurvival <- survfit (Surv(time, status) ~ sex, data=data)
 km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
 colnames(km_result) <- c("time", "est", "lcl", "ucl")
 km_result$Method <- "Observed"
-
 # add in gender strata terms
+km_result$strata <- c(rep(1, kmsurvival$n[1]),
+rep(2, kmsurvival$n[2]) ) # doesnt work
 
 
 
