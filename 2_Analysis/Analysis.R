@@ -334,13 +334,26 @@ for(i in 1:length(extrapolations)) {   # Head of for-loop
   if(extrapolations[i] == "spline1") {
     
     # 1knotspline
-    model <- flexsurvspline(formula=Surv(time,status-1)~1,data=lung,k = 1, scale = "hazard")
+    model <- flexsurvspline(formula=Surv(time,status-1)~sex,data=lung,k = 1, scale = "hazard")
     model_out <-summary(model,t=t)[[1]] # extract the data
+    model_outa <-summary(model,t=t)[[2]] # extract the data
+    #add names of strata
+    model_out$strata <- levels(data$sex)[1]
+    model_outa$strata <- levels(data$sex)[2]
+    #bind the results
+    model_out <- rbind(model_out, model_outa)
     model_out$Method <- extrapolations_formatted[i]
     list_extrap_results[[i]] <- model_out   # Store output in list
     
     #carry out models for different parametric methods cumhaz
     model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
+    model_out2a <- summary(model, t=t , type = "cumhaz")[[2]]
+    #add names of strata
+    model_out2$strata <- levels(data$sex)[1]
+    model_out2a$strata <- levels(data$sex)[2]
+    #bind the results
+    model_out2 <- rbind(model_out2, model_out2a)
+    
     model_out2$Method <- extrapolations_formatted[i]
     cumhaz_results[[i]] <- model_out2   # Store output in list
     
@@ -352,13 +365,30 @@ for(i in 1:length(extrapolations)) {   # Head of for-loop
     
   } else if(extrapolations[i] == "spline3") {
     # 3knotspline
-    model <- flexsurvspline(formula=Surv(time,status-1)~1,data=lung,k = 3, scale = "hazard")
+    model <- flexsurvspline(formula=Surv(time,status-1)~sex,data=lung,k = 3, scale = "hazard")
     model_out <-summary(model,t=t)[[1]] # extract the data
+    model_outa <-summary(model,t=t)[[2]] # extract the data
+    
+    #add names of strata
+    model_out$strata <- levels(data$sex)[1]
+    model_outa$strata <- levels(data$sex)[2]
+    #bind the results
+    model_out <- rbind(model_out, model_outa)
+    
     model_out$Method <- extrapolations_formatted[i]
     list_extrap_results[[i]] <- model_out   # Store output in list
     
     #carry out models for different parametric methods cumhaz
     model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
+    model_out2a <- summary(model, t=t , type = "cumhaz")[[2]]
+    
+    #add names of strata
+    model_out2$strata <- levels(data$sex)[1]
+    model_out2a$strata <- levels(data$sex)[2]
+    #bind the results
+    model_out2 <- rbind(model_out2, model_out2a)
+    
+    
     model_out2$Method <- extrapolations_formatted[i]
     cumhaz_results[[i]] <- model_out2   # Store output in list
     
@@ -401,9 +431,14 @@ for(i in 1:length(extrapolations)) {   # Head of for-loop
 }
 
 #get the observed data and output the results survival
-kmsurvival <- survfit (Surv(time, status) ~ 1, data=data)
+kmsurvival <- survfit (Surv(time, status) ~ sex, data=data)
 km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
 colnames(km_result) <- c("time", "est", "lcl", "ucl")
 km_result$Method <- "Observed"
+
+# add in gender strata terms
+
+
+
 
 
