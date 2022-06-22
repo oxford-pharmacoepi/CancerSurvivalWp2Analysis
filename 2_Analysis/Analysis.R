@@ -40,6 +40,7 @@ cumhaz_results <- list() #required for cumhaz plots
 # Bring in data (this will be removed when we have data) -----
 data(cancer, package="survival")
 lung
+# what i imagine is that we will have a csv file listing the cancer cohorts names at least
 
 # set up inputs ----- at the moment one dataset and alot of these settings will be in other scripts
 output.folder<-here("lung")
@@ -119,6 +120,23 @@ kmsurvival <- survfit (Surv(time, status) ~ 1, data=data)
 km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
 colnames(km_result) <- c("time", "est", "lcl", "ucl")
 km_result$Method <- "Observed"
+
+
+# get the mean and median survival from observed data
+asd <- as.data.frame(summary(kmsurvival)$table)
+
+# get the survival probabilities for 1, 5 and 10 years
+#1 year
+year1 <- summary(survfit(Surv(time, status) ~ 1, data = lung), times = 365.25)$surv
+
+#5 years
+year5 <- summary(survfit(Surv(time, status) ~ 1, data = lung), times = 1826.25)$surv # comes up with an error
+
+#10 years
+year10 <- summary(survfit(Surv(time, status) ~ 1, data = lung), times = 3652.5) # comes up with an error
+
+
+
 
 # carry out the for the observed data using km cum hazard # cumulative hazard is y -log(y) -----
 km_result_cumhaz <- km_result %>%
@@ -326,6 +344,7 @@ for(i in 1:length(extrapolations)) {
 # Initiate lists to store output ---- 
 list_extrap_results_strat <- list() # Create empty list for extrapolations
 gof_results_strat <- list() # required to assess goodness of fit (AIC/BIC)
+cumhaz_results_strat <- list() #not sure if we need this
 
 # need to check the variable for stratification are factors if not then turn them into factor
 data <- data %>%
@@ -418,7 +437,7 @@ for(i in 1:length(extrapolations)) {   # Head of for-loop
     model_out <- rbind(model_out1, model_out2)
     #add in the method name
     model_out$Method <- extrapolations_formatted[i]
-    list_extrap_results[[i]] <- model_out   # Store output in list
+    list_extrap_results_strat[[i]] <- model_out   # Store output in list
     
     #carry out models for different parametric methods cumhaz
     model_out3 <- summary(model, t=t , type = "cumhaz")[[1]]
@@ -428,10 +447,10 @@ for(i in 1:length(extrapolations)) {   # Head of for-loop
     model_out4$strata <- levels(data$sex)[2]
     model_out5 <- rbind(model_out3, model_out4)
     model_out5$Method <- extrapolations_formatted[i]
-    cumhaz_results[[i]] <- model_out5   # Store output in list
+    cumhaz_results_strat[[i]] <- model_out5   # Store output in list
     
     #get the goodness of fit for each model
-    gof_results[[i]] <- round(glance(model)[,c(6:8)],2)
+    gof_results_strat[[i]] <- round(glance(model)[,c(6:8)],2)
     
     #print out progress               
     print(paste0(extrapolations_formatted[i]," ", Sys.time(), " completed"))
@@ -440,14 +459,36 @@ for(i in 1:length(extrapolations)) {   # Head of for-loop
 
 #get the observed data and output the results survival
 kmsurvival <- survfit (Surv(time, status) ~ sex, data=data)
-km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
-colnames(km_result) <- c("time", "est", "lcl", "ucl")
-km_result$Method <- "Observed"
+km_result_strat <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
+colnames(km_result_strat) <- c("time", "est", "lcl", "ucl")
 # add in gender strata terms
-km_result$strata <- c(rep(1, kmsurvival$strata[1]),
-rep(2, kmsurvival$strata[2]) )
+km_result_strat$strata <- c(rep("1", kmsurvival$strata[1]),
+                            rep("2", kmsurvival$strata[2]) )
+km_result_strat$Method <- "Observed"
 
+#save the results in the output ----- so people can create their own plots for each cancer
+Survival.summary_strat <- list_extrap_results_strat %>%
+  map(as_tibble) %>%
+  reduce(bind_rows) %>% 
+  bind_rows(km_result_strat) %>% 
+  collect()
 
+#save gof outputs -------
+Survival.gof_strat <- gof_results_strat %>%
+  map(as_tibble) %>%
+  reduce(bind_rows) %>% 
+  mutate(Method = extrapolations_formatted[1:6],
+         .before=logLik) %>%
+  collect()
+
+#save in output files ----------
+#first check if there is a folder
+if (!file.exists(output.folder))
+  dir.create(output.folder, recursive = TRUE)
+
+#write out the results extrapolation results, cumulative hazard and gof plots ALL POPULATION
+write.csv(Survival.summary_strat, file=paste0(output.folder, "/Survival_extrapolations_", db.name, "_strata.csv"), row.names = FALSE)
+write.csv(Survival.gof_strat, file=paste0(output.folder, "/GOF_", db.name, "_strata.csv"), row.names = FALSE)
 
 
 
