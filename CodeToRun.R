@@ -37,14 +37,15 @@ library(flexsurv)
 library(tictoc)
 library(purrr)
 
+# Set the name/ acronym for your database (to be used in the titles of reports, etc) -----
+db.name<-"CPRD_Aurum"
+
 # Set output folder location -----
 # the path to a folder where the results from this analysis will be saved
-# to set the location within the project with folder called "lung", we can use: here("lung")
+# to set the location within the project with folder called "CPRD", we can use: here("CPRD")
 # but this file path could be set to somewhere else
-output.folder<-here("lung")
+output.folder<-here("Results",db.name)
 
-# Set the name/ acronym for your database (to be used in the titles of reports, etc) -----
-db.name<-"CPRD"
 
 # Specify OHDSI DatabaseConnector connection details  ------
 # set up the createConnectionDetails to connect to the database
