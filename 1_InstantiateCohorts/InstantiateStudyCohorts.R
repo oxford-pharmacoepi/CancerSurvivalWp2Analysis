@@ -7,7 +7,7 @@ exposure.cohorts<-tibble(id=CohortsToCreate$cohortId,
                         file=paste0(CohortsToCreate$name, ".sql"),
                         name=CohortsToCreate$name)
 if(run.as.test==TRUE){
-  exposure.cohorts<-exposure.cohorts %>% filter(name=="dose1_pfizer")
+  exposure.cohorts<-exposure.cohorts %>% filter(name=="colorectal_cancer")
 }
 
 if(create.exposure.cohorts==TRUE){
