@@ -1,13 +1,3 @@
 atlasId,atlasName,cohortId,name
-101,dose1_AZ,101,dose1_AZ
-102,dose1_pfizer,102,dose1_pfizer
-103,dose1_moderna,103,dose1_moderna
-104,dose1_janssen,104,dose1_janssen
-201,dose2_AZ,201,dose2_AZ
-202,dose2_pfizer,202,dose2_pfizer
-203,dose2_moderna,203,dose2_moderna
-204,dose2_pfizer_any,204,dose2_pfizer_any
-205,dose2_pfizer_mix,205,dose2_pfizer_mix
-206,dose2_moderna_any,206,dose2_moderna_any
-207,dose2_moderna_mix,207,dose2_moderna_mix
-301,General population 2017,301,General population 2017
+101,colorectal_cancer,101,colorectal_cancer
+102,dummy_cancer,102,dummy_cancer
