@@ -1,3 +1,10 @@
 atlasId,atlasName,cohortId,name
-101,colorectal_cancer,101,colorectal_cancer
-102,dummy_cancer,102,dummy_cancer
+101,BreastCancer,101,BreastCancer
+102,ColorectalCancer,102,ColorectalCancer
+103,ColorectalCancerRead,103,ColorectalCancerRead
+104,HeadNeckCancer,104,HeadNeckCancer
+105,LiverBileDuctCancer,105,LiverBileDuctCancer
+106,LiverCancer,106,LiverCancer
+107,LungCancer,107,LungCancer
+108,ProstateCancer,108,ProstateCancer
+109,StomachCancer,109,StomachCancer
