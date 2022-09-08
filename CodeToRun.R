@@ -8,7 +8,7 @@ renv::restore()
 # load r packages
 library(SqlRender)
 library(DatabaseConnector)
-library(FeatureExtraction)
+library(FeatureExtraction) 
 library(here)
 library(lubridate)
 library(stringr)
@@ -18,24 +18,33 @@ library(dbplyr)
 library(dplyr)
 library(tidyr)
 library(kableExtra)
-library(RSQLite)
+library(RSQLite) 
 library(rmarkdown)
-library(tableone)
+library(tableone) 
 library(scales)
-library(forcats)
-library(epiR)
+library(forcats) 
+#library(epiR) ## not working
 library(RPostgres)
-library(cmprsk)
+library(cmprsk) #
 library(mstate)
-library(broom)
+library(broom) #
 library(rms)
-library(glue)
+library(glue) #
 library(readr)
-library(log4r)
+library(log4r) #
 library(survival)
 library(flexsurv)
 library(tictoc)
 library(purrr)
+library(CirceR)
+library(remotes)
+library(CohortGenerator)
+library(survminer)
+
+
+# install.packages("drat")
+# drat::addRepo("OHDSI")
+# install.packages("FeatureExtraction")
 
 # Set the name/ acronym for your database (to be used in the titles of reports, etc) -----
 db.name<-"CPRD_Aurum"
@@ -47,15 +56,25 @@ db.name<-"CPRD_Aurum"
 output.folder<-here("Results",db.name)
 
 
+# database connection details
+server     <- Sys.getenv("DB_SERVER_cdm_aurum_202106") # AURUM
+server_dbi <- Sys.getenv("DB_SERVER_cdm_aurum_202106_dbi") #AURUM
+user       <- Sys.getenv("DB_USER")
+password   <- Sys.getenv("DB_PASSWORD")
+port       <- Sys.getenv("DB_PORT") 
+host       <- Sys.getenv("DB_HOST") 
+
 # Specify OHDSI DatabaseConnector connection details  ------
 # set up the createConnectionDetails to connect to the database
 # see http://ohdsi.github.io/DatabaseConnector for more details
-connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = "....",
-                                                                server ="....", #eg "10.80...../mypostgres"
-                                                                user = "....",
-                                                                password = "....",
-                                                                port = "....",
-                                                                pathToDriver = "....")
+
+downloadJdbcDrivers("postgresql", here()) # if you already have this you can omit and change pathToDriver below
+connectionDetails <- createConnectionDetails(dbms = "postgresql",
+                                             server =server,
+                                             user = user,
+                                             password = password,
+                                             port = port ,
+                                             pathToDriver = here())
 
 
 
@@ -64,16 +83,8 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = "....",
 # set up the dbConnect details below (see https://dbi.r-dbi.org/articles/dbi for more details)
 # you may need to install another package for this (although RPostgres is included with renv in case you are using postgres)
 
-db <- dbConnect("...")
-# eg for postgres 
-# db <- dbConnect(RPostgres::PostgreSQL(),
-#                 dbname = "....", #eg "mypostgres" (without the "10.80...../" used in DatabaseConnector)
-#                 port = "....",
-#                 host = "....", 
-#                 user = "....", 
-#                 password = "....")
-
-
+db <- dbConnect(RPostgres::Postgres(), dbname = server_dbi, port = port, host = host, user = user,
+                password = password)
 
 
 # Set database details -----
@@ -81,21 +92,21 @@ db <- dbConnect("...")
 # your sql dialect used with the OHDSI SqlRender package
 # eg postgresql, redshift etc
 # see https://ohdsi.github.io/SqlRender/articles/UsingSqlRender.html for more details
-targetDialect <-"....."  
+targetDialect <-"postgresql" 
 
 # The name of the schema that contains the OMOP CDM with patient-level data
-cdm_database_schema<-"....."
+cdm_database_schema<-"public"
 
 # The name of the schema that contains the vocabularies 
 # (often this will be the same as cdm_database_schema)
-vocabulary_database_schema<-"....."
+vocabulary_database_schema<-"public"
 
 # The name of the schema where results tables will be created 
-results_database_schema<-"....."
+results_database_schema<-"results"
 
 # Tables to be created in your results schema for this analysis will be named using this as the stem 
 # Note, any existing tables in your results schema with the same names will be overwritten
-cohortTableStem<-"CancerSurvivalExtrapolation"
+cohortTableStem<-"CancerExtrapolation"
 
 # Check database connections -----
 # to check whether the OHDSI DatabaseConnector worked, uncomment and run the below three lines
@@ -104,12 +115,12 @@ cohortTableStem<-"CancerSurvivalExtrapolation"
 # disconnect(conn)
 
 # to check the DBI worked, uncomment and run the below line
-# tbl(db, sql(paste0("SELECT * FROM ",cdm_database_schema, ".person"))) %>% tally()
+#tbl(db, sql(paste0("SELECT * FROM ",cdm_database_schema, ".person"))) %>% tally()
 
 # in both cases, you should have a count of people in the database printed back in the console
 
 # Run the study ------
-source(here("RunStudy.R"))
+#source(here("RunStudy.R"))
 
 # after the study is run you should have a zip folder in your output folder to share
 
