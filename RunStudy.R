@@ -1,39 +1,22 @@
 if (!file.exists(output.folder)){
   dir.create(output.folder, recursive = TRUE)}
 
+if (!file.exists(plots.folder)){
+  dir.create(plots.folder, recursive = TRUE)}
+
+if (!file.exists(example.plots.folder)){
+  dir.create(example.plots.folder, recursive = TRUE)}
+
 start<-Sys.time()
 # extra options for running -----
 # if you have already created the cohorts, you can set this to FALSE to skip instantiating these cohorts again
 create.exposure.cohorts<-TRUE
-# create.outcome.cohorts<-TRUE
-# create.profile.cohorts<-TRUE
-
-# to run for just one exposure/ outcome pair
-run.as.test<-FALSE
-
-# run main exposure/ outcome pairs only
-run.main.analyses.only<-FALSE
 
 # start log ----
 log_file <- paste0(output.folder, "/log.txt")
 logger <- create.logger()
 logfile(logger) <- log_file
 level(logger) <- "INFO"
-
-# functions ----
-# printing numbers with 1 decimal place and commas 
-nice.num<-function(x) {
-  trimws(format(round(x,1),
-                big.mark=",", nsmall = 1, digits=1, scientific=FALSE))}
-# printing numbers with 2 decimal place and commas 
-nice.num2<-function(x) {
-  trimws(format(round(x,2),
-                big.mark=",", nsmall = 2, digits=2, scientific=FALSE))}
-# for counts- without decimal place
-nice.num.count<-function(x) {
-  trimws(format(x,
-                big.mark=",", nsmall = 0, digits=0, scientific=FALSE))}
-
 
 # link to db tables -----
 person_db<-tbl(db, sql(paste0("SELECT * FROM ",
@@ -64,16 +47,8 @@ death_db<-tbl(db, sql(paste0("SELECT * FROM ",
 
 
 # result table names ----
-#cohortTableExposures<-paste0(cohortTableStem, "Exposures") # using this doesnt work
 cohortTableExposures<-paste0(cohortTableStem)
 
-# cohortTableOutcomes<-paste0(cohortTableStem, "Outcomes")
-# cohortTableComorbiditiestmp<-paste0(cohortTableStem, "Comorbiditiestmp")
-# cohortTableComorbidities<-paste0(cohortTableStem, "Comorbidities")
-# cohortTableCovid<-paste0(cohortTableStem, "Covid")
-# cohortTableMedicationstmp<-paste0(cohortTableStem, "Medicationstmp")
-# cohortTableMedications<-paste0(cohortTableStem, "Medications")
-# cohortTableLargeScaleFeatures<-paste0(cohortTableStem, "LSF")
 
 # instantiate study cohorts ----
 info(logger, 'INSTANTIATING STUDY COHORTS')
@@ -132,17 +107,19 @@ if(sum(is.na(Pop$day_of_birth))==0 & sum(is.na(Pop$month_of_birth))==0){
 
 # age age groups ----
 Pop<-Pop %>% 
-  mutate(age_gr=ifelse(age<20,  "<20",
-                       ifelse(age>=20 &  age<=44,  "20-44",
-                              ifelse(age>=45 & age<=54,  "45-54",
-                                     ifelse(age>=55 & age<=64,  "55-64",
-                                            ifelse(age>=65 & age<=74, "65-74", 
-                                                   ifelse(age>=75 & age<=84, "75-84",      
-                                                          ifelse(age>=85, ">=85",
-                                                                 NA)))))))) %>% 
+  mutate(age_gr=ifelse(age<30,  "<30",
+                       ifelse(age>=30 &  age<=39,  "30-39",
+                              ifelse(age>=40 & age<=49,  "40-49",
+                                     ifelse(age>=50 & age<=59,  "50-59",
+                                            ifelse(age>=60 & age<=69, "60-69", 
+                                                   ifelse(age>=70 & age<=79, "70-79", 
+                                                   
+                                                   ifelse(age>=80 & age<=89, "80-89",      
+                                                          ifelse(age>=90, ">=90",
+                                                                 NA))))))))) %>% 
   mutate(age_gr= factor(age_gr, 
-                        levels = c("<20","20-44","45-54", "55-64",
-                                   "65-74", "75-84",">=85"))) 
+                        levels = c("<30","30-39","40-49", "50-59",
+                                   "60-69", "70-79","80-89",">=90"))) 
 table(Pop$age_gr, useNA = "always")
 
 # wider age groups
@@ -183,7 +160,7 @@ Pop<-Pop %>%
   mutate(prior_obs_days=as.numeric(difftime(cohort_start_date,
                                             observation_period_start_date,
                                             units="days"))) %>% 
-  mutate(prior_obs_years=prior_obs_days/365.25)
+  mutate(prior_obs_years=prior_obs_days/365)
 
 # make sure all have year of prior history ---
 Pop<-Pop %>%
@@ -202,18 +179,17 @@ Pop<-Pop %>%
 # need to take into account follow up
 # if death date is > 1/1/2019 set death to 0
 Pop<-Pop %>% 
-  mutate(status= ifelse(!is.na(death_date), 1, 0 )) %>%
-  mutate(status= ifelse(death_date > observation_period_end_date_2019 , 0, status )) %>% 
-  mutate(status= ifelse(is.na(status), 0, status )) %>%
-  mutate_at(vars(status), 
-            list(factor))
+  mutate(status= ifelse(!is.na(death_date), 2, 1 )) %>%
+  mutate(status= ifelse(death_date > observation_period_end_date_2019 , 1, status )) %>% 
+  mutate(status= ifelse(is.na(status), 1, status ))
 
 # calculate follow up in years
 Pop<-Pop %>%  
   mutate(time_days=as.numeric(difftime(observation_period_end_date_2019,
                                             cohort_start_date,
                                             units="days"))) %>% 
-  mutate(time_years=time_days/365.25) 
+#  mutate(time_years=time_days/365.25) 
+mutate(time_years=time_days/365) 
 
 
 # remove people with end of observation end date == cohort entry
@@ -232,6 +208,21 @@ Pop<-Pop %>%
 # table(Pop$cohort_definition_id == 8, Pop$gender)
 # 
 # table(Pop$cohort_definition_id)
+
+# min(Pop$time_years)
+# max(Pop$time_years)
+ 
+
+#plotting frequency of cancers --
+
+cancernumb <- as.data.frame(table(Pop$cohort_definition_id))
+
+cancernumb$name <- gsub("Cancer", "", cohortDefinitionSet$cohortName)
+
+p<-ggplot(data=cancernumb, aes(x=name, y=Freq)) +
+  geom_bar(stat="identity", fill = "steelblue") +
+  geom_text(aes(label=Freq), vjust=1.6, color="black", size=3.5)
+p
 
 
 # Run analysis ----
