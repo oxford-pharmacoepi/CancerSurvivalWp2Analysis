@@ -45,6 +45,10 @@ library(bshazard)
 # Set the name/ acronym for your database (to be used in the titles of reports, etc) -----
 db.name<-"..."
 
+# set the number of years you want to extrapolate to (in years)
+timeinyrs <- 25
+
+
 # Set output folder locations -----
 # the path to a folder where the results from this analysis will be saved
 # to set the location within the project with folder called "CPRD", we can use: here("CPRD")
