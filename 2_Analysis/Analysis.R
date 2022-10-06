@@ -253,7 +253,7 @@ data <- Pop %>%
 #carry out km estimate
 observedkm[[j]] <- survfit (Surv(time_years, status) ~ 1, data=data) %>%
   tidy() %>%
-  mutate(Method = "Observed", cancer = cohortDefinitionSet$cohortName[j]) %>%
+  mutate(Method = "Observed", Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both") %>%
   filter(n.risk >= 5) #remove entries with less than 5 patients
 
 print(paste0("KM for observed data ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
@@ -270,7 +270,7 @@ grid <- seq(0,floor(max(data$time_years)),by=2)
 observedrisktableKM[[j]] <- RiskSetCount(grid,data$time_years) %>%
   rbind(grid) %>% as.data.frame() %>%
   `colnames<-`(grid) %>%
-  mutate(cancer = cohortDefinitionSet$cohortName[j] ) %>%
+  mutate(Method = "Observed", Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" ) %>%
   slice(1)
 
 
@@ -292,7 +292,9 @@ modelKM1510 <- as.data.frame(cbind(modelKMpred$n,
 ))
 colnames(modelKM1510) <- c("N", "time", "n.risk", "est", "SE", "lcl", "ucl")
 modelKM1510$Method <- "observed"
-modelKM1510$cancer <- cohortDefinitionSet$cohortName[j]
+modelKM1510$Cancer <- cohortDefinitionSet$cohortName[j]
+modelKM1510$Age <- "All"
+modelKM1510$Gender <- "Both"
 observedkmpred[[j]] <- modelKM1510
   
   
@@ -302,7 +304,9 @@ modelKMMed <- summary(modelKM)$table
 modelKMMed <- t(modelKMMed)
 modelKMMed <- as.data.frame(modelKMMed)
 modelKMMed$Method <- "observed"
-modelKMMed$cancer <- cohortDefinitionSet$cohortName[j]
+modelKMMed$Cancer <- cohortDefinitionSet$cohortName[j]
+modelKMMed$Age <- "All"
+modelKMMed$Gender <- "Both"
 observedmedianKM[[j]] <- modelKMMed
 
 print(paste0("Median survival and 1,5,10 years surival from KM from observed data ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
@@ -331,7 +335,7 @@ as.data.frame.bshazard <- function(x, ...) {
 # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
 
 observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>%
-  mutate(Method = "Observed", cancer = cohortDefinitionSet$cohortName[j])
+  mutate(Method = "Observed", Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both")
 
 max_data <- max(data$time_years) # need this for axis scales
 hazardsot <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>% 
@@ -368,7 +372,7 @@ hotkmcombined <- dplyr::bind_rows(observedhazotKM) %>%
 risktableskm <- dplyr::bind_rows(observedrisktableKM)%>%
   mutate(across(everything(), ~replace(., . <=  5 , NA))) %>%
   replace(is.na(.), "<5") %>%
-  relocate(cancer)
+  relocate(Cancer)
   
 
 ResultsKM_ALL <- list("KM_observed_all" = observedkmcombined, 
@@ -413,22 +417,22 @@ for(j in 1:nrow(cohortDefinitionSet)) {
       # 1knotspline
       extrap_results_temp[[i]] <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard") %>%
         summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
       # hazard over time
       hazot_all_temp[[i]] <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard") %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
       #carry out models for different parametric methods cumhaz
       cumhaz_results_temp[[i]] <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard") %>%
         summary(t=t/365, tidy = TRUE, type = "cumhaz") %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard") %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
       
       #print out progress               
@@ -438,22 +442,22 @@ for(j in 1:nrow(cohortDefinitionSet)) {
       # 3knotspline
       extrap_results_temp[[i]] <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 3, scale = "hazard") %>%
       summary(t=t/365, tidy = TRUE) %>%
-      mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+      mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
       # hazard over time
       hazot_all_temp[[i]] <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 3, scale = "hazard") %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
       #carry out models for different parametric methods cumhaz
       cumhaz_results_temp[[i]] <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 3, scale = "hazard") %>%
         summary(t=t/365, tidy = TRUE, type = "cumhaz") %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 3, scale = "hazard") %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cohortDefinitionSet$cohortName[j], " completed"))
@@ -463,22 +467,22 @@ for(j in 1:nrow(cohortDefinitionSet)) {
       #carry out models for different parametic methods survival
       extrap_results_temp[[i]] <- flexsurvreg(Surv(time_years, status)~1, data=data, dist=extrapolations[i]) %>%
         summary(t=t/365, tidy = TRUE) %>%
-      mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+      mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
       #extract the hazard function over time
       hazot_all_temp[[i]] <- flexsurvreg(Surv(time_years, status)~1, data=data, dist=extrapolations[i]) %>%
         summary(t=(t + 1)/365, type = "hazard",tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j]) 
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" ) 
       
       #carry out models for different parametric methods cumhaz
       cumhaz_results_temp[[i]] <- flexsurvreg(Surv(time_years, status)~1, data=data, dist=extrapolations[i]) %>%
         summary(t=t/365, tidy = TRUE, type = "cumhaz") %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
 
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- flexsurvreg(Surv(time_years, status)~1, data=data, dist=extrapolations[i]) %>%
       glance() %>%
-        mutate(Method = extrapolations_formatted[i], cancer = cohortDefinitionSet$cohortName[j])
+        mutate(Method = extrapolations_formatted[i], Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" )
       
 
       #print out progress               
