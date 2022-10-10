@@ -548,7 +548,7 @@ plot_combined_all <- bind_rows(extrapolatedfinal, observedkmcombined)
 for(j in 1:nrow(cohortDefinitionSet)) { 
 
 data <- plot_combined_all %>%
-  filter(cancer == cohortDefinitionSet$cohortName[j])
+  filter(Cancer == cohortDefinitionSet$cohortName[j])
 
 
 cols <- c("#00468BFF", #dark blue
@@ -639,12 +639,12 @@ print(paste0("Plots ", Sys.time()," for extrapolation method for ",cohortDefinit
 }
 
 
-# plot log cumulative hazard plot
+# plot loglog cumulative hazard plot
 
-for(j in 1:nrow(cohortDefinitionSet)) { 
+#for(j in 1:nrow(cohortDefinitionSet)) { 
   
   data <- plot_combined_all %>%
-    filter(cancer == cohortDefinitionSet$cohortName[j])
+    filter(Cancer == cohortDefinitionSet$cohortName[j])
   
   
   cols <- c("#00468BFF", #dark blue
@@ -664,7 +664,7 @@ for(j in 1:nrow(cohortDefinitionSet)) {
   data$Method <- factor(data$Method, levels=c(extrapolations_formatted, 'Observed' ))
   
   logcumhazplot2 <- ggplot(filter(data, est != 1), aes(x = log(time), y = log(-log(est)), colour = Method)) + 
-    xlab("Log(Time [Years])") + ylab("log(-log(y)") +
+    xlab("Log(Time [Years])") + ylab("log(-log(y))") +
     geom_line() +
     geom_line(data = filter(data, Method == "Observed"), size = 1) +
     scale_color_manual(values = my_colors) +
@@ -725,7 +725,7 @@ plot_hazot_combined_all <- bind_rows(hazardotfinal, hotkmcombined)
 for(j in 1:nrow(cohortDefinitionSet)) { 
   
   data <- plot_hazot_combined_all %>%
-    filter(cancer == cohortDefinitionSet$cohortName[j])
+    filter(Cancer == cohortDefinitionSet$cohortName[j])
   
   cols <- c("#00468BFF", #dark blue
             "#ED0000FF", # red
@@ -822,6 +822,165 @@ oneyearpred <- oneyearpred %>%
 ########################################
 # GENDER STRATIFICATION
 
+model<-flexsurvreg(Surv(time, status)~sex, data=data, dist=extrapolations[i])
+
+observedkm_gender <- list()
+observedkmpred_gender <- list()
+observedmedianKM_gender <- list()
+observedhazotKM_gender <- list()
+observedrisktableKM_gender <- list()
+
+# loop to carry out for each cancer
+for(j in 1:nrow(cohortDefinitionSet)) { 
+  
+  #subset the data by cancer type
+  data <- Pop %>%
+    filter(cohort_definition_id == j) 
+  
+  #carry out km estimate
+  observedkm_gender[[j]] <- survfit (Surv(time_years, status) ~ gender, data=data) %>%
+    tidy() %>%
+    rename(Gender = strata) %>%
+    mutate(Method = "Observed", Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = str_replace(Gender, "gender=Male", "Male"), Gender = str_replace(Gender,"gender=Female", "Female"))
+  
+  
+  print(paste0("KM for observed data ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
+  
+  # get the risk table
+  RiskSetCount <- function(timeindex, survivaltime) {
+    atrisk <- NULL
+    for (t in timeindex)
+      atrisk <- c(atrisk, sum(survivaltime >= t))
+    return(atrisk)
+  }
+  
+  grid <- seq(0,floor(max(data$time_years)),by=2)
+  observedrisktableKM[[j]] <- RiskSetCount(grid,data$time_years) %>%
+    rbind(grid) %>% as.data.frame() %>%
+    `colnames<-`(grid) %>%
+    mutate(Method = "Observed", Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" ) %>%
+    slice(1)
+  
+  
+  print(paste0("Extract risk table ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
+  
+  
+  # KM survival for 1,5,10 years and median survival---
+  # needs tidying up
+  
+  modelKM <- survfit(Surv(time_years, status) ~ 1, data=data) #get model
+  modelKMpred <- summary(modelKM, tidy = TRUE, times = c(1,5,10), )# get summary results for 1,5,10 years
+  modelKM1510 <- as.data.frame(cbind(modelKMpred$n, 
+                                     modelKMpred$time,
+                                     modelKMpred$n.risk,
+                                     modelKMpred$surv,
+                                     modelKMpred$std.err,
+                                     modelKMpred$lower,
+                                     modelKMpred$upper
+  ))
+  colnames(modelKM1510) <- c("N", "time", "n.risk", "est", "SE", "lcl", "ucl")
+  modelKM1510$Method <- "observed"
+  modelKM1510$Cancer <- cohortDefinitionSet$cohortName[j]
+  modelKM1510$Age <- "All"
+  modelKM1510$Gender <- "Both"
+  observedkmpred[[j]] <- modelKM1510
+  
+  
+  
+  # median survival
+  modelKMMed <- summary(modelKM)$table
+  modelKMMed <- t(modelKMMed)
+  modelKMMed <- as.data.frame(modelKMMed)
+  modelKMMed$Method <- "observed"
+  modelKMMed$Cancer <- cohortDefinitionSet$cohortName[j]
+  modelKMMed$Age <- "All"
+  modelKMMed$Gender <- "Both"
+  observedmedianKM[[j]] <- modelKMMed
+  
+  print(paste0("Median survival and 1,5,10 years surival from KM from observed data ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
+  
+  
+  # log cumulative hazard plots ------
+  logcumhazplot <- ggplot(observedkm[[j]], aes(x = log(time), y = log(-log(estimate)))) + 
+    xlab("log(time)") + ylab("log(-log(y)") +
+    geom_line() +
+    geom_ribbon(aes(ymin = log(-log(conf.low)), ymax = log(-log(conf.high))), linetype = 2, alpha = 0.1) +
+    theme_bw()
+  
+  plotname <- paste0("plot_log_cumulative_hazard ",cohortDefinitionSet$cohortName[j],"_ALL",".png")
+  
+  ggsave(logcumhazplot, file= here("Results", db.name,"Plots", plotname)
+         , width = 14, height = 10, units = "cm")
+  
+  print(paste0("Plot log cumulative hazard plot ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
+  
+  # hazard function over time ----
+  
+  #calculate hazard over time
+  as.data.frame.bshazard <- function(x, ...) {
+    with(x, data.frame(time,hazard,lower.ci,upper.ci))
+  }
+  # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
+  
+  observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>%
+    mutate(Method = "Observed", Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both")
+  
+  max_data <- max(data$time_years) # need this for axis scales
+  hazardsot <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>% 
+    ggplot(hazardsot, mapping = aes(x = time, y = hazard)) +
+    geom_line() +
+    geom_ribbon(aes(ymin=lower.ci, ymax=upper.ci), alpha=0.3) +
+    #ylim(0,0.1) + if you want to change the hazard rate axis
+    xlab('Follow-up Time') + ylab('Hazard Rate') +
+    scale_x_continuous(breaks = seq(0, max_data, by = 2)) +
+    theme_bw()
+  
+  plotname1 <- paste0("plot_hazard_over_time ",cohortDefinitionSet$cohortName[j],"_ALL",".png")
+  
+  ggsave(hazardsot, file= here("Results", db.name,"Plots", plotname1)
+         , width = 14, height = 10, units = "cm")
+  
+  print(paste0("Plot hazard over time plot and results ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
+  
+  
+}
+
+# take the results from a list (one element for each cancer) and put into dataframe for KM survival
+observedkmcombined <- dplyr::bind_rows(observedkm) %>%
+  rename(est = estimate ,ucl = conf.high, lcl = conf.low )
+
+predkmcombined <- dplyr::bind_rows(observedkmpred)
+
+medkmcombined <- dplyr::bind_rows(observedmedianKM) 
+
+hotkmcombined <- dplyr::bind_rows(observedhazotKM) %>%
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci )
+
+#generate the risk table and remove entries < 5 patients
+risktableskm <- dplyr::bind_rows(observedrisktableKM)%>%
+  mutate(across(everything(), ~replace(., . <=  5 , NA))) %>%
+  replace(is.na(.), "<5") %>%
+  relocate(Cancer)
+
+
+ResultsKM_ALL <- list("KM_observed_all" = observedkmcombined, 
+                      "prediction1510KM_all" = predkmcombined,
+                      "KM_MedianSur_all" = medkmcombined,
+                      "KM_hazard_rate_all" = hotkmcombined,
+                      "KM_risktable_all" = risktableskm)
+
+#write to excel
+openxlsx::write.xlsx(ResultsKM_ALL, file = here("Results", db.name ,"cancer_KM_observed_results_ALL.xlsx"))
+
+
+
+
+
+
+
+
+
+
 ########################################
 # AGE STRATIFICATION
 
@@ -830,286 +989,15 @@ oneyearpred <- oneyearpred %>%
 
 ########################################
 
-# using muhaz plotting KM observed and can plot the extrapolated plots
-
-test_muhaz <- muhaz(times = data$time_years, delta = data$status -1)
-weib <- flexsurvreg(Surv(time_years,status-1)~1,data=data,dist="weibull")
-plot(test_muhaz)
-
-plot(test_muhaz,ylim=c(0,1.2),xlim=c(0,14))
-lines(weib, type="hazard",col="red")
-
-
-# trying it with bahazards and extracting hazards from extrapolations
-testytest <- flexsurvreg(Surv(time_years, status)~1, data=data, dist= "weibull")
-testytest1 <- flexsurvreg(Surv(time_years, status)~1, data=data, dist= "exp")
-testytest2 <- flexsurvreg(Surv(time_years, status)~1, data=data, dist= "gamma")
-testytest3 <- flexsurvreg(Surv(time_years, status)~1, data=data, dist= "llogis")
-
-# plot(testytest)
-# plot(testytest, type = "hazard")
-
-asdf <- summary(testytest,type="hazard") 
-asdf <- as.data.frame(asdf) # hazard
-asdf$Method <- "Weiball"
-
-asdf1 <- summary(testytest1,type="hazard") 
-asdf1 <- as.data.frame(asdf1) # hazard
-asdf1$Method <- "exponential"
-
-asdf2 <- summary(testytest2,type="hazard") 
-asdf2 <- as.data.frame(asdf2) # hazard
-asdf2$Method <- "Gamma"
-
-asdf3 <- summary(testytest3,type="hazard") 
-asdf3 <- as.data.frame(asdf3) # hazard
-asdf3$Method <- "Log-Logistic"
-
-
-max_data <- max(data$time_years) # need this for axis scales
-hazardsot <- bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)
-hazardsot1 <- cbind(hazardsot$time,
-                    hazardsot$hazard,
-                    hazardsot$lower.ci,
-                    hazardsot$upper.ci
-                    )
-hazardsot1 <- as.data.frame(hazardsot1)
-hazardsot1$Method <- "Observed"
-colnames(hazardsot1) <- c("time" ,  "est"  ,  "lcl"  ,  "ucl"  ,  "Method")
-
-# plot(hazardsot)
-# lines(testytest)
-
-#bind observed and extrapolated
-comb_hot <- rbind(hazardsot1, asdf, asdf1, asdf2, asdf3 )
-
-#plot
-
-cols <- c("#00468BFF", #dark blue
-          "#ED0000FF", # red
-          "#42B540FF", #green
-          "#0099B4FF", #lightblue
-          "#925E9FFF", # purple
-          "#FF6F0EFF", #orange
-          "#E377C2FF", #pink
-          "#BCBD22FF", #olive
-          "#AD002AFF" # dark red
-) 
-
-my_colors <- c("darkgrey", cols[i], cols[i-1], cols[i-2], cols[i-3] )
-
-plot_hot <- ggplot(comb_hot, aes(x = time, y = est, colour = Method)) + 
-  xlab("Years") + ylab("Hazard Rate") +
-  geom_line() +
-  #geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Method), linetype = 2, alpha = 0.1) +
-  scale_color_manual(values = my_colors) +
-  scale_fill_manual(values = my_colors) +
-  scale_x_continuous(breaks = seq(0, max_data, by = 2)) +
-  scale_y_continuous(limits = c(min(comb_hot$lcl)- 0.1,1.25), expand =c(0.01,0)) +
-  theme_bw()
-
-plot_hot
-
-
-
 ################END ####################
 
 
 
 
        
-  
-
-
-
-
-
-# for colorectal cancer only
-
-
-
-#extrapolation the time is in year for the observed but the extrapolation is in days BUG
-# extrap_results_temp <- flexsurvreg(Surv(time_years, status)~1, data=data, dist=extrapolations[1]) %>%
-#   summary(t=t/365, tidy = TRUE) %>%
-#   mutate(Method = extrapolations_formatted[1], cancer = cohortDefinitionSet$cohortName[2])
-
-
-extrap_results_temp <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 3, scale = "hazard") %>%
-  summary(t=t/365, tidy = TRUE) %>%
-  mutate(Method = extrapolations_formatted[8], cancer = cohortDefinitionSet$cohortName[2])
-
-
-cols <- c("#00468BFF", #dark blue
-          "#ED0000FF", # red
-          "#42B540FF", #green
-          "#0099B4FF", #lightblue
-          "#925E9FFF", # purple
-          "#FF6F0EFF", #orange
-          "#E377C2FF", #pink
-          "#BCBD22FF", #olive
-          "#AD002AFF"
-) # dark red
-
-#  carry out basic plots
-#survival extrapolations
-#for(i in 1:length(extrapolations)) { 
-
-my_colors <- c("darkgrey", cols[i])
-
-
-#rbind the observed results to the extrapolated ones
-extrap_results1 <- rbind(km_CRC, extrap_results_temp)
-
-extrap_results1$Method <- factor(extrap_results1$Method, levels=c('Observed', extrap_results1$Method[nrow(extrap_results1)] ))
-
-
-plot_km1 <- ggplot(extrap_results1, aes(x = time, y = est, colour = Method)) + 
-  xlab("Years") + ylab("Survival Probability") +
-  geom_line() +
-  geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Method), linetype = 2, alpha = 0.1) +
-  scale_color_manual(values = my_colors) +
-  scale_fill_manual(values = my_colors) +
-  theme_bw() + 
-  theme( legend.position = 'top', legend.direction = "horizontal") +
-  scale_x_continuous(limits = c(0,max(extrap_results1$time)), expand =c(0,0) ,
-                     breaks = seq(0,max(extrap_results1$time), by = 2 ) ) +
-  scale_y_continuous(limits = c(0,1.02), expand =c(0.01,0)) 
-
-
-
-
-
-
-
-
-
 
 
 ################# OLD CODE ##################
-
-
-# function to carry out extrapolation produces survival data and goodness of fit
-for(i in 1:length(extrapolations)) {   # Head of for-loop
-  
-  if(extrapolations[i] == "spline1") {
-    
-    # 1knotspline
-    model <- flexsurvspline(formula=Surv(time,status-1)~1,data=data[j],k = 1, scale = "hazard")
-    model_out <-summary(model,t=t)[[1]] # extract the data
-    model_out$Method <- extrapolations_formatted[i]
-    model_out$cancer <- cohortDefinitionSet$cohortName[j]
-    list_extrap_results[[i]] <- model_out   # Store output in list
-    
-    #carry out models for different parametric methods cumhaz
-    model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
-    model_out2$Method <- extrapolations_formatted[i]
-    model_out2$cancer <- cohortDefinitionSet$cohortName[j]
-    cumhaz_results[[i]] <- model_out2   # Store output in list
-    
-    #get the goodness of fit for each model
-    gof_results[[i]] <- round(glance(model)[,c(6:8)],2)
-    
-    #print out progress               
-    print(paste0(extrapolations_formatted[i]," ", Sys.time(),"for " ,cohortDefinitionSet$cohortName[j], " completed"))
-    
-  } else if(extrapolations[i] == "spline3") {
-    # 3knotspline
-    model <- flexsurvspline(formula=Surv(time,status-1)~1,data=data[j],k = 3, scale = "hazard")
-    model_out <-summary(model,t=t)[[1]] # extract the data
-    model_out$Method <- extrapolations_formatted[i]
-    model_out$cancer <- cohortDefinitionSet$cohortName[j]
-    list_extrap_results[[i]] <- model_out   # Store output in list
-    
-    #carry out models for different parametric methods cumhaz
-    model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
-    model_out2$Method <- extrapolations_formatted[i]
-    model_out2$cancer <- cohortDefinitionSet$cohortName[j]
-    cumhaz_results[[i]] <- model_out2   # Store output in list
-    
-    #get the goodness of fit for each model
-    gof_results[[i]] <- round(glance(model)[,c(6:8)],2)
-    
-    #print out progress               
-    print(paste0(extrapolations_formatted[i]," ", Sys.time(),"for " ,cohortDefinitionSet$cohortName[j], " completed"))
-    
-    
-  } else {
-    #carry out models for different parametic methods survival
-    model<-flexsurvreg(Surv(time, status)~1, data=data[j], dist=extrapolations[i])
-    model_out <-summary(model,t=t)[[1]] # extract the data
-    model_out$Method <- extrapolations_formatted[i]
-    model_out$cancer <- cohortDefinitionSet$cohortName[j]
-    list_extrap_results[[i]] <- model_out   # Store output in list
-    
-    #carry out models for different parametric methods cumhaz
-    model_out2 <- summary(model, t=t , type = "cumhaz")[[1]]
-    model_out2$Method <- extrapolations_formatted[i]
-    model_out2$cancer <- cohortDefinitionSet$cohortName[j]
-    cumhaz_results[[i]] <- model_out2   # Store output in list
-    
-    #get the goodness of fit for each model
-    gof_results[[i]] <- round(glance(model)[,c(6:8)],2)
-    
-    #print out progress               
-    print(paste0(extrapolations_formatted[i]," ", Sys.time(),"for " ,cohortDefinitionSet$cohortName[j], " completed"))
-    
-  }
-}
-
-#get the observed data and output the results survival
-kmsurvival <- survfit (Surv(time, status) ~ 1, data=data[j])
-km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper))
-colnames(km_result) <- c("time", "est", "lcl", "ucl")
-km_result$Method <- "Observed"
-km_result$cancer <- cohortDefinitionSet$cohortName[j]
-
-
-print(paste0("KM for observed data completed", Sys.time()))
-
-
-
-
-
-
-
-
-
-#remove entries with less than 5 entries
-km_result <- km_result %>%
-  filter(nrisk >= 5)
-
-
-
-
-
-# get the results from whole population
-
-kmsurvival <- survfit(Surv(time_years, status) ~ 1, data = Pop1)
-
-km_result <- as.data.frame(cbind(kmsurvival$time, kmsurvival$surv, kmsurvival$lower, kmsurvival$upper, kmsurvival$n.risk))
-colnames(km_result) <- c("time", "est", "lcl", "ucl", "nrisk")
-km_result$Method <- "Observed"
-
-#remove those with 5 or less
-km_result <- km_result %>%
-  filter(nrisk >= 5)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # original code using dummy data ----
