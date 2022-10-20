@@ -552,6 +552,7 @@ print(paste0("Plots ", Sys.time()," for extrapolation method for ",cohortDefinit
 # merge extrapolation and observed results
 
 plot_hazot_combined_all <- bind_rows(hazardotfinal, hotkmcombined)
+
 for(j in 1:nrow(cohortDefinitionSet)) { 
   
   data <- plot_hazot_combined_all %>%
@@ -698,20 +699,20 @@ observedhazotKM_gender[[j]] <- group_by(data,gender) %>%
   ungroup %>%
   mutate(Method = "Observed", Cancer = cohortDefinitionSet$cohortName[j], Age = "All")
 
-  max_data <- max(data$time_years) # need this for axis scales
-  hazardsot <- observedhazotKM_gender[[j]] %>%
-    ggplot(observedhazotKM_gender[[j]], mapping = aes(x = time, y = hazard,group=gender)) +
-    geom_line(aes(col=gender)) +
-    xlab('Follow-up Time') + ylab('Hazard Rate') +
-    scale_x_continuous(breaks = seq(0, max_data, by = 2)) +
-    theme_bw()
+  # max_data <- max(data$time_years) # need this for axis scales
+  # hazardsot <- observedhazotKM_gender[[j]] %>%
+  #   ggplot(observedhazotKM_gender[[j]], mapping = aes(x = time, y = hazard,group=gender)) +
+  #   geom_line(aes(col=gender)) +
+  #   xlab('Follow-up Time') + ylab('Hazard Rate') +
+  #   scale_x_continuous(breaks = seq(0, max_data, by = 2)) +
+  #   theme_bw()
+  # 
+  # plotname1 <- paste0("plot_hazard_over_time ",cohortDefinitionSet$cohortName[j],"_GENDER_STRAT",".png")
+  # 
+  # ggsave(hazardsot, file= here("Results", db.name,"Plots", plotname1)
+  #        , width = 14, height = 10, units = "cm")
 
-  plotname1 <- paste0("plot_hazard_over_time ",cohortDefinitionSet$cohortName[j],"_GENDER_STRAT",".png")
-
-  ggsave(hazardsot, file= here("Results", db.name,"Plots", plotname1)
-         , width = 14, height = 10, units = "cm")
-
-  print(paste0("Plot hazard over time plot and results ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], "gender strat completed"))
+  print(paste0("Hazard over time results ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], "gender strat completed"))
 
 
   }
@@ -725,12 +726,13 @@ observedkmcombined_gender <- dplyr::bind_rows(observedkm_gender) %>%
 medkmcombined_gender <- dplyr::bind_rows(observedmedianKM_gender) 
 
 hotkmcombined_gender <- dplyr::bind_rows(observedhazotKM_gender) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci )
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, Gender = gender )
 
 #generate the risk table and remove entries < 5 patients
-risktableskm_gender <- dplyr::bind_rows(observedrisktableKM_gender) %>%
+risktableskm_gender <- dplyr::bind_rows(observedrisktableKM_gender) 
+risktableskm_gender <- risktableskm_gender %>%
   mutate_at(.vars = c(1:(ncol(risktableskm_gender)-4)), funs(ifelse(.== 0, NA, .))) %>%  
-  mutate_at(.vars = c(1:elgcols), funs(ifelse(.<= 5, "<5", .))) %>%
+  mutate_at(.vars = c(1:(ncol(risktableskm_gender)-4)), funs(ifelse(.<= 5, "<5", .))) %>%
   replace(is.na(.), 0) %>%
   relocate(Cancer)
 
@@ -742,6 +744,11 @@ ResultsKM_GENDER <- list("KM_observed_gender" = observedkmcombined_gender,
 
 #write to excel
 openxlsx::write.xlsx(ResultsKM_GENDER, file = here("Results", db.name ,"cancer_KM_observed_results_GENDER.xlsx"))
+
+# observedkmcombined_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 1)
+# medkmcombined_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 2)
+# hotkmcombined_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 3)
+# risktableskm_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 4)
 
 
 ###########################################
@@ -883,12 +890,140 @@ Results_GENDER <- list("extrapolation_gender" = extrapolatedfinalGender,
 #write results to excel ---
 openxlsx::write.xlsx(Results_GENDER, file = here("Results", db.name , "cancer_extrapolation_results_GENDER.xlsx"))
 
+# extrapolatedfinalGender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_GENDER.xlsx"), sheet = 1)
+# hazardotfinalGender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_GENDER.xlsx"), sheet = 2)
+# goffinalGender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_GENDER.xlsx"), sheet = 3)
+# extrapolation_predGender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_GENDER.xlsx"), sheet = 4)
+
+
 
 #######################################
-# Create plots for stratification population ---
+# Create plots for stratification population GENDER ---
 #######################################
 
-#TBC
+#merge KM and extrapolated data
+
+extrap_combinedGender <- bind_rows(observedkmcombined_gender, extrapolatedfinalGender)
+
+#run over each cancer apart from prostate (males only)
+
+for(j in 1:nrow(cohortDefinitionSet)) { 
+  
+  
+  #set up the median survival for plot
+  medsurv4plotGender <- medkmcombined_gender %>%
+    mutate(median = paste0("Median OS = ",round(median, 2))) %>%
+    mutate(median = str_replace(median, "Median OS = NA", "Median OS = Not achieved")) %>%
+    select( Gender, median, Cancer)
+  
+data <- extrap_combinedGender %>%
+  filter(Cancer == cohortDefinitionSet$cohortName[j])
+
+if(j != PC_id){
+
+
+cols <- c("#00468BFF", #dark blue
+          "#ED0000FF", # red
+          "#42B540FF", #green
+          "#0099B4FF", #lightblue
+          "#925E9FFF", # purple
+          "#FF6F0EFF", #orange
+          "#E377C2FF", #pink
+          "#BCBD22FF", #olive
+          "#AD002AFF" # dark red
+) 
+
+#carry out plot with all extrapolations on one plot
+my_colors <- c(cols[1:length(extrapolations_formatted)], "black")
+
+data$Method <- factor(data$Method, levels=c(extrapolations_formatted, 'Observed' ))
+
+plot_extrap_gender <- ggplot(data, aes(x = time, y = est, colour = Method)) + 
+  xlab("Time (Years)") + ylab("Survival Probability (%)") +
+  geom_line() +
+geom_line(data = filter(data, Method == "Observed"), size = 1) +
+scale_color_manual(values = my_colors) +
+  scale_fill_manual(values = my_colors) +
+  theme_bw() +
+  theme( legend.position = 'right') +
+  scale_x_continuous(limits = c(0,max(data$time)), expand =c(0,0) ,
+                     breaks = seq(0,max(data$time), by = 2 ) ) + 
+#facet_wrap( ~ Gender,scales = "free") +
+  facet_wrap( ~ Gender ) + 
+  geom_text(data = medsurv4plotGender[medsurv4plotGender$Cancer == cohortDefinitionSet$cohortName[j] ,], aes(label=median), 
+             x = Inf , y = Inf,
+             inherit.aes = FALSE,
+            size = 3,
+            hjust = 1.1,
+            vjust = 1.9
+            )
+
+plotname1 <- paste0("plot_extrapolations_ ",cohortDefinitionSet$cohortName[j],"_GENDER_STRAT",".png")
+
+ggsave(plot_extrap_gender, file= here("Results", db.name,"Plots", plotname1)
+       , width = 18, height = 10, units = "cm")
+
+print(paste0("Plot KM and extrapolation plot ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], "gender strat completed"))
+
+
+
+}
+
+}
+
+# hazard over time by gender
+
+hazot_combinedGender <- bind_rows(hotkmcombined_gender, hazardotfinalGender)
+
+for(j in 1:nrow(cohortDefinitionSet)) { 
+  
+  data <- hazot_combinedGender %>%
+    filter(Cancer == cohortDefinitionSet$cohortName[j])
+  
+  if(j != PC_id){
+    
+    
+    cols <- c("#00468BFF", #dark blue
+              "#ED0000FF", # red
+              "#42B540FF", #green
+              "#0099B4FF", #lightblue
+              "#925E9FFF", # purple
+              "#FF6F0EFF", #orange
+              "#E377C2FF", #pink
+              "#BCBD22FF", #olive
+              "#AD002AFF" # dark red
+    ) 
+    
+    #carry out plot with all extrapolations on one plot
+    my_colors <- c(cols[1:length(extrapolations_formatted)], "black")
+    
+    data$Method <- factor(data$Method, levels=c(extrapolations_formatted, 'Observed' ))
+    
+    plot_hot_gender <- ggplot(data, aes(x = time, y = est, colour = Method)) + 
+      xlab('Follow-up Time') + ylab('Hazard Rate') +
+      geom_line() +
+      geom_line(data = filter(data, Method == "Observed"), size = 1) +
+      scale_color_manual(values = my_colors) +
+      scale_fill_manual(values = my_colors) +
+      theme_bw() +
+      theme( legend.position = 'right') +
+      scale_x_continuous(breaks = seq(0,max(data$time), by = 2 ) ) +
+      coord_cartesian(xlim = c(-0.25, 14.5)) +
+      facet_wrap( ~ Gender, scales = "free")
+    
+    plotname1 <- paste0("plot_extrapolations_HOT_ ",cohortDefinitionSet$cohortName[j],"_GENDER_STRAT",".png")
+    
+    ggsave(plot_hot_gender, file= here("Results", db.name,"Plots", plotname1)
+           , width = 18, height = 10, units = "cm")
+    
+    print(paste0("Plot hazard over time plot ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], "gender strat completed"))
+    
+    
+    
+  }
+  
+}
+
 
 ########################################
 # AGE STRATIFICATION 
@@ -988,20 +1123,20 @@ for(j in 1:nrow(cohortDefinitionSet)) {
       ungroup %>%
       mutate(Method = "Observed", Cancer = cohortDefinitionSet$cohortName[j], Gender = "Both")
     
-    max_data <- max(data$time_years) # need this for axis scales
-    hazardsot <- observedhazotKM_age[[j]] %>%
-      ggplot(observedhazotKM_age[[j]], mapping = aes(x = time, y = hazard,group=age_gr)) +
-      geom_line(aes(col=age_gr)) +
-      xlab('Follow-up Time') + ylab('Hazard Rate') +
-      scale_x_continuous(breaks = seq(0, max_data, by = 2)) +
-      theme_bw()
-    
-    plotname1 <- paste0("plot_hazard_over_time ",cohortDefinitionSet$cohortName[j],"_AGE_STRAT",".png")
-    
-    ggsave(hazardsot, file= here("Results", db.name,"Plots", plotname1)
-           , width = 14, height = 10, units = "cm")
-    
-    print(paste0("Plot hazard over time plot and results ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], "age strat completed"))
+    # max_data <- max(data$time_years) # need this for axis scales
+    # hazardsot <- observedhazotKM_age[[j]] %>%
+    #   ggplot(observedhazotKM_age[[j]], mapping = aes(x = time, y = hazard,group=age_gr)) +
+    #   geom_line(aes(col=age_gr)) +
+    #   xlab('Follow-up Time') + ylab('Hazard Rate') +
+    #   scale_x_continuous(breaks = seq(0, max_data, by = 2)) +
+    #   theme_bw()
+    # 
+    # plotname1 <- paste0("plot_hazard_over_time ",cohortDefinitionSet$cohortName[j],"_AGE_STRAT",".png")
+    # 
+    # ggsave(hazardsot, file= here("Results", db.name,"Plots", plotname1)
+    #        , width = 14, height = 10, units = "cm")
+    # 
+    print(paste0("Hazard over time plot results ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], "age strat completed"))
     
     
   }
@@ -1014,12 +1149,12 @@ observedkmcombined_age <- dplyr::bind_rows(observedkm_age) %>%
 medkmcombined_age <- dplyr::bind_rows(observedmedianKM_age) 
 
 hotkmcombined_age <- dplyr::bind_rows(observedhazotKM_age) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci )
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, Age = age_gr )
 
 #generate the risk table and remove entries < 5 patients
 risktableskm_age <- dplyr::bind_rows(observedrisktableKM_age) %>%
-  mutate_at(.vars = c(1:elgcols), funs(ifelse(.== 0, NA, .))) %>%  
-  mutate_at(.vars = c(1:elgcols), funs(ifelse(.<= 5, "<5", .))) %>%
+  mutate_at(.vars = c(1:(ncol(risktableskm_age)-4)), funs(ifelse(.== 0, NA, .))) %>%  
+  mutate_at(.vars = c(1:(ncol(risktableskm_age)-4)), funs(ifelse(.<= 5, "<5", .))) %>%
   replace(is.na(.), 0) %>%
   relocate(Cancer)
 
@@ -1031,6 +1166,13 @@ ResultsKM_AGE <- list("KM_observed_age" = observedkmcombined_age,
 
 #write to excel
 openxlsx::write.xlsx(ResultsKM_AGE, file = here("Results", db.name ,"cancer_KM_observed_results_AGE.xlsx"))
+
+# observedkmcombined_age <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_AGE.xlsx"), sheet = 1)
+# medkmcombined_age <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_AGE.xlsx"), sheet = 2)
+# hotkmcombined_age <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_AGE.xlsx"), sheet = 3)
+#risktableskm_age <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_AGE.xlsx"), sheet = 4)
+
+
 
 ###########################################
 # EXTRAPOLATION ANALYSIS AGE EXTRAPOLATION
@@ -1182,7 +1324,25 @@ extrapolation_predAge <- subset(extrapolatedfinalAge, extrapolatedfinalAge$time 
                                      extrapolatedfinalAge$time == 5 |
                                      extrapolatedfinalAge$time == 10  )
 
+# catch to remove hazard extrapolation where hazard cant be generated on observed data
+#create the filters pulls out the age and the cancer type where there is no data
+filterage <- as.data.frame(table(hotkmcombined_age$Age, hotkmcombined_age$Cancer)) %>%
+  rename(Age = Var1, Cancer = Var2, n = Freq ) %>%
+  filter(n == 0) %>% 
+  mutate_if(is.factor, as.character) %>%
+  pull(Age) 
 
+filtercancer <- as.data.frame(table(hotkmcombined_age$Age, hotkmcombined_age$Cancer)) %>%
+  rename(Age = Var1, Cancer = Var2, n = Freq ) %>%
+  filter(n == 0) %>% 
+  mutate_if(is.factor, as.character) %>%
+  pull(Cancer) 
+  
+#filter out the extrapolated data which doesnt have hazard over time for observed
+hazardotfinalAge <- hazardotfinalAge %>%
+  filter(!Cancer %in% filtercancer | !Age %in% filterage ) 
+
+  
 #save files in results folder ---
 Results_AGE <- list("extrapolation_age" = extrapolatedfinalAge, 
                        "hazardrate_age" = hazardotfinalAge,
@@ -1192,11 +1352,145 @@ Results_AGE <- list("extrapolation_age" = extrapolatedfinalAge,
 #write results to excel ---
 openxlsx::write.xlsx(Results_AGE, file = here("Results", db.name , "cancer_extrapolation_results_AGE.xlsx"))
 
+# extrapolatedfinalAge <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_AGE.xlsx"), sheet = 1)
+# hazardotfinalAge <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_AGE.xlsx"), sheet = 2)
+# goffinalAge <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_AGE.xlsx"), sheet = 3)
+# extrapolation_predAge <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_AGE.xlsx"), sheet = 4)
 
 
 
+#######################################
+# Create plots for stratification population AGE ---
+#######################################
 
+#merge KM and extrapolated data
+extrap_combinedAge <- bind_rows(observedkmcombined_age, extrapolatedfinalAge)
 
+for(j in 1:nrow(cohortDefinitionSet)) { 
+  
+  
+  #set up the median survival for plot
+  medsurv4plotAge <- medkmcombined_age %>%
+    mutate(median = paste0("Median OS = ",round(median, 2))) %>%
+    mutate(median = str_replace(median, "Median OS = NA", "Median OS = Not achieved")) %>%
+    select( Age, median, Cancer)
+  
+  data <- extrap_combinedAge %>%
+    filter(Cancer == cohortDefinitionSet$cohortName[j])
+
+    
+    cols <- c("#00468BFF", #dark blue
+              "#ED0000FF", # red
+              "#42B540FF", #green
+              "#0099B4FF", #lightblue
+              "#925E9FFF", # purple
+              "#FF6F0EFF", #orange
+              "#E377C2FF", #pink
+              "#BCBD22FF", #olive
+              "#AD002AFF" # dark red
+    ) 
+    
+    #carry out plot with all extrapolations on one plot
+    my_colors <- c(cols[1:length(extrapolations_formatted)], "black")
+    
+    data$Method <- factor(data$Method, levels=c(extrapolations_formatted, 'Observed' ))
+    data$Age <- factor(data$Age, levels=c(">=90",
+                                          "80-89" ,
+                                          "70-79" ,  
+                                          "60-69" ,   
+                                          "50-59"   ,
+                                          "40-49"  ,
+                                          "30-39" ,  
+                                          "<30"
+                                          ))
+    
+    
+    plot_extrap_age <- ggplot(data, aes(x = time, y = est, colour = Method)) + 
+      xlab("Time (Years)") + ylab("Survival Probability (%)") +
+      geom_line() +
+      geom_line(data = filter(data, Method == "Observed"), size = 1) +
+      scale_color_manual(values = my_colors) +
+      scale_fill_manual(values = my_colors) +
+      theme_bw() +
+      theme( legend.position = 'right') +
+      scale_x_continuous(limits = c(0,max(data$time)), expand =c(0,0) ,
+                         breaks = seq(0,max(data$time), by = 2 ) ) + 
+      facet_wrap( ~ fct_rev(Age),scales = "free") +
+      geom_text(data = medsurv4plotAge[medsurv4plotAge$Cancer == cohortDefinitionSet$cohortName[j] ,], aes(label=median), 
+                x = Inf , y = Inf,
+                inherit.aes = FALSE,
+                size = 2.75,
+                hjust = 1.1,
+                vjust = 1.9
+      )
+    
+    
+    plotname1 <- paste0("plot_extrapolations_ ",cohortDefinitionSet$cohortName[j],"_AGE_STRAT",".png")
+    
+    ggsave(plot_extrap_age, file= here("Results", db.name,"Plots", plotname1)
+           , width = 24, height = 18, units = "cm")
+    
+    print(paste0("Plot KM and extrapolation plot ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], "age strat completed"))
+    
+    
+    
+  }
+  
+# hazard over time by age
+hazot_combinedAge <- bind_rows(hotkmcombined_age, hazardotfinalAge)
+
+for(j in 1:nrow(cohortDefinitionSet)) { 
+  
+  data <- hazot_combinedAge %>%
+    filter(Cancer == cohortDefinitionSet$cohortName[j])
+
+    
+    cols <- c("#00468BFF", #dark blue
+              "#ED0000FF", # red
+              "#42B540FF", #green
+              "#0099B4FF", #lightblue
+              "#925E9FFF", # purple
+              "#FF6F0EFF", #orange
+              "#E377C2FF", #pink
+              "#BCBD22FF", #olive
+              "#AD002AFF" # dark red
+    ) 
+    
+    #carry out plot with all extrapolations on one plot
+    my_colors <- c(cols[1:length(extrapolations_formatted)], "black")
+    
+    data$Method <- factor(data$Method, levels=c(extrapolations_formatted, 'Observed' ))
+    data$Age <- factor(data$Age, levels=c(">=90",
+                                          "80-89" ,
+                                          "70-79" ,  
+                                          "60-69" ,   
+                                          "50-59"   ,
+                                          "40-49"  ,
+                                          "30-39" ,  
+                                          "<30"
+    ))
+    
+    plot_hot_age <- ggplot(data, aes(x = time, y = est, colour = Method)) + 
+      xlab('Follow-up Time') + ylab('Hazard Rate') +
+      geom_line() +
+      geom_line(data = filter(data, Method == "Observed"), size = 1) +
+      scale_color_manual(values = my_colors) +
+      scale_fill_manual(values = my_colors) +
+      theme_bw() +
+      theme( legend.position = 'right') +
+      scale_x_continuous(breaks = seq(0,max(data$time), by = 2 ) ) +
+      coord_cartesian(xlim = c(-0.25, 14.5)) +
+      facet_wrap( ~ fct_rev(Age),scales = "free")
+    
+    plotname1 <- paste0("plot_extrapolations_HOT_ ",cohortDefinitionSet$cohortName[j],"_AGE_STRAT",".png")
+    
+    ggsave(plot_hot_age, file= here("Results", db.name,"Plots", plotname1)
+           , width = 24, height = 18, units = "cm")
+    
+    print(paste0("Plot hazard over time plot ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], "age strat completed"))
+    
+  
+}
 
 ########################################
 # GENDER*AGE STRATIFICATION

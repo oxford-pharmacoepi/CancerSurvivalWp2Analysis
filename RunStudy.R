@@ -10,7 +10,7 @@ if (!file.exists(example.plots.folder)){
 start<-Sys.time()
 # extra options for running -----
 # if you have already created the cohorts, you can set this to FALSE to skip instantiating these cohorts again
-create.exposure.cohorts<-TRUE
+create.exposure.cohorts<- FALSE
 
 # start log ----
 log_file <- paste0(output.folder, "/log.txt")
@@ -220,10 +220,21 @@ cancernumb <- as.data.frame(table(Pop$cohort_definition_id))
 cancernumb$name <- gsub("Cancer", "", cohortDefinitionSet$cohortName)
 
 p<-ggplot(data=cancernumb, aes(x=name, y=Freq)) +
-  geom_bar(stat="identity", fill = "steelblue") +
-  geom_text(aes(label=Freq), vjust=1.6, color="black", size=3.5)
+  geom_bar(stat="identity", fill = "cadetblue2") +
+  geom_text(aes(label=Freq), vjust=0.5, hjust = 0.8, color="black", size=3.5) +
+theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  coord_flip()+
+  theme_bw()
 p
 
+# functions
+# get the risk table
+RiskSetCount <- function(timeindex, survivaltime) {
+  atrisk <- NULL
+  for (t in timeindex)
+    atrisk <- c(atrisk, sum(survivaltime >= t))
+  return(atrisk)
+}
 
 # Run analysis ----
 # info(logger, 'RUNNING ANALYSIS')
