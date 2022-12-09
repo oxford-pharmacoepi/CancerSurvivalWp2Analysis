@@ -1,11 +1,27 @@
+#Create folder for the results
 if (!file.exists(output.folder)){
   dir.create(output.folder, recursive = TRUE)}
+
+if (!file.exists(example.plots.folder)){
+  dir.create(example.plots.folder, recursive = TRUE)}
 
 if (!file.exists(plots.folder)){
   dir.create(plots.folder, recursive = TRUE)}
 
-if (!file.exists(example.plots.folder)){
-  dir.create(example.plots.folder, recursive = TRUE)}
+if (!file.exists(plots.folder.all)){
+  dir.create(plots.folder.all, recursive = TRUE)}
+
+if (!file.exists(plots.folder.gender)){
+  dir.create(plots.folder.gender, recursive = TRUE)}
+
+if (!file.exists(plots.folder.age)){
+  dir.create(plots.folder.age, recursive = TRUE)}
+
+if (!file.exists(plots.folder.genderAge)){
+  dir.create(plots.folder.genderAge, recursive = TRUE)}
+
+if (!file.exists(plots.folder.com)){
+  dir.create(plots.folder.com, recursive = TRUE)}
 
 start<-Sys.time()
 # extra options for running -----
@@ -18,61 +34,49 @@ logger <- create.logger()
 logfile(logger) <- log_file
 level(logger) <- "INFO"
 
-# link to db tables -----
-person_db<-tbl(db, sql(paste0("SELECT * FROM ",
-                              cdm_database_schema,
-                              ".person")))
-observation_period_db<-tbl(db, sql(paste0("SELECT * FROM ",
-                                          cdm_database_schema,
-                                          ".observation_period")))
-visit_occurrence_db<-tbl(db, sql(paste0("SELECT * FROM ",
-                                        cdm_database_schema,
-                                        ".visit_occurrence")))
-condition_occurrence_db<-tbl(db, sql(paste0("SELECT * FROM ",
-                                            cdm_database_schema,
-                                            ".condition_occurrence")))
-drug_era_db<-tbl(db, sql(paste0("SELECT * FROM ",
-                                cdm_database_schema,
-                                ".drug_era")))
-concept_db<-tbl(db, sql(paste0("SELECT * FROM ",
-                                        vocabulary_database_schema,
-                                        ".concept")))
-concept_ancestor_db<-tbl(db, sql(paste0("SELECT * FROM ",
-                                        vocabulary_database_schema,
-                                        ".concept_ancestor")))
+# create study cohorts ----
+# The study cohorts are various cancer cohorts that have been instantiated using CDM connector
 
-death_db<-tbl(db, sql(paste0("SELECT * FROM ",
-                                cdm_database_schema,
-                                ".death")))
+# set a cdm reference -----
+cdm <- CDMConnector::cdm_from_con(con = db, # connected using DBI dbConnect
+                                  cdm_schema = cdm_database_schema, #schema of the database
+                                  cdm_tables = tbl_group("clinical"), # which sets of tables needed
+                                  write_schema = results_database_schema) # need this to show where to write results to
 
 
-# result table names ----
-cohortTableExposures<-paste0(cohortTableStem)
+# read the cohorts using CDM connector
+outcome_cohorts <- CDMConnector::readCohortSet(here(
+  "1_InstantiateCohorts",
+  "Cohorts" 
+))
 
 
-# instantiate study cohorts ----
-info(logger, 'INSTANTIATING STUDY COHORTS')
-source(here("1_InstantiateCohorts","InstantiateStudyCohorts.R"))
-info(logger, 'GOT STUDY COHORTS')
+#create a cdm reference for your cohorts
+cdm <- CDMConnector::generateCohortSet(cdm, outcome_cohorts,
+                                       cohortTableName = cohortTableStem,
+                                       overwrite = TRUE)
 
-# study cohorts ----
-# The study cohorts are various cancer cohorts that have been instantiated (10 aug just people with colorectal and a dummy set to make sure it works for > 1)
+#check it has worked
+cdm$ehdenwp2cancerextrap %>% 
+  group_by(cohort_definition_id) %>%
+  tally()
+
+
+
 
 # get variables for analysis ---
-# get the variables needed for demographics for cohorts (age, gender, death date)
-# this pulls out information from person table and attaches information to the exposure cohorts (all of them)
-Pop<-person_db %>% 
-  inner_join(exposure.cohorts_db,
+Pop<-cdm$person %>% 
+  inner_join(cdm$ehdenwp2cancerextrap,
              by = c("person_id" = "subject_id" )) %>%
   select(person_id,gender_concept_id, 
          year_of_birth, month_of_birth, day_of_birth,
          cohort_start_date,
          cohort_definition_id)  %>% 
-  left_join(observation_period_db %>% 
+  left_join(cdm$observation_period %>% 
               select("person_id",  "observation_period_start_date", "observation_period_end_date") %>% 
               distinct(),
             by = "person_id") %>% 
-  left_join(death_db %>% 
+  left_join(cdm$death %>% 
               select("person_id",  "death_date") %>% 
               distinct(),
             by = "person_id") %>% 
@@ -150,6 +154,14 @@ Pop<-Pop %>%
   filter(age<=110) %>%
   filter(!is.na(gender))
 
+# create sex:agegp categorical variables
+Pop <- Pop %>%
+  unite('genderAgegp', c(gender,age_gr), remove = FALSE) %>%
+  mutate(genderAgegp= factor(genderAgegp, 
+                      levels = c("Female_<30","Female_30-39","Female_40-49", "Female_50-59",
+                                 "Female_60-69", "Female_70-79","Female_80-89","Female_>=90",
+                                 "Male_<30","Male_30-39","Male_40-49", "Male_50-59",
+                                 "Male_60-69", "Male_70-79","Male_80-89","Male_>=90"))) 
 
 # drop if missing observation period end date ----
 Pop<-Pop %>% 
@@ -165,8 +177,6 @@ Pop<-Pop %>%
 # make sure all have year of prior history ---
 Pop<-Pop %>%
   filter(prior_obs_years>=1)
-# the above removes those with 0.999931 but 365 days removes 21 people - due to rounding errors
-
 
 # need to make new end of observation period to 1/1/2019 ----
 Pop<-Pop %>% 
@@ -188,7 +198,7 @@ Pop<-Pop %>%
   mutate(time_days=as.numeric(difftime(observation_period_end_date_2019,
                                             cohort_start_date,
                                             units="days"))) %>% 
-#  mutate(time_years=time_days/365.25) 
+#  mutate(time_years=time_days/365) 
 mutate(time_years=time_days/365) 
 
 
@@ -197,9 +207,10 @@ Pop<-Pop %>%
   filter(time_days != 0)
 
 
+# REMOVE AND PUT INTO JSON FILE TO ONLY INCLUDE MALES
 # remove females with a diagnosis with prostate cancer
 # use the cohortDefinition to find out the cohort id for prostate
-PC_id <- as.numeric(cohortDefinitionSet[grep("Prostate", cohortDefinitionSet$cohortName, ignore.case = TRUE), ][,2])
+PC_id <- as.numeric(outcome_cohorts[grep("Prostate", cohortName$cohortName, ignore.case = TRUE), ][,2])
 
 #filter out those who are female with prostate cancer
 Pop<-Pop %>%
@@ -235,6 +246,12 @@ RiskSetCount <- function(timeindex, survivaltime) {
     atrisk <- c(atrisk, sum(survivaltime >= t))
   return(atrisk)
 }
+
+# hazard function over time extraction ----
+as.data.frame.bshazard <- function(x, ...) {
+  with(x, data.frame(time,hazard,lower.ci,upper.ci))
+}
+
 
 # Run analysis ----
 # info(logger, 'RUNNING ANALYSIS')
