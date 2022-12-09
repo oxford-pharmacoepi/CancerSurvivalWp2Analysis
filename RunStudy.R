@@ -62,8 +62,6 @@ cdm$ehdenwp2cancerextrap %>%
   tally()
 
 
-
-
 # get variables for analysis ---
 Pop<-cdm$person %>% 
   inner_join(cdm$ehdenwp2cancerextrap,
@@ -207,28 +205,13 @@ Pop<-Pop %>%
   filter(time_days != 0)
 
 
-# REMOVE AND PUT INTO JSON FILE TO ONLY INCLUDE MALES
-# remove females with a diagnosis with prostate cancer
-# use the cohortDefinition to find out the cohort id for prostate
-PC_id <- as.numeric(outcome_cohorts[grep("Prostate", cohortName$cohortName, ignore.case = TRUE), ][,2])
-
-#filter out those who are female with prostate cancer
-Pop<-Pop %>%
-  filter(!(gender == "Female" & cohort_definition_id == PC_id))
-
-# table(Pop$cohort_definition_id == 8, Pop$gender)
-# 
-# table(Pop$cohort_definition_id)
-
-# min(Pop$time_years)
-# max(Pop$time_years)
- 
-
 #plotting frequency of cancers --
 
 cancernumb <- as.data.frame(table(Pop$cohort_definition_id))
 
-cancernumb$name <- gsub("Cancer", "", cohortDefinitionSet$cohortName)
+cancernumb$name <- gsub("Cancer", "", outcome_cohorts$cohortName)
+
+cancernumb$name <- gsub("MaleOnly", "", outcome_cohorts$cohortName)
 
 p<-ggplot(data=cancernumb, aes(x=name, y=Freq)) +
   geom_bar(stat="identity", fill = "cadetblue2") +
@@ -236,9 +219,10 @@ p<-ggplot(data=cancernumb, aes(x=name, y=Freq)) +
 theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   coord_flip()+
   theme_bw()
-p
+p # maybe put this in the QC check box?
 
-# functions
+# Functions for analysis -----
+
 # get the risk table
 RiskSetCount <- function(timeindex, survivaltime) {
   atrisk <- NULL
@@ -253,10 +237,44 @@ as.data.frame.bshazard <- function(x, ...) {
 }
 
 
-# Run analysis ----
-# info(logger, 'RUNNING ANALYSIS')
-# source(here("2_Analysis","Analysis.R"))
-# info(logger, 'ANALYSIS RAN')
+#Run analysis ----
+
+#whole population
+info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
+source(here("2_Analysis","Analysis.R"))
+info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
+
+
+#gender stratification
+if(RunGenderStrat == TRUE){
+
+  info(logger, 'RUNNING ANALYSIS FOR GENDER STRATIFICATION')
+  source(here("2_Analysis","AnalysisGenderStrat.R"))
+  info(logger, 'ANALYSIS RAN FOR GENDER STRAT')
+  
+}
+
+#age stratification
+if(RunAgeStrat == TRUE){
+  
+  info(logger, 'RUNNING ANALYSIS FOR AGE STRATIFICATION')
+  source(here("2_Analysis","AnalysisAgeStrat.R"))
+  info(logger, 'ANALYSIS RAN FOR AGE STRAT')
+  
+}
+
+#age*gender stratification
+if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
+  
+  info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER STRATIFICATION')
+  source(here("2_Analysis","AnalysisAgeGenderStrat.R"))
+  info(logger, 'ANALYSIS RAN FOR AGE STRAT')
+  
+}
+
+
+
+
 # 
 # # Tidy up and save ----
 # Survival.summary<-bind_rows(Survival.summary, .id = NULL)
@@ -301,7 +319,7 @@ as.data.frame.bshazard <- function(x, ...) {
 #               files = files)
 # 
 # print("Done!")
-# print("-- If all has worked, there should now be a zip folder with your results in the output folder to share")
+# print("-- If all has worked, there should now be a zip folder with your results in the results to share")
 # print("-- Thank you for running the study!")
 # Sys.time()-start
 # # readLines(log_file)
