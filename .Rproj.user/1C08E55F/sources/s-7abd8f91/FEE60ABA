@@ -1,0 +1,26 @@
+{
+    "id": "FEE60ABA",
+    "path": "~/R/CancerSurvivalWp2Analysis/RunStudy.R",
+    "project_path": "RunStudy.R",
+    "type": "r_source",
+    "hash": "3625020481",
+    "contents": "",
+    "dirty": false,
+    "created": 1670596344310.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "209,53",
+        "scrollLine": "192"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1670597374,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1670597374110,
+    "read_only": false,
+    "read_only_alternatives": []
+}
