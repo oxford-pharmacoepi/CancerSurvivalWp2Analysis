@@ -1,27 +1,12 @@
+# create folder name for QC plots
+qc.plots.folder <- here("3_QCPlots") # for QCing and for troubleshooting
+
 #Create folder for the results
 if (!file.exists(output.folder)){
   dir.create(output.folder, recursive = TRUE)}
 
-# if (!file.exists(example.plots.folder)){
-#   dir.create(example.plots.folder, recursive = TRUE)}
-# 
-# if (!file.exists(plots.folder)){
-#   dir.create(plots.folder, recursive = TRUE)}
-# 
-# if (!file.exists(plots.folder.all)){
-#   dir.create(plots.folder.all, recursive = TRUE)}
-# 
-# if (!file.exists(plots.folder.gender)){
-#   dir.create(plots.folder.gender, recursive = TRUE)}
-# 
-# if (!file.exists(plots.folder.age)){
-#   dir.create(plots.folder.age, recursive = TRUE)}
-# 
-# if (!file.exists(plots.folder.genderAge)){
-#   dir.create(plots.folder.genderAge, recursive = TRUE)}
-# 
-# if (!file.exists(plots.folder.com)){
-#   dir.create(plots.folder.com, recursive = TRUE)}
+if (!file.exists(output.folder)){
+  dir.create(qc.plots.folder, recursive = TRUE)}
 
 start<-Sys.time()
 # extra options for running -----
@@ -205,12 +190,10 @@ Pop<-Pop %>%
   filter(time_days != 0)
 
 
-#plotting frequency of cancers --
+#plotting frequency of cancers for QC checks --
 
 cancernumb <- as.data.frame(table(Pop$cohort_definition_id))
-
 cancernumb$name <- gsub("Cancer", "", outcome_cohorts$cohortName)
-
 cancernumb$name <- gsub("MaleOnly", "", outcome_cohorts$cohortName)
 
 p<-ggplot(data=cancernumb, aes(x=name, y=Freq)) +
@@ -219,7 +202,28 @@ p<-ggplot(data=cancernumb, aes(x=name, y=Freq)) +
 theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   coord_flip()+
   theme_bw()
-p # maybe put this in the QC check box?
+
+
+plotname <- paste0("SampleNumbers", db.name,".pdf")
+
+pdf(here("3_QCPlots", plotname),
+    width = 7, height = 5)
+print(p, newpage = FALSE)
+dev.off()
+
+# plot numbers by gender
+gendern <- Pop %>%
+  group_by(cohort_definition_id, gender) %>%
+  tally() %>% 
+  rename(name = cohort_definition_id) %>%
+  inner_join(outcome_cohorts[,c(1:2)], by = c("name" = "cohortId")) %>%
+  collect()
+
+q <- gendern %>%
+  ggplot(aes(fill = gender, y = n, x = as.factor(cohortId) )) +
+  geom_bar(position = "dodge", stat = "identity") +
+  xlab("Cancer")
+  
 
 # Functions for analysis -----
 
@@ -275,18 +279,9 @@ if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
 
 
 
-# 
+
 # # Tidy up and save ----
-# Survival.summary<-bind_rows(Survival.summary, .id = NULL)
-# Survival.summary$db<-db.name
-# Survival.summary<-Survival.summary %>% 
-#   group_by(group, strata, outcome,pop, pop.type,
-#            outcome.name,prior.obs.required, surv.type) %>% 
-#   mutate(cum.n.event=cumsum(n.event))
-# 
-# Cohort.age.plot.data<-bind_rows(Cohort.age.plot.data, .id = NULL)
-# 
-# 
+
 # save(Patient.characteristcis, 
 #      file = paste0(output.folder, "/Patient.characteristcis_", db.name, ".RData"))
 # save(Survival.summary, 
