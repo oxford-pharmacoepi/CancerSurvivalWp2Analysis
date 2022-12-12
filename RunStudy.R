@@ -2,26 +2,26 @@
 if (!file.exists(output.folder)){
   dir.create(output.folder, recursive = TRUE)}
 
-if (!file.exists(example.plots.folder)){
-  dir.create(example.plots.folder, recursive = TRUE)}
-
-if (!file.exists(plots.folder)){
-  dir.create(plots.folder, recursive = TRUE)}
-
-if (!file.exists(plots.folder.all)){
-  dir.create(plots.folder.all, recursive = TRUE)}
-
-if (!file.exists(plots.folder.gender)){
-  dir.create(plots.folder.gender, recursive = TRUE)}
-
-if (!file.exists(plots.folder.age)){
-  dir.create(plots.folder.age, recursive = TRUE)}
-
-if (!file.exists(plots.folder.genderAge)){
-  dir.create(plots.folder.genderAge, recursive = TRUE)}
-
-if (!file.exists(plots.folder.com)){
-  dir.create(plots.folder.com, recursive = TRUE)}
+# if (!file.exists(example.plots.folder)){
+#   dir.create(example.plots.folder, recursive = TRUE)}
+# 
+# if (!file.exists(plots.folder)){
+#   dir.create(plots.folder, recursive = TRUE)}
+# 
+# if (!file.exists(plots.folder.all)){
+#   dir.create(plots.folder.all, recursive = TRUE)}
+# 
+# if (!file.exists(plots.folder.gender)){
+#   dir.create(plots.folder.gender, recursive = TRUE)}
+# 
+# if (!file.exists(plots.folder.age)){
+#   dir.create(plots.folder.age, recursive = TRUE)}
+# 
+# if (!file.exists(plots.folder.genderAge)){
+#   dir.create(plots.folder.genderAge, recursive = TRUE)}
+# 
+# if (!file.exists(plots.folder.com)){
+#   dir.create(plots.folder.com, recursive = TRUE)}
 
 start<-Sys.time()
 # extra options for running -----
