@@ -5,7 +5,7 @@ qc.plots.folder <- here("3_QCPlots") # for QCing and for troubleshooting
 if (!file.exists(output.folder)){
   dir.create(output.folder, recursive = TRUE)}
 
-if (!file.exists(output.folder)){
+if (!file.exists(qc.plots.folder)){
   dir.create(qc.plots.folder, recursive = TRUE)}
 
 start<-Sys.time()
@@ -204,7 +204,7 @@ theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   theme_bw()
 
 
-plotname <- paste0("SampleNumbers", db.name,".pdf")
+plotname <- paste0("QCSampleNumbers", db.name,".pdf")
 
 pdf(here("3_QCPlots", plotname),
     width = 7, height = 5)
@@ -227,7 +227,7 @@ q <- gendern %>%
   xlab("Cancer") +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-plotname <- paste0("SampleNumbersGenderStrat", db.name,".pdf")
+plotname <- paste0("QCSampleGenderStrat", db.name,".pdf")
 
 pdf(here("3_QCPlots", plotname),
     width = 7, height = 5)
