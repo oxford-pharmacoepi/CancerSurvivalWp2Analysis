@@ -217,13 +217,22 @@ gendern <- Pop %>%
   tally() %>% 
   rename(name = cohort_definition_id) %>%
   inner_join(outcome_cohorts[,c(1:2)], by = c("name" = "cohortId")) %>%
+  mutate(cohortName = str_replace_all(cohortName, 'Cancer', '')) %>%
+  mutate(cohortName = str_replace_all(cohortName, 'MaleOnly', '')) %>%
   collect()
 
 q <- gendern %>%
-  ggplot(aes(fill = gender, y = n, x = as.factor(cohortId) )) +
+  ggplot(aes(fill = gender, y = n, x = as.factor(cohortName) )) +
   geom_bar(position = "dodge", stat = "identity") +
-  xlab("Cancer")
-  
+  xlab("Cancer") +
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+plotname <- paste0("SampleNumbersGenderStrat", db.name,".pdf")
+
+pdf(here("3_QCPlots", plotname),
+    width = 7, height = 5)
+print(q, newpage = FALSE)
+dev.off()
 
 # Functions for analysis -----
 
