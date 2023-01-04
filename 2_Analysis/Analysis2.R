@@ -32,20 +32,20 @@ data <- Pop %>%
 #carry out km estimate
 observedkm[[j]] <- survfit (Surv(time_years, status) ~ 1, data=data) %>%
   tidy() %>%
-  mutate(Method = "Kaplan-Meier", Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both") %>%
+  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both") %>%
   filter(n.risk >= 5) #remove entries with less than 5 patients
 
-print(paste0("KM for observed data ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
+print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
 
 # get the risk table ---
 grid <- seq(0,floor(max(data$time_years)),by=2)
 observedrisktableKM[[j]] <- RiskSetCount(grid,data$time_years) %>%
   rbind(grid) %>% as.data.frame() %>%
   `colnames<-`(grid) %>%
-  mutate(Method = "Observed", Cancer = cohortDefinitionSet$cohortName[j], Age = "All", Gender = "Both" ) %>%
+  mutate(Method = "Observed", Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) %>%
   slice(1)
 
-print(paste0("Extract risk table ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
+print(paste0("Extract risk table ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
 
 
 # KM median survival---
@@ -58,16 +58,13 @@ observedmedianKM[[j]] <- modelKM$table %>%
   pivot_longer(-rowname) %>% 
   pivot_wider(names_from=rowname, values_from=value) %>%
   mutate(Method = "Kaplan-Meier", 
-         Cancer = cohortDefinitionSet$cohortName[j],
+         Cancer = outcome_cohorts$cohortName[j],
          Gender = "Both" ,
          Age = "All" )
 
-print(paste0("Median survival from KM from observed data ", Sys.time()," for ",cohortDefinitionSet$cohortName[j], " completed"))
+print(paste0("Median survival from KM from observed data ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
 
 # hazard function over time ----
-as.data.frame.bshazard <- function(x, ...) {
-  with(x, data.frame(time,hazard,lower.ci,upper.ci))
-}
 # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
 
 observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>%
