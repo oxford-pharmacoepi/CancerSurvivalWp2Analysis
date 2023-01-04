@@ -102,9 +102,11 @@ toc(func.toc=toc_min)
 info(logger, 'KM analysis for whole population COMPLETE')
 
 ###########################################
-# EXTRAPOLATION ANALYSIS ALL POPULATION
+
+# Extrapolation analysis for whole population ------
 
 tic("Extrapolation analysis for whole population")
+info(logger, 'Extrapolation analysis for whole population START')
 
 # Initiate templists to store output ---- will have to make folders for each cancer and loop
 extrapolations_all <- list()
@@ -332,7 +334,4 @@ Spline5kParametersAll <- dplyr::bind_rows(Spline5kP)
 
 toc(func.toc=toc_min)
 
-
-
-
-
+info(logger, 'Extrapolation analysis for whole population FINISHED')
