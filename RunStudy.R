@@ -249,9 +249,21 @@ as.data.frame.bshazard <- function(x, ...) {
   with(x, data.frame(time,hazard,lower.ci,upper.ci))
 }
 
+# measuring time in minutes using tictoc package
+toc_min <- function(tic,toc,msg="") {
+  mins <- round((((toc-tic)/60)),2)
+  outmsg <- paste0(mins, " minutes elapsed")
+}
+
+# Setting up information for extrapolation methods to be used
+extrapolations <- c("gompertz", "weibull", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3", "spline5") 
+extrapolations_formatted <- c("Gompertz", "Weibull", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (3 knots)", "Spline (5 knots)")
+# setting up time for extrapolation
+#t <- seq(0, timeinyrs*365, by=1)
+t <- seq(0, timeinyrs*365, by=5) # just for debugging 
+
 
 #Run analysis ----
-
 #whole population
 info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
 source(here("2_Analysis","Analysis.R"))
@@ -259,37 +271,38 @@ info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
 
 
 #gender stratification
-if(RunGenderStrat == TRUE){
-
-  info(logger, 'RUNNING ANALYSIS FOR GENDER STRATIFICATION')
-  source(here("2_Analysis","AnalysisGenderStrat.R"))
-  info(logger, 'ANALYSIS RAN FOR GENDER STRAT')
-  
-}
+# if(RunGenderStrat == TRUE){
+# 
+#   info(logger, 'RUNNING ANALYSIS FOR GENDER STRATIFICATION')
+#   source(here("2_Analysis","AnalysisGenderStrat.R"))
+#   info(logger, 'ANALYSIS RAN FOR GENDER STRAT')
+#   
+# }
 
 #age stratification
-if(RunAgeStrat == TRUE){
-  
-  info(logger, 'RUNNING ANALYSIS FOR AGE STRATIFICATION')
-  source(here("2_Analysis","AnalysisAgeStrat.R"))
-  info(logger, 'ANALYSIS RAN FOR AGE STRAT')
-  
-}
+# if(RunAgeStrat == TRUE){
+#   
+#   info(logger, 'RUNNING ANALYSIS FOR AGE STRATIFICATION')
+#   source(here("2_Analysis","AnalysisAgeStrat.R"))
+#   info(logger, 'ANALYSIS RAN FOR AGE STRAT')
+#   
+# }
 
 #age*gender stratification
-if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
-  
-  info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER STRATIFICATION')
-  source(here("2_Analysis","AnalysisAgeGenderStrat.R"))
-  info(logger, 'ANALYSIS RAN FOR AGE STRAT')
-  
-}
+# if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
+#   
+#   info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER STRATIFICATION')
+#   source(here("2_Analysis","AnalysisAgeGenderStrat.R"))
+#   info(logger, 'ANALYSIS RAN FOR AGE STRAT')
+#   
+# }
 
 
 
+# # Tidy up results and save ----
 
+# extract results from all and gender and age stratifications and save them as a RData file
 
-# # Tidy up and save ----
 
 # save(Patient.characteristcis, 
 #      file = paste0(output.folder, "/Patient.characteristcis_", db.name, ".RData"))
