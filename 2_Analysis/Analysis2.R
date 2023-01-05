@@ -117,8 +117,8 @@ parameters_all <- list()
 # Initiate templists to store output ---- 
 extrap_results_temp <- list() # Create empty list for extrapolations
 gof_results_temp <- list() # required to assess goodness of fit (AIC/BIC)
-hazot_all_temp <- list() #required
-parameters_all_temp <- list() #required
+hazot_results_temp <- list() #required
+parameters_results_temp <- list() #required
 
 
 # Running analysis for each cancer
@@ -142,13 +142,13 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
       
       #grab the parameters from the model
-      parameters_all_temp[[i]] <- model[["coefficients"]] %>%
+      parameters_results_temp[[i]] <- model[["coefficients"]] %>%
         enframe() %>%
         pivot_wider(value, name) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) 
       
       # hazard over time
-      hazot_all_temp[[i]] <- model %>%
+      hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
       
@@ -171,13 +171,13 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
 
       #extract parameters
-      parameters_all_temp[[i]] <- model[["coefficients"]] %>%
+      parameters_results_temp[[i]] <- model[["coefficients"]] %>%
         enframe() %>%
         pivot_wider(value, name) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) 
       
       # hazard over time
-      hazot_all_temp[[i]] <- model %>%
+      hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
       
@@ -191,20 +191,19 @@ for(j in 1:nrow(outcome_cohorts)) {
       
     } else if(extrapolations[i] == "spline5") {
       # 5knotspline
-      
       model <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 5, scale = "hazard")
       
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
       
-      parameters_all_temp[[i]] <- model[["coefficients"]] %>%
+      parameters_results_temp[[i]] <- model[["coefficients"]] %>%
         enframe() %>%
         pivot_wider(value, name) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) 
       
       # hazard over time
-      hazot_all_temp[[i]] <- model %>%
+      hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
       
@@ -228,13 +227,13 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
       
       #grab the parameters from the model
-      parameters_all_temp[[i]] <- model[["coefficients"]] %>%
+      parameters_results_temp[[i]] <- model[["coefficients"]] %>%
         enframe() %>%
         pivot_wider(value, name) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) 
       
       #extract the hazard function over time
-      hazot_all_temp[[i]] <- model %>%
+      hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard",tidy = TRUE) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
 
@@ -252,7 +251,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     #combine all results
     extrapolatedcombined <- dplyr::bind_rows(extrap_results_temp)
     gofcombined <- dplyr::bind_rows(gof_results_temp)
-    hotcombined <- dplyr::bind_rows(hazot_all_temp) %>%
+    hotcombined <- dplyr::bind_rows(hazot_results_temp) %>%
       filter(time > 0) # remove rows with inf/NAs
     
     
@@ -260,7 +259,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     extrapolations_all[[j]] <- extrapolatedcombined
     gof_haz_all[[j]] <- gofcombined
     hazot_all[[j]] <- hotcombined
-    parameters_all[[j]] <-  parameters_all_temp
+    parameters_all[[j]] <-  parameters_results_temp
     
   }
   
@@ -324,7 +323,8 @@ for(j in 1:nrow(outcome_cohorts)) {
 GompertzParametersAll <- dplyr::bind_rows(GompertzP)
 weibullParametersAll <- dplyr::bind_rows(weibullP)
 weibullPHParametersAll <- dplyr::bind_rows(weibullPHP)
-ExponentialParametersAll <- dplyr::bind_rows(ExponentialP)
+ExponentialParametersAll <- dplyr::bind_rows(ExponentialP) %>%
+  rename(rate = 1)
 LoglogParametersAll <- dplyr::bind_rows(LoglogP)
 LognormParametersAll <- dplyr::bind_rows(LognormP)
 GenGammaParametersAll <- dplyr::bind_rows(GenGammaP)
@@ -332,6 +332,22 @@ Spline1kParametersAll <- dplyr::bind_rows(Spline1kP)
 Spline3kParametersAll <- dplyr::bind_rows(Spline3kP)
 Spline5kParametersAll <- dplyr::bind_rows(Spline5kP)
 
+#save files in results folder ---
+Results_Parameters_ALL <- list(
+  "GompertzParametersAll" =  GompertzParametersAll ,
+  "weibullParametersAll" =  weibullParametersAll ,
+  "weibullPHParametersAll" =  weibullPHParametersAll,
+  "ExponentialParametersAll" = ExponentialParametersAll,
+  "LoglogParametersAll" = LoglogParametersAll,
+  "LognormParametersAll" =  LognormParametersAll,
+  "GenGammaParametersAll" = GenGammaParametersAll,
+  "Spline1kParametersAll" = Spline1kParametersAll,
+  "Spline3kParametersAll" = Spline3kParametersAll,
+  "Spline5kParametersAll" = Spline5kParametersAll)
+
+#write results to excel ---
+openxlsx::write.xlsx(Results_Parameters_ALL, file = here("Results", db.name , "cancer_extrapolation_modelParameters_ALL.xlsx"))
+
 toc(func.toc=toc_min)
 
-info(logger, 'Extrapolation analysis for whole population FINISHED')
+info(logger, 'Extrapolation analysis for whole population COMPLETED')

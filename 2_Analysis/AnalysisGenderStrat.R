@@ -71,6 +71,10 @@ for(j in 1:nrow(outcome_cohorts)) {
     print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohortName[j], "gender strat completed"))
     
     
+  } else{
+    
+    print(paste0("Gender stratification KM analysis not carried out for ", outcome_cohorts$cohortName[j], " due to only 1 gender present " , Sys.time()))
+    
   }
   
 } # this closes the loop on the analysis containing both genders
@@ -106,8 +110,8 @@ openxlsx::write.xlsx(ResultsKM_GENDER, file = here("Results", db.name ,"cancer_K
 # hotkmcombined_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 3)
 # risktableskm_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 4)
 
-
 toc(func.toc=toc_min)
+
 info(logger, 'KM analysis for gender stratification COMPLETE')
 
 ###########################################
@@ -115,6 +119,268 @@ info(logger, 'KM analysis for gender stratification COMPLETE')
 # Extrapolation analysis for gender stratification ------
 
 tic("Extrapolation analysis for gender stratification")
+
 info(logger, 'Extrapolation analysis for gender stratification START')
 
+# Initiate lists to store output within loop ---- 
+extrapolations_gender <- list()
+gof_haz_gender <- list()
+hazot_gender <- list()
+parameters_gender <- list()
 
+# Initiate temp lists to store outputs ---- 
+extrap_results_temp <- list() # Create empty list for extrapolations (this will be removed)
+gof_results_temp <- list() # Create empty list goodness of fit (AIC/BIC)
+hazot_results_temp <- list() #Create empty list for hazard over time
+parameters_results_temp <- list() #Create empty list for model parameters
+
+# Run extrapolations for all cancers for gender stratification ---
+for(j in 1:nrow(outcome_cohorts)) { 
+  
+  #subset the data by cancer type
+  
+  data <- Pop %>%
+    filter(cohort_definition_id == j)
+  
+  #creates a test that determines if both genders in the data
+  genderlevels <- data %>%
+    group_by(gender) %>% summarise(count = n()) %>% tally()
+  
+  # analysis wont run if only 1 gender present
+  if(genderlevels == 2){
+    
+    #carry out extrapolation for each cancer for each extrapolation method
+    for(i in 1:length(extrapolations)) {   
+      
+      if(extrapolations[i] == "spline1") { 
+        
+        # 1knotspline
+        model <- flexsurvspline(formula=Surv(time_years,status-1)~gender,data=data,k = 1, scale = "hazard")
+        
+        #extrapolation # will need this to check results can remove once checked
+        extrap_results_temp[[i]] <- model %>%
+          summary(t=t/365, tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #grab the parameters from the model
+        parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+          enframe() %>%
+          pivot_wider(value, name) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All") 
+        
+        # hazard over time
+        hazot_results_temp[[i]] <- model %>%
+          summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #get the goodness of fit for each model
+        gof_results_temp[[i]] <- model %>%
+          glance() %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "GenderStrat" )
+        
+        #print out progress               
+        print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+        
+      } else if(extrapolations[i] == "spline3") {
+        # 3knotspline
+        model <- flexsurvspline(formula=Surv(time_years,status-1)~gender,data=data,k = 3, scale = "hazard")
+        
+        #extrapolation # will need this to check results can remove once checked
+        extrap_results_temp[[i]] <- model %>%
+          summary(t=t/365, tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #grab the parameters from the model
+        parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+          enframe() %>%
+          pivot_wider(value, name) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All") 
+        
+        # hazard over time
+        hazot_results_temp[[i]] <- model %>%
+          summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #get the goodness of fit for each model
+        gof_results_temp[[i]] <- model %>%
+          glance() %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "GenderStrat" )
+        
+        #print out progress               
+        print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+        
+      } else if(extrapolations[i] == "spline5") {
+        # 5knotspline
+        model <- flexsurvspline(formula=Surv(time_years,status-1)~gender,data=data,k = 5, scale = "hazard")
+        
+        #extrapolation # will need this to check results can remove once checked
+        extrap_results_temp[[i]] <- model %>%
+          summary(t=t/365, tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #grab the parameters from the model
+        parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+          enframe() %>%
+          pivot_wider(value, name) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All") 
+        
+        # hazard over time
+        hazot_results_temp[[i]] <- model %>%
+          summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #get the goodness of fit for each model
+        gof_results_temp[[i]] <- model %>%
+          glance() %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "GenderStrat" )
+        
+        #print out progress               
+        print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+        
+        
+      } else {
+        
+        #carry out models for different parametric methods survival
+        model <- flexsurvreg(Surv(time_years, status)~gender, data=data, dist=extrapolations[i])
+      
+        # extrapolations
+        extrap_results_temp[[i]] <- model %>%
+          summary(t=t/365, tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #grab the parameters from the model
+        parameters_results_temp[[i]]  <- model[["coefficients"]] %>%
+          enframe() %>%
+          pivot_wider(value, name) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All")  
+        
+        #extract the hazard function over time
+        hazot_results_temp[[i]] <- model %>%
+          summary(t=(t + 1)/365, type = "hazard",tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #get the goodness of fit for each model
+        gof_results_temp[[i]] <- model %>%
+          glance() %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "GenderStrat" )
+        
+        #print out progress               
+        print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+        
+      }
+      
+      #combine all results
+      extrapolatedcombined <- dplyr::bind_rows(extrap_results_temp)
+      gofcombined <- dplyr::bind_rows(gof_results_temp)
+      hotcombined <- dplyr::bind_rows(hazot_results_temp) %>%
+        filter(time > 0) # remove rows with inf/NAs
+      
+      
+      #put the results from each cancer in separate list
+      extrapolations_gender[[j]] <- extrapolatedcombined
+      gof_haz_gender[[j]] <- gofcombined
+      hazot_gender[[j]] <- hotcombined
+      parameters_gender[[j]] <-  parameters_results_temp
+      
+      
+    }
+    
+    #print out progress               
+    print(paste0(outcome_cohorts$cohortName[j]," Extrapolation Analysis Completed ", Sys.time()))
+    
+    
+  } else {
+    
+      
+      print(paste0("Gender stratification extrapolation analysis not carried out for ", outcome_cohorts$cohortName[j], " due to only 1 gender present " , Sys.time()))
+      
+    }
+    
+    
+  }
+  
+# Merge results together from each cancer and extrapolation into a dataframe ---
+extrapolatedfinalGender <- dplyr::bind_rows(extrapolations_gender)
+goffinalGender <- dplyr::bind_rows(gof_haz_gender)
+hazardotfinalGender <- dplyr::bind_rows(hazot_gender)
+
+#save files in results folder ---
+Results_GENDER <- list("extrapolation_gender" = extrapolatedfinalGender, 
+                       "hazardrate_gender" = hazardotfinalGender,
+                       "GOF_gender" = goffinalGender)
+
+#write results to excel ---
+openxlsx::write.xlsx(Results_GENDER, file = here("Results", db.name , "cancer_extrapolation_results_GENDER.xlsx"))
+
+# extracting parameters for each model for each cancer
+# create empty lists for parameters extraction
+GompertzP <- list()
+weibullP <- list()
+weibullPHP <- list()
+ExponentialP <- list()
+LoglogP <- list()
+LognormP <- list()
+GenGammaP <- list()
+Spline1kP <- list()
+Spline3kP <- list()
+Spline5kP <- list()
+
+
+# pull out the extrapolation parameters in a separate list for each cancer 
+# (so for example all exponential parameters for all cancers will be in same list)
+
+for(j in 1:nrow(outcome_cohorts)) { 
+  
+  GompertzP[[j]] <- parameters_gender[[j]] %>% pluck(1) 
+  weibullP[[j]] <- parameters_gender[[j]] %>% pluck(2) 
+  weibullPHP[[j]] <- parameters_gender[[j]] %>% pluck(3) 
+  ExponentialP[[j]] <- parameters_gender[[j]] %>% pluck(4) 
+  LoglogP[[j]] <- parameters_gender[[j]] %>% pluck(5) 
+  LognormP[[j]] <- parameters_gender[[j]] %>% pluck(6) 
+  GenGammaP[[j]] <- parameters_gender[[j]] %>% pluck(7) 
+  Spline1kP[[j]] <- parameters_gender[[j]] %>% pluck(8) 
+  Spline3kP[[j]] <- parameters_gender[[j]] %>% pluck(9) 
+  Spline5kP[[j]] <- parameters_gender[[j]] %>% pluck(10) 
+  
+}
+
+
+# grab the parameters from the list and row bind
+GompertzParametersGender <- dplyr::bind_rows(GompertzP)
+weibullParametersGender <- dplyr::bind_rows(weibullP)
+weibullPHParametersGender <- dplyr::bind_rows(weibullPHP)
+ExponentialParametersGender <- dplyr::bind_rows(ExponentialP)
+LoglogParametersGender <- dplyr::bind_rows(LoglogP)
+LognormParametersGender <- dplyr::bind_rows(LognormP)
+GenGammaParametersGender <- dplyr::bind_rows(GenGammaP)
+Spline1kParametersGender <- dplyr::bind_rows(Spline1kP)
+Spline3kParametersGender <- dplyr::bind_rows(Spline3kP)
+Spline5kParametersGender <- dplyr::bind_rows(Spline5kP)
+
+#save files in results folder ---
+Results_Parameters_GENDER <- list(
+  "GompertzParametersGender" =  GompertzParametersGender ,
+  "weibullParametersGender" =  weibullParametersGender ,
+  "weibullPHParametersGender" =  weibullPHParametersGender,
+  "ExponentialParametersGender" = ExponentialParametersGender,
+  "LoglogParametersGender" = LoglogParametersGender,
+  "LognormParametersGender" =  LognormParametersGender,
+  "GenGammaParametersGender" = GenGammaParametersGender,
+  "Spline1kParametersGender" = Spline1kParametersGender,
+  "Spline3kParametersGender" = Spline3kParametersGender,
+  "Spline5kParametersGender" = Spline5kParametersGender)
+
+#write results to excel ---
+openxlsx::write.xlsx(Results_Parameters_GENDER, file = here("Results", db.name , "cancer_extrapolation_modelParameters_GENDER.xlsx"))
+
+toc(func.toc=toc_min)
+
+info(logger, 'Extrapolation analysis for gender stratification COMPLETE')
