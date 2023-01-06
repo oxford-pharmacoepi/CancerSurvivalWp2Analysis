@@ -152,27 +152,20 @@ for(j in 1:nrow(outcome_cohorts)) {
     modelKM <- survfit (Surv(time_years, status) ~ genderAgegp, data=data) %>%
       summary()
     
-    observedmedianKM_age_gender[[j]] <- 
-      
-      test <- modelKM$table %>%
+    observedmedianKM_age_gender[[j]] <- modelKM$table %>%
       as.data.frame() %>%
       mutate(Method = "Kaplan-Meier", 
              Cancer = outcome_cohorts$cohortName[j],
              GenderAge = rownames(modelKM$table), 
-             GenderAge = str_replace(GenderAge, "genderAgegp=", "")  )
-    
-             Gender = c(rep("Female", nlevels(data$age_gr) ), rep("Male", nlevels(data$age_gr))) ,
-             Age = rep(c("<30" ,"30-39", "40-49" ,"50-59" ,"60-69", "70-79", "80-89" ,">=90"), 2))
-    
+             GenderAge = str_replace(GenderAge, "genderAgegp=", "")) %>%
+            separate(col = "GenderAge", into = c("Gender", "Age"), sep = "_")
     
     print(paste0("Median survival from KM from observed data ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
     
     
-    
-    
   } else {
     
-# code for running when only 1 gender for age*gender extrapolations
+print(paste0("Gender*Age stratification KM analysis not carried out for ", outcome_cohorts$cohortName[j], " due to only 1 gender present age stratification will have results " , Sys.time()))
     
   }
   
