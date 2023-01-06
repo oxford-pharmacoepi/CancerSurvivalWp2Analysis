@@ -11,7 +11,7 @@ if (!file.exists(qc.plots.folder)){
 start<-Sys.time()
 # extra options for running -----
 # if you have already created the cohorts, you can set this to FALSE to skip instantiating these cohorts again
-create.exposure.cohorts<- FALSE
+create.exposure.cohorts<- FALSE # need to set this up
 
 # start log ----
 log_file <- paste0(output.folder, "/log.txt")
@@ -41,7 +41,7 @@ cdm <- CDMConnector::generateCohortSet(cdm, outcome_cohorts,
                                        cohortTableName = cohortTableStem,
                                        overwrite = TRUE)
 
-#check it has worked
+#check it has worked # need to update this to have whatever person has set as name
 cdm$ehdenwp2cancerextrap %>% 
   group_by(cohort_definition_id) %>%
   tally()

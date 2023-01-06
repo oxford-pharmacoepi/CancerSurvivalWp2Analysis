@@ -11,6 +11,7 @@ observedkm_gender <- list()
 observedmedianKM_gender <- list()
 observedhazotKM_gender <- list()
 observedrisktableKM_gender <- list()
+target_gender <- list()
 
 # loop to carry out for each cancer
 for(j in 1:nrow(outcome_cohorts)) { 
@@ -19,12 +20,55 @@ for(j in 1:nrow(outcome_cohorts)) {
   data <- Pop %>%
     filter(cohort_definition_id == j) 
   
+  # add a filter than removes data with 75% missingness
+  grid <- seq(0,floor(max(data$time_years)),by=2)
+  filter4gender <- RiskSetCount(grid,data$time_years[data$gender == "Male"])%>%
+    rbind(grid) %>% as.data.frame() %>%
+    `colnames<-`(grid) %>%
+    mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Age = "All") %>%
+    slice(1) %>%
+    rbind(RiskSetCount(grid,data$time_years[data$gender == "Female"]))%>%
+    mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = c("Male", "Female"))
+  
+  # filter the data
+  filterdatatest <- filter4gender %>%
+    mutate_at(.vars = c(1:(ncol(filter4gender)-4)), funs(ifelse(.== 0, NA, .))) %>%  
+    mutate_at(.vars = c(1:(ncol(filter4gender)-4)), funs(ifelse(.<= 5, 0, .))) %>%
+    replace(is.na(.), 0) 
+  
+  # calculate the number of columns 
+  elgcols <- ncol(filterdatatest) - 4 
+  #count the number of zeros across the rows
+  filterdatatest <- filterdatatest %>% 
+    mutate(count=rowSums(.[1:elgcols]==0), percentzero = ((count/elgcols)*100) ) %>%
+    filter(percentzero != 75) %>%
+    filter(percentzero < 75)
+  
+  #create filter function to put into results below
+  target_gender[[j]] <- filterdatatest$Gender
+  
+  #filter data removing data with > 75% missingness
+  data <- data %>%
+    filter((gender %in% target_gender[[j]]))
+  
   #creates a test that determines if both genders in the data
   genderlevels <- data %>%
     group_by(gender) %>% summarise(count = n()) %>% tally()
   
   # analysis wont run if only 1 gender present
   if(genderlevels == 2){
+    
+    # get the risk table ---
+    observedrisktableKM_gender[[j]] <- RiskSetCount(grid,data$time_years[data$gender == "Male"])%>%
+      rbind(grid) %>% as.data.frame() %>%
+      `colnames<-`(grid) %>%
+      mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Age = "All") %>%
+      slice(1) %>%
+      rbind(RiskSetCount(grid,data$time_years[data$gender == "Female"]))%>%
+      mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = c("Male", "Female")) %>%
+     filter((Gender %in% target_gender[[j]]))
+    
+    print(paste0("Extract risk table ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
     
     #carry out km estimate
     observedkm_gender[[j]] <- survfit (Surv(time_years, status) ~ gender, data=data) %>%
@@ -34,19 +78,6 @@ for(j in 1:nrow(outcome_cohorts)) {
       filter(n.risk >= 5) #remove entries with less than 5 patients
     
     print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
-    
-    # get the risk table ---
-    grid <- seq(0,floor(max(data$time_years)),by=2)
-    observedrisktableKM_gender[[j]] <- RiskSetCount(grid,data$time_years[data$gender == "Male"])%>%
-      rbind(grid) %>% as.data.frame() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Age = "All") %>%
-      slice(1) %>%
-      rbind(RiskSetCount(grid,data$time_years[data$gender == "Female"]))%>%
-      mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = c("Male", "Female"))
-    
-    print(paste0("Extract risk table ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
-    
     
     # KM median survival ---
     modelKM <- survfit(Surv(time_years, status) ~ gender, data=data) %>%
@@ -142,9 +173,16 @@ for(j in 1:nrow(outcome_cohorts)) {
   data <- Pop %>%
     filter(cohort_definition_id == j)
   
+  # only run extrapolations where there is enough data (> 75% of complete data for each subgroup analysis)
+  data <- data %>%
+    filter((gender %in% target_gender[[j]])) %>%
+    droplevels()
+  
   #creates a test that determines if both genders in the data
   genderlevels <- data %>%
     group_by(gender) %>% summarise(count = n()) %>% tally()
+  
+
   
   # analysis wont run if only 1 gender present
   if(genderlevels == 2){

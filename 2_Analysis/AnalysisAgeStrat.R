@@ -11,7 +11,7 @@ observedkm_age <- list()
 observedmedianKM_age <- list()
 observedhazotKM_age <- list()
 observedrisktableKM_age <- list()
-target <- list()
+target_age <- list()
 
 # loop to carry out for each cancer
 for(j in 1:nrow(outcome_cohorts)) { 
@@ -51,15 +51,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     filter(percentzero < 75)
   
   #create filter function to put into results below
-  target[[j]] <- filterdatatest$Age
+  target_age[[j]] <- filterdatatest$Age
   
   #filter data removing data with > 75% missingness
   data <- data %>%
-    filter((age_gr %in% target[[j]]))
+    filter((age_gr %in% target_age[[j]]))
   
   #remove row from risk table
   observedrisktableKM_age[[j]] <-  observedrisktableKM_age[[j]] %>%
-    filter((Age %in% target[[j]])) %>%
+    filter((Age %in% target_age[[j]])) %>%
     mutate_at(.vars = c(1:(ncol(observedrisktableKM_age[[j]])-4)), funs(ifelse(.== 0, NA, .))) %>%
     mutate_at(.vars = c(1:(ncol(observedrisktableKM_age[[j]])-4)), funs(ifelse(.<= 5, "<5", .))) %>%
     replace(is.na(.), 0) %>%
@@ -87,7 +87,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   print(paste0("KM for observed data age strat ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
 
   
-  # KM median survival---
+# KM median survival---
   modelKM <- survfit(Surv(time_years, status) ~ age_gr, data=data) %>%
     summary()
   
@@ -95,7 +95,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     as.data.frame() %>%
     mutate(Method = "Kaplan-Meier", 
            Cancer = outcome_cohorts$cohortName[j], 
-           Age = target[[j]] ,
+           Age = target_age[[j]] ,
            Gender = "Both" )
   
   print(paste0("Median survival from KM from observed data ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
@@ -111,7 +111,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   
 }
 
-# take the results from a list (one element for each cancer) and put into dataframe for KM survival
+# take the results from a list (one element for each cancer) and put into dataframe ----
 observedkmcombined_age <- dplyr::bind_rows(observedkm_age) %>%
   rename(est = estimate ,ucl = conf.high, lcl = conf.low )
 
@@ -167,7 +167,8 @@ for(j in 1:nrow(outcome_cohorts)) {
   
   # only run extrapolations where there is enough data (> 75% of complete data for each subgroup analysis)
   data <- data %>%
-    filter((age_gr %in% target[[j]]))
+    filter((age_gr %in% target_age[[j]])) %>%
+    droplevels()
     
     #carry out extrapolation for each cancer for each extrapolation method
     for(i in 1:length(extrapolations)) {   
@@ -180,8 +181,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         #extrapolation # will need this to check results can remove once checked
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr ) %>%
-          rename(Gender = "Both")
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
         
         #grab the parameters from the model
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
@@ -211,8 +211,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         #extrapolation # will need this to check results can remove once checked
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr ) %>%
-          rename(Gender = "Both")
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
         
         #grab the parameters from the model
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
@@ -242,8 +241,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         #extrapolation # will need this to check results can remove once checked
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr ) %>%
-          rename(Gender = "Both")
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
         
         #grab the parameters from the model
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
@@ -273,8 +271,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         # extrapolations
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr ) %>%
-          rename(Gender = "Both")
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
         
         #grab the parameters from the model
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
@@ -364,7 +361,6 @@ for(j in 1:nrow(outcome_cohorts)) {
   Spline5kP[[j]] <- parameters_age[[j]] %>% pluck(10) 
   
 }
-
 
 # grab the parameters from the list and row bind
 GompertzParametersAge <- dplyr::bind_rows(GompertzP)
