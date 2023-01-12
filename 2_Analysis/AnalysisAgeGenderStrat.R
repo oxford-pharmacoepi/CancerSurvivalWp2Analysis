@@ -235,7 +235,7 @@ hazot_results_temp <- list() #required
 parameters_results_temp <- list()
 
 # Run extrapolations for all cancers for age_gender extrapolation ---
-for(j in 1:nrow(cohortDefinitionSet)) { 
+for(j in 1:nrow(outcome_cohorts)) { 
   
   data <- Pop %>%
     filter(cohort_definition_id == j) 
@@ -391,7 +391,7 @@ for(j in 1:nrow(cohortDefinitionSet)) {
   }
   
   #print out progress               
-  print(paste0(cohortDefinitionSet$cohortName[j]," Extrapolation Analysis Completed ", Sys.time()))
+  print(paste0(outcome_cohorts$cohortName[j]," Extrapolation Analysis Completed ", Sys.time()))
   
 
   
