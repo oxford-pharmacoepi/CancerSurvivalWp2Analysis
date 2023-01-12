@@ -1,7 +1,0 @@
-{
-    "installOptions": {
-        "installFromRepository": true,
-        "libraryPath": "/home/dnewby/R/CancerSurvivalWp2Analysis/renv/library/R-4.1/x86_64-pc-linux-gnu",
-        "installDependencies": true
-    }
-}
