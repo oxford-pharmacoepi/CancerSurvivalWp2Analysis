@@ -2,3 +2,5 @@ CodeToRun_local.R
 .Rhistory
 .Rprofile
 .Rproj.user/*
+3_QCPlots/*
+Results/*
