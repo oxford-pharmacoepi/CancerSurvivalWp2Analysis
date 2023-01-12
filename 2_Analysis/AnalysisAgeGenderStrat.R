@@ -202,10 +202,10 @@ risktableskm_age_gender <- dplyr::bind_rows(observedrisktableKM_age_gender) %>%
   replace(is.na(.), 0) 
 
 
-ResultsKM_AGEGENDER <- list("KM_observed_age" = observedkmcombined_age, 
-                      "KM_MedianSur_age" = medkmcombined_age,
-                      "KM_hazard_rate_age" = hotkmcombined_age,
-                      "KM_risktable_age" = risktableskm_age)
+ResultsKM_AGEGENDER <- list("KM_observed_age_gender" = observedkmcombined_age_gender, 
+                      "KM_MedianSur_age_gender" = medkmcombined_age_gender,
+                      "KM_hazard_rate_age_gender" = hotkmcombined_age_gender,
+                      "KM_risktable_age_gender" = risktableskm_age_gender)
 
 #write to excel
 openxlsx::write.xlsx(ResultsKM_AGEGENDER, file = here("Results", db.name ,"cancer_KM_observed_results_AGEGENDER.xlsx"))
