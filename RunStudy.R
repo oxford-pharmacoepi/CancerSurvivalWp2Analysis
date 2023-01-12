@@ -45,7 +45,7 @@ cdm <- CDMConnector::generateCohortSet(cdm, outcome_cohorts,
 cdm$ehdenwp2cancerextrap %>% 
   group_by(cohort_definition_id) %>%
   tally()
-
+# cohortTableStem
 
 # get variables for analysis ---
 Pop<-cdm$person %>% 
@@ -265,9 +265,9 @@ t <- seq(0, timeinyrs*365, by=50) # just for debugging
 
 #Run analysis ----
 #whole population
-info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
-source(here("2_Analysis","Analysis.R"))
-info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
+# info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
+# source(here("2_Analysis","Analysis.R"))
+# info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
 
 
 #gender stratification
