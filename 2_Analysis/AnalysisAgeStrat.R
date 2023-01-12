@@ -198,12 +198,12 @@ for(j in 1:nrow(outcome_cohorts)) {
         #get the goodness of fit for each model
         gof_results_temp[[i]] <- model %>%
           glance() %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "AgeStrat", Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" )
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
         
-      } else if(extrapolations[i] == "spline3") {
+      } else if (extrapolations[i] == "spline3") {
         
         # 3knotspline
         model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 3, scale = "hazard")
@@ -228,7 +228,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         #get the goodness of fit for each model
         gof_results_temp[[i]] <- model %>%
           glance() %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "AgeStrat", Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" )
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -258,7 +258,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         #get the goodness of fit for each model
         gof_results_temp[[i]] <- model %>%
           glance() %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "AgeStrat", Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" )
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -288,7 +288,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         #get the goodness of fit for each model
         gof_results_temp[[i]] <- model %>%
           glance() %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "AgeStrat", Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" )
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))

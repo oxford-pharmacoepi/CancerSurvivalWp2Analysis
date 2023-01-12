@@ -165,10 +165,314 @@ for(j in 1:nrow(outcome_cohorts)) {
     
   } else {
     
+    
+    
+    
 print(paste0("Gender*Age stratification KM analysis not carried out for ", outcome_cohorts$cohortName[j], " due to only 1 gender present age stratification will have results " , Sys.time()))
+    
+    
     
   }
   
 
 }
+
+
+
+###########################################
+
+# Extrapolation analysis for age*gender stratification ------
+
+info(logger, 'Extrapolation analysis for age*gender stratification START')
+
+# generating extrapolations ----
+# Initiate templists to store output ---- will have to make folders for each cancer and loop
+extrapolations_age_gender <- list()
+gof_haz_age_gender <- list()
+hazot_age_gender <- list()
+parameters_age_gender <- list()
+
+# Initiate templists to store output ---- 
+extrap_results_temp <- list() # Create empty list for extrapolations
+gof_results_temp <- list() # required to assess goodness of fit (AIC/BIC)
+hazot_results_temp <- list() #required
+parameters_results_temp <- list()
+
+# Run extrapolations for all cancers for age_gender extrapolation ---
+for(j in 1:nrow(cohortDefinitionSet)) { 
+  #for(j in 1:2) { 
+  
+  data <- Pop %>%
+    filter(cohort_definition_id == j) 
+  
+  #filter data removing data groups with > 75% missingness
+  data <- data %>%
+    filter((genderAgegp %in% target_age_gender[[j]])) %>%
+    droplevels()
+  
+  #carry out extrapolation for each cancer
+  
+  for(i in 1:length(extrapolations)) {   
+    
+    if(extrapolations[i] == "spline1") { 
+      
+      # 1knotspline
+      model <- flexsurvspline(formula=Surv(time_years,status-1)~genderAgegp,data=data,k = 1, scale = "hazard")
+      
+      #extrapolation # will need this to check results can remove once checked
+      extrap_results_temp[[i]] <- model %>%
+        summary(t=t/365, tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+      
+      #grab the parameters from the model
+      parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+        enframe() %>%
+        pivot_wider(value, name) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+      
+      # hazard over time
+      hazot_results_temp[[i]] <- model %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+      
+      #get the goodness of fit for each model
+      gof_results_temp[[i]] <- model %>%
+        glance() %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+      
+      #print out progress               
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+      
+    } else if (extrapolations[i] == "spline3") {
+      
+      # 3knotspline
+      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 3, scale = "hazard")
+      
+      #extrapolation # will need this to check results can remove once checked
+      extrap_results_temp[[i]] <- model %>%
+        summary(t=t/365, tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
+      
+      #grab the parameters from the model
+      parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+        enframe() %>%
+        pivot_wider(value, name) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both") 
+      
+      # hazard over time
+      hazot_results_temp[[i]] <- model %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+        rename(Age = age_gr)
+      
+      #get the goodness of fit for each model
+      gof_results_temp[[i]] <- model %>%
+        glance() %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "AgeStrat", Gender = "Both" )
+      
+      #print out progress               
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+      
+    } else if(extrapolations[i] == "spline5") {
+      
+      # 5knotspline
+      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 5, scale = "hazard")
+      
+      #extrapolation # will need this to check results can remove once checked
+      extrap_results_temp[[i]] <- model %>%
+        summary(t=t/365, tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
+      
+      #grab the parameters from the model
+      parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+        enframe() %>%
+        pivot_wider(value, name) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both") 
+      
+      # hazard over time
+      hazot_results_temp[[i]] <- model %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+        rename(Age = age_gr)
+      
+      #get the goodness of fit for each model
+      gof_results_temp[[i]] <- model %>%
+        glance() %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "AgeStrat", Gender = "Both" )
+      
+      #print out progress               
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+      
+    } else {
+      
+      #carry out models for different parametric methods survival
+      model <- flexsurvreg(Surv(time_years, status)~age_gr, data=data, dist=extrapolations[i])
+      
+      # extrapolations
+      extrap_results_temp[[i]] <- model %>%
+        summary(t=t/365, tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
+      
+      #grab the parameters from the model
+      parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+        enframe() %>%
+        pivot_wider(value, name) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both") 
+      
+      # hazard over time
+      hazot_results_temp[[i]] <- model %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+        rename(Age = age_gr)
+      
+      #get the goodness of fit for each model
+      gof_results_temp[[i]] <- model %>%
+        glance() %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "AgeStrat", Gender = "Both" )
+      
+      #print out progress               
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+      
+    }
+    
+    #combine all results
+    extrapolatedcombined <- dplyr::bind_rows(extrap_results_temp)
+    gofcombined <- dplyr::bind_rows(gof_results_temp)
+    hotcombined <- dplyr::bind_rows(hazot_results_temp) %>%
+      filter(time > 0) # remove rows with inf/NAs
+    
+    
+    #put the results from each cancer in separate list
+    extrapolations_age[[j]] <- extrapolatedcombined
+    gof_haz_age[[j]] <- gofcombined
+    hazot_age[[j]] <- hotcombined
+    parameters_age[[j]] <-  parameters_results_temp
+    
+    
+  }
+  
+  #print out progress               
+  print(paste0(cohortDefinitionSet$cohortName[j]," Extrapolation Analysis Completed ", Sys.time()))
+  
+}
+
+# Merge results together from each cancer and extrpolation into a dataframe ---
+extrapolatedfinalAgeGender <- dplyr::bind_rows(extrapolations_age_gender) %>%
+  mutate(Age = genderAgegp ,
+         Age = str_replace(Age, "Female_<30", "<30"),
+         Age = str_replace(Age, "Female_30-39", "30-39"),
+         Age = str_replace(Age, "Female_40-49", "40-49"),
+         Age = str_replace(Age, "Female_50-59", "50-59"),
+         Age = str_replace(Age, "Female_60-69", "60-69"),
+         Age = str_replace(Age, "Female_70-79", "70-79"),
+         Age = str_replace(Age, "Female_80-89", "80-89"),
+         Age = str_replace(Age, "Female_>=90", ">=90"),
+         Age = str_replace(Age, "Male_<30", "<30"),
+         Age = str_replace(Age, "Male_30-39", "30-39"),
+         Age = str_replace(Age, "Male_40-49", "40-49"),
+         Age = str_replace(Age, "Male_50-59", "50-59"),
+         Age = str_replace(Age, "Male_60-69", "60-69"),
+         Age = str_replace(Age, "Male_70-79", "70-79"),
+         Age = str_replace(Age, "Male_80-89", "80-89"),
+         Age = str_replace(Age, "Male_>=90", ">=90"),       
+         Gender = genderAgegp,
+         Gender = str_replace(Gender, "Female_<30", "Female"),
+         Gender = str_replace(Gender, "Female_30-39", "Female"),
+         Gender = str_replace(Gender, "Female_40-49", "Female"),
+         Gender = str_replace(Gender, "Female_50-59", "Female"),
+         Gender = str_replace(Gender, "Female_60-69", "Female"),
+         Gender = str_replace(Gender, "Female_70-79", "Female"),
+         Gender = str_replace(Gender, "Female_80-89", "Female"),
+         Gender = str_replace(Gender, "Female_>=90", "Female"),
+         Gender = str_replace(Gender, "Male_<30", "Male"),
+         Gender = str_replace(Gender, "Male_30-39", "Male"),
+         Gender = str_replace(Gender, "Male_40-49", "Male"),
+         Gender = str_replace(Gender, "Male_50-59", "Male"),
+         Gender = str_replace(Gender, "Male_60-69", "Male"),
+         Gender = str_replace(Gender, "Male_70-79", "Male"),
+         Gender = str_replace(Gender, "Male_80-89", "Male"),
+         Gender = str_replace(Gender, "Male_>=90", "Male")
+  )
+
+goffinalAgeGender <- dplyr::bind_rows(gof_haz_age_gender) %>%
+  mutate(Age = "All" ,
+         Gender = "Both",
+         genderAgegp = "genderAgegp")
+
+hazardotfinalAgeGender <- dplyr::bind_rows(hazot_age_gender)%>%
+  mutate(Age = genderAgegp ,
+         Age = str_replace(Age, "Female_<30", "<30"),
+         Age = str_replace(Age, "Female_30-39", "30-39"),
+         Age = str_replace(Age, "Female_40-49", "40-49"),
+         Age = str_replace(Age, "Female_50-59", "50-59"),
+         Age = str_replace(Age, "Female_60-69", "60-69"),
+         Age = str_replace(Age, "Female_70-79", "70-79"),
+         Age = str_replace(Age, "Female_80-89", "80-89"),
+         Age = str_replace(Age, "Female_>=90", ">=90"),
+         Age = str_replace(Age, "Male_<30", "<30"),
+         Age = str_replace(Age, "Male_30-39", "30-39"),
+         Age = str_replace(Age, "Male_40-49", "40-49"),
+         Age = str_replace(Age, "Male_50-59", "50-59"),
+         Age = str_replace(Age, "Male_60-69", "60-69"),
+         Age = str_replace(Age, "Male_70-79", "70-79"),
+         Age = str_replace(Age, "Male_80-89", "80-89"),
+         Age = str_replace(Age, "Male_>=90", ">=90"),       
+         Gender = genderAgegp,
+         Gender = str_replace(Gender, "Female_<30", "Female"),
+         Gender = str_replace(Gender, "Female_30-39", "Female"),
+         Gender = str_replace(Gender, "Female_40-49", "Female"),
+         Gender = str_replace(Gender, "Female_50-59", "Female"),
+         Gender = str_replace(Gender, "Female_60-69", "Female"),
+         Gender = str_replace(Gender, "Female_70-79", "Female"),
+         Gender = str_replace(Gender, "Female_80-89", "Female"),
+         Gender = str_replace(Gender, "Female_>=90", "Female"),
+         Gender = str_replace(Gender, "Male_<30", "Male"),
+         Gender = str_replace(Gender, "Male_30-39", "Male"),
+         Gender = str_replace(Gender, "Male_40-49", "Male"),
+         Gender = str_replace(Gender, "Male_50-59", "Male"),
+         Gender = str_replace(Gender, "Male_60-69", "Male"),
+         Gender = str_replace(Gender, "Male_70-79", "Male"),
+         Gender = str_replace(Gender, "Male_80-89", "Male"),
+         Gender = str_replace(Gender, "Male_>=90", "Male")
+  )
+
+
+# extract results for 1,5,10 years for extrapolated data
+# extrapolation_predAgeGender <- subset(extrapolatedfinalAge, extrapolatedfinalAge$time == 1 |
+#                                   extrapolatedfinalAge$time == 5 |
+#                                   extrapolatedfinalAge$time == 10  )
+
+
+# catch to remove hazard extrapolation where hazard cant be generated on observed data
+# #create the filters pulls out the age and the cancer type where there is no data
+# filteragegender <- as.data.frame(table(hotkmcombined_age_gender$genderAgegp, hotkmcombined_age_gender$Cancer)) %>%
+#   rename(AgeGender = Var1, Cancer = Var2, n = Freq ) %>%
+#   filter(n == 0) %>% 
+#   mutate_if(is.factor, as.character) %>%
+#   pull(AgeGender) 
+# 
+# filtercancer <- as.data.frame(table(hotkmcombined_age_gender$genderAgegp, hotkmcombined_age_gender$Cancer)) %>%
+#   rename(AgeGender = Var1, Cancer = Var2, n = Freq ) %>%
+#   filter(n == 0) %>% 
+#   mutate_if(is.factor, as.character) %>%
+#   pull(Cancer) 
+# 
+# #filter out the extrapolated data which doesnt have hazard over time for observed
+# hazardotfinalAgeGender <- hazardotfinalAgeGender %>%
+#   filter(!Cancer %in% filtercancer | !Age %in% filterage ) 
+
+
+#save files in results folder ---
+Results_AGEGENDER <- list("extrapolation_age_gender" = extrapolatedfinalAgeGender, 
+                          "hazardrate_age_gender" = hazardotfinalAgeGender,
+                          "GOF_age_gender" = goffinalAgeGender)
+
+#write results to excel ---
+openxlsx::write.xlsx(Results_AGEGENDER, file = here("Results", db.name , "cancer_extrapolation_results_AGEGENDER.xlsx"))
+
+# extrapolatedfinalAge <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_AGE.xlsx"), sheet = 1)
+# hazardotfinalAge <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_AGE.xlsx"), sheet = 2)
+# goffinalAge <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_extrapolation_results_AGE.xlsx"), sheet = 3)
+
+info(logger, 'Extrapolation analysis for age*gender stratification COMPLETE')
 
