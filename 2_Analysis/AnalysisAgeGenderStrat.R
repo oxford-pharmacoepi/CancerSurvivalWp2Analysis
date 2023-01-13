@@ -470,7 +470,7 @@ Spline3kParametersAgeGender <- dplyr::bind_rows(Spline3kP)
 Spline5kParametersAgeGender <- dplyr::bind_rows(Spline5kP)
 
 #save files in results folder ---
-Results_Parameters_AGE <- list(
+Results_Parameters_AGEGENDER <- list(
   "GompertzParametersAgeGender" =  GompertzParametersAgeGender ,
   "weibullParametersAgeGender" =  weibullParametersAgeGender ,
   "weibullPHParametersAgeGender" =  weibullPHParametersAgeGender,
