@@ -71,9 +71,9 @@ Pop<-cdm$person %>%
 Pop<-Pop %>% 
   filter(cohort_start_date >= '2005-01-01') 
 
-# Only include people with a diagnosis at or before 1st jan 2019 to remove pandemic effects ---
+# Only include people with a diagnosis at or before 1st dec 2019 to remove pandemic effects ---
 Pop<-Pop %>% 
-  filter(cohort_start_date <= '2019-01-01') 
+  filter(cohort_start_date <= '2019-12-31') 
 
 
 # format data -----
