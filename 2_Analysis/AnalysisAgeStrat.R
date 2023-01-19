@@ -21,7 +21,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     filter(cohort_definition_id == j) 
   
   # get the risk table ---
-  grid <- seq(0,floor(max(data$time_years)),by=2)
+  grid <- seq(0,floor(max(data$time_years)),by=1)
   observedrisktableKM_age[[j]] <- RiskSetCount(grid,data$time_years[data$age_gr == "<30"]) %>%
     rbind(grid) %>% as.data.frame() %>%
     `colnames<-`(grid) %>%
@@ -35,7 +35,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     rbind(RiskSetCount(grid,data$time_years[data$age_gr == ">=90"]))%>%
     mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Gender = "Both", Age = c("<30" ,"30-39", "40-49" ,"50-59" ,"60-69", "70-79", "80-89" ,">=90")) 
   
-  # filter that removes data where there are more than 75% missing data points after removing columns with less than 5 entries
+  # filter that removes data where 3 or less data points after obscuring results
   # remove entries < 5 patients turn to zero
   filterdatatest <- observedrisktableKM_age[[j]] %>%
     mutate_at(.vars = c(1:(ncol(observedrisktableKM_age[[j]])-4)), funs(ifelse(.== 0, NA, .))) %>%  
@@ -47,15 +47,16 @@ for(j in 1:nrow(outcome_cohorts)) {
   #count the number of zeros across the rows
   filterdatatest <- filterdatatest %>% 
     mutate(count=rowSums(.[1:elgcols]==0), percentzero = ((count/elgcols)*100) ) %>%
-    filter(percentzero != 75) %>%
-    filter(percentzero < 75)
+    filter(percentzero != 60) %>%
+    filter(percentzero < 60)
   
   #create filter function to put into results below
   target_age[[j]] <- filterdatatest$Age
   
   #filter data removing data with > 75% missingness
   data <- data %>%
-    filter((age_gr %in% target_age[[j]]))
+    filter((age_gr %in% target_age[[j]])) %>%
+    droplevels()
   
   #remove row from risk table
   observedrisktableKM_age[[j]] <-  observedrisktableKM_age[[j]] %>%

@@ -41,8 +41,8 @@ for(j in 1:nrow(outcome_cohorts)) {
   #count the number of zeros across the rows
   filterdatatest <- filterdatatest %>% 
     mutate(count=rowSums(.[1:elgcols]==0), percentzero = ((count/elgcols)*100) ) %>%
-    filter(percentzero != 75) %>%
-    filter(percentzero < 75)
+    filter(percentzero != 60) %>%
+    filter(percentzero < 60)
   
   #create filter function to put into results below
   target_gender[[j]] <- filterdatatest$Gender

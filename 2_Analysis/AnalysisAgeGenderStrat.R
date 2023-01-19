@@ -57,8 +57,8 @@ for(j in 1:nrow(outcome_cohorts)) {
   filterdatatest <- filterdatatest %>% 
     unite("GenderAge", c(Gender, Age), remove = FALSE) %>%
     mutate(count=rowSums(.[1:elgcols]==0), percentzero = ((count/elgcols)*100) ) %>%
-    filter(percentzero != 75) %>%
-    filter(percentzero < 75)
+    filter(percentzero != 60) %>%
+    filter(percentzero < 60)
   
   #create filter function to put into results below
   target_age_gender[[j]] <- filterdatatest$GenderAge
