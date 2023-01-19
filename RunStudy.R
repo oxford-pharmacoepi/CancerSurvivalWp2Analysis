@@ -71,7 +71,7 @@ Pop<-cdm$person %>%
 Pop<-Pop %>% 
   filter(cohort_start_date >= '2005-01-01') 
 
-# Only include people with a diagnosis at or before 1st dec 2019 to remove pandemic effects ---
+# Only include people with a diagnosis at or before 31st dec 2019 to remove pandemic effects ---
 Pop<-Pop %>% 
   filter(cohort_start_date <= '2019-12-31') 
 
@@ -161,9 +161,9 @@ Pop<-Pop %>%
 Pop<-Pop %>%
   filter(prior_obs_years>=1)
 
-# need to make new end of observation period to 1/1/2019 ----
+# need to make new end of observation period to 31/12/2019 ----
 Pop<-Pop %>% 
-  mutate(observation_period_end_date_2019 = ifelse(observation_period_end_date >= '2019-01-01', '2019-01-01', NA)) %>%
+  mutate(observation_period_end_date_2019 = ifelse(observation_period_end_date >= '2019-12-31', '2019-12-31', NA)) %>%
   mutate(observation_period_end_date_2019 = as.Date(observation_period_end_date_2019) ) %>%
   mutate(observation_period_end_date_2019 = coalesce(observation_period_end_date_2019, observation_period_end_date))
   
@@ -265,39 +265,37 @@ t <- seq(0, timeinyrs*365, by=50) # just for debugging
 
 #Run analysis ----
 #whole population
-# info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
-# source(here("2_Analysis","Analysis.R"))
-# info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
+info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
+source(here("2_Analysis","Analysis2.R"))
+info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
 
 
 #gender stratification
-# if(RunGenderStrat == TRUE){
-# 
-#   info(logger, 'RUNNING ANALYSIS FOR GENDER STRATIFICATION')
-#   source(here("2_Analysis","AnalysisGenderStrat.R"))
-#   info(logger, 'ANALYSIS RAN FOR GENDER STRAT')
-#   
-# }
+if(RunGenderStrat == TRUE){
+
+  info(logger, 'RUNNING ANALYSIS FOR GENDER STRATIFICATION')
+  source(here("2_Analysis","AnalysisGenderStrat.R"))
+  info(logger, 'ANALYSIS RAN FOR GENDER STRAT')
+
+}
 
 #age stratification
-# if(RunAgeStrat == TRUE){
-#   
-#   info(logger, 'RUNNING ANALYSIS FOR AGE STRATIFICATION')
-#   source(here("2_Analysis","AnalysisAgeStrat.R"))
-#   info(logger, 'ANALYSIS RAN FOR AGE STRAT')
-#   
-# }
+if(RunAgeStrat == TRUE){
+
+  info(logger, 'RUNNING ANALYSIS FOR AGE STRATIFICATION')
+  source(here("2_Analysis","AnalysisAgeStrat.R"))
+  info(logger, 'ANALYSIS RAN FOR AGE STRAT')
+
+}
 
 #age*gender stratification
-# if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
-#   
-#   info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER STRATIFICATION')
-#   source(here("2_Analysis","AnalysisAgeGenderStrat.R"))
-#   info(logger, 'ANALYSIS RAN FOR AGE STRAT')
-#   
-# }
+if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
 
+  info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER STRATIFICATION')
+  source(here("2_Analysis","AnalysisAgeGenderStrat.R"))
+  info(logger, 'ANALYSIS RAN FOR AGE STRAT')
 
+}
 
 # # Tidy up results and save ----
 
