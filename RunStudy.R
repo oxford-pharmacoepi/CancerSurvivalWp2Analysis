@@ -359,11 +359,16 @@ GOFResults <- bind_rows(
 saveRDS(GOFResults, 
         here(output.folder, "GOF_results.rds"))
 
+
 #parameters of the extrapolated models
+ExtrpolationParameters <-bind_rows(
+  ParametersAll ,
+  ParametersGender ,
+  ParametersAgeGender
+)
 
-
-
-
+saveRDS(ExtrpolationParameters, 
+        here(output.folder, "Extrapolation_parameters.rds"))
 
 
 

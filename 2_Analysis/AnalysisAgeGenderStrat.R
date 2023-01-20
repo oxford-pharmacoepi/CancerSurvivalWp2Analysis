@@ -232,7 +232,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   data <- Pop %>%
     filter(cohort_definition_id == j) 
   
-  #filter data removing data groups with > 75% missingness
+  #filter data removing data groups with > 60% missingness
   data <- data %>%
     filter((genderAgegp %in% target_age_gender[[j]])) %>%
     droplevels()
@@ -406,17 +406,6 @@ extrapolatedfinalAgeGender <- dplyr::bind_rows(extrapolations_age_gender)
 goffinalAgeGender <- dplyr::bind_rows(gof_haz_age_gender) 
 hazardotfinalAgeGender <- dplyr::bind_rows(hazot_age_gender)
 
-
-
-#save files in results folder ---
-Results_AGEGENDER <- list("extrapolation_age_gender" = extrapolatedfinalAgeGender, 
-                          "hazardrate_age_gender" = hazardotfinalAgeGender,
-                          "GOF_age_gender" = goffinalAgeGender)
-
-#write results to excel ---
-openxlsx::write.xlsx(Results_AGEGENDER, file = here("Results", db.name , "cancer_extrapolation_results_AGEGENDER.xlsx"))
-
-
 # extracting parameters for each model for each cancer ----
 # create empty lists for parameters extraction
 GompertzP <- list()
@@ -461,22 +450,17 @@ Spline1kParametersAgeGender <- dplyr::bind_rows(Spline1kP)
 Spline3kParametersAgeGender <- dplyr::bind_rows(Spline3kP)
 Spline5kParametersAgeGender <- dplyr::bind_rows(Spline5kP)
 
-#save files in results folder ---
-Results_Parameters_AGEGENDER <- list(
-  "GompertzParametersAgeGender" =  GompertzParametersAgeGender ,
-  "weibullParametersAgeGender" =  weibullParametersAgeGender ,
-  "weibullPHParametersAgeGender" =  weibullPHParametersAgeGender,
-  "ExponentialParametersAgeGender" = ExponentialParametersAgeGender,
-  "LoglogParametersAgeGender" = LoglogParametersAgeGender,
-  "LognormParametersAgeGender" =  LognormParametersAgeGender,
-  "GenGammaParametersAgeGender" = GenGammaParametersAgeGender,
-  "Spline1kParametersAgeGender" = Spline1kParametersAgeGender,
-  "Spline3kParametersAgeGender" = Spline3kParametersAgeGender,
-  "Spline5kParametersAgeGender" = Spline5kParametersAgeGender)
-
-#write results to excel ---
-openxlsx::write.xlsx(Results_Parameters_AGEGENDER, file = here("Results", db.name , "cancer_extrapolation_modelParameters_AGEGENDER.xlsx"))
-
+ParametersAgeGender <- bind_rows(
+  GompertzParametersAgeGender ,
+  weibullParametersAgeGender ,
+  weibullPHParametersAgeGender,
+  ExponentialParametersAgeGender, 
+  LoglogParametersAgeGender,
+  LognormParametersAgeGender, 
+  GenGammaParametersAgeGender, 
+  Spline1kParametersAgeGender ,
+  Spline3kParametersAgeGender ,
+  Spline5kParametersAgeGender )
 
 toc(func.toc=toc_min)
 

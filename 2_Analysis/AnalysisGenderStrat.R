@@ -169,8 +169,6 @@ for(j in 1:nrow(outcome_cohorts)) {
   genderlevels <- data %>%
     group_by(gender) %>% summarise(count = n()) %>% tally()
   
-
-  
   # analysis wont run if only 1 gender present
   if(genderlevels == 2){
     
@@ -192,7 +190,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All") 
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Gender" ) 
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
@@ -222,7 +220,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All") 
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Gender" ) 
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
@@ -252,7 +250,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All") 
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Gender" ) 
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
@@ -284,7 +282,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         parameters_results_temp[[i]]  <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All")  
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Gender" )  
         
         #extract the hazard function over time
         hazot_results_temp[[i]] <- model %>%
@@ -329,23 +327,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       
     }
     
-    
   }
-  
+
 # Merge results together from each cancer and extrapolation into a dataframe ---
 extrapolatedfinalGender <- dplyr::bind_rows(extrapolations_gender)
 goffinalGender <- dplyr::bind_rows(gof_haz_gender)
 hazardotfinalGender <- dplyr::bind_rows(hazot_gender)
 
-#save files in results folder ---
-Results_GENDER <- list("extrapolation_gender" = extrapolatedfinalGender, 
-                       "hazardrate_gender" = hazardotfinalGender,
-                       "GOF_gender" = goffinalGender)
-
-#write results to excel ---
-openxlsx::write.xlsx(Results_GENDER, file = here("Results", db.name , "cancer_extrapolation_results_GENDER.xlsx"))
-
-# extracting parameters for each model for each cancer
+# extracting parameters for each model for each cancer -----
 # create empty lists for parameters extraction
 GompertzP <- list()
 weibullP <- list()
@@ -390,21 +379,17 @@ Spline1kParametersGender <- dplyr::bind_rows(Spline1kP)
 Spline3kParametersGender <- dplyr::bind_rows(Spline3kP)
 Spline5kParametersGender <- dplyr::bind_rows(Spline5kP)
 
-#save files in results folder ---
-Results_Parameters_GENDER <- list(
-  "GompertzParametersGender" =  GompertzParametersGender ,
-  "weibullParametersGender" =  weibullParametersGender ,
-  "weibullPHParametersGender" =  weibullPHParametersGender,
-  "ExponentialParametersGender" = ExponentialParametersGender,
-  "LoglogParametersGender" = LoglogParametersGender,
-  "LognormParametersGender" =  LognormParametersGender,
-  "GenGammaParametersGender" = GenGammaParametersGender,
-  "Spline1kParametersGender" = Spline1kParametersGender,
-  "Spline3kParametersGender" = Spline3kParametersGender,
-  "Spline5kParametersGender" = Spline5kParametersGender)
-
-#write results to excel ---
-openxlsx::write.xlsx(Results_Parameters_GENDER, file = here("Results", db.name , "cancer_extrapolation_modelParameters_GENDER.xlsx"))
+ParametersGender <- bind_rows(
+  GompertzParametersGender ,
+  weibullParametersGender ,
+  weibullPHParametersGender,
+  ExponentialParametersGender, 
+  LoglogParametersGender,
+  LognormParametersGender, 
+  GenGammaParametersGender, 
+  Spline1kParametersGender ,
+  Spline3kParametersGender ,
+  Spline5kParametersGender )
 
 toc(func.toc=toc_min)
 

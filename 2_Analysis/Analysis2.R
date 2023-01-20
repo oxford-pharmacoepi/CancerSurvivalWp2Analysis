@@ -254,21 +254,10 @@ for(j in 1:nrow(outcome_cohorts)) {
   
 }
 
-
 # Merge results together from each cancer and extrpolation into a dataframe ---
-extrapolatedfinal <- dplyr::bind_rows(extrapolations_all)
-goffinal <- dplyr::bind_rows(gof_haz_all)
+extrapolatedfinal <- dplyr::bind_rows(extrapolations_all) 
+goffinal <- dplyr::bind_rows(gof_haz_all) 
 hazardotfinal <- dplyr::bind_rows(hazot_all)
-
-
-# will remove this when other stratifications are done and merging in run study page
-#save files in results folder ---
-Results_ALL <- list("extrapolation_all" = extrapolatedfinal, 
-                    "hazardrate_all" = hazardotfinal,
-                    "GOF_all" = goffinal)
-
-#write results to excel ---
-openxlsx::write.xlsx(Results_ALL, file = here("Results", db.name , "cancer_extrapolation_results_ALL.xlsx"))
 
 
 # extracting parameters for each model for each cancer
@@ -317,21 +306,17 @@ Spline1kParametersAll <- dplyr::bind_rows(Spline1kP)
 Spline3kParametersAll <- dplyr::bind_rows(Spline3kP)
 Spline5kParametersAll <- dplyr::bind_rows(Spline5kP)
 
-#save files in results folder ---
-Results_Parameters_ALL <- list(
-  "GompertzParametersAll" =  GompertzParametersAll ,
-  "weibullParametersAll" =  weibullParametersAll ,
-  "weibullPHParametersAll" =  weibullPHParametersAll,
-  "ExponentialParametersAll" = ExponentialParametersAll,
-  "LoglogParametersAll" = LoglogParametersAll,
-  "LognormParametersAll" =  LognormParametersAll,
-  "GenGammaParametersAll" = GenGammaParametersAll,
-  "Spline1kParametersAll" = Spline1kParametersAll,
-  "Spline3kParametersAll" = Spline3kParametersAll,
-  "Spline5kParametersAll" = Spline5kParametersAll)
-
-#write results to excel ---
-openxlsx::write.xlsx(Results_Parameters_ALL, file = here("Results", db.name , "cancer_extrapolation_modelParameters_ALL.xlsx"))
+ParametersAll <- bind_rows(
+  GompertzParametersAll ,
+  weibullParametersAll ,
+  weibullPHParametersAll,
+  ExponentialParametersAll, 
+  LoglogParametersAll,
+  LognormParametersAll, 
+  GenGammaParametersAll, 
+  Spline1kParametersAll ,
+  Spline3kParametersAll ,
+  Spline5kParametersAll )
 
 toc(func.toc=toc_min)
 

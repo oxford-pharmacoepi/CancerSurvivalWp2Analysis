@@ -179,7 +179,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both") 
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both", Age = "Age") 
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
@@ -209,7 +209,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both") 
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both", Age = "Age") 
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
@@ -239,7 +239,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both") 
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both", Age = "Age") 
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
@@ -269,7 +269,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both") 
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both", Age = "Age") 
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
@@ -310,17 +310,9 @@ for(j in 1:nrow(outcome_cohorts)) {
   } 
   
 # Merge results together from each cancer and extrapolation into a dataframe ---
-extrapolatedfinalGender <- dplyr::bind_rows(extrapolations_age)
-goffinalGender <- dplyr::bind_rows(gof_haz_age)
-hazardotfinalGender <- dplyr::bind_rows(hazot_age)
-
-#save files in results folder ---
-Results_AGE <- list("extrapolation_age" = extrapolatedfinalGender, 
-                       "hazardrate_age" = hazardotfinalGender,
-                       "GOF_age" = goffinalGender)
-
-#write results to excel ---
-openxlsx::write.xlsx(Results_AGE, file = here("Results", db.name , "cancer_extrapolation_results_AGE.xlsx"))
+extrapolatedfinalAge <- dplyr::bind_rows(extrapolations_age)
+goffinalAge <- dplyr::bind_rows(gof_haz_age)
+hazardotfinalAge <- dplyr::bind_rows(hazot_age)
 
 # extracting parameters for each model for each cancer ----
 # create empty lists for parameters extraction
