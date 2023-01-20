@@ -21,7 +21,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     filter(cohort_definition_id == j) 
   
   # get the risk table ---
-  grid <- seq(0,floor(max(data$time_years)),by=1)
+  grid <- seq(0,floor(max(data$time_years)),by=2)
   observedrisktableKM_age[[j]] <- RiskSetCount(grid,data$time_years[data$age_gr == "<30"]) %>%
     rbind(grid) %>% as.data.frame() %>%
     `colnames<-`(grid) %>%
@@ -124,15 +124,6 @@ hotkmcombined_age <- dplyr::bind_rows(observedhazotKM_age) %>%
 #generate the risk table and remove entries < 5 patients
 risktableskm_age <- dplyr::bind_rows(observedrisktableKM_age) %>%
   replace(is.na(.), 0) 
-
-
-ResultsKM_AGE <- list("KM_observed_age" = observedkmcombined_age, 
-                      "KM_MedianSur_age" = medkmcombined_age,
-                      "KM_hazard_rate_age" = hotkmcombined_age,
-                      "KM_risktable_age" = risktableskm_age)
-
-#write to excel
-openxlsx::write.xlsx(ResultsKM_AGE, file = here("Results", db.name ,"cancer_KM_observed_results_AGE.xlsx"))
 
 toc(func.toc=toc_min)
 

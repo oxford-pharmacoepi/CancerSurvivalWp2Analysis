@@ -128,20 +128,6 @@ risktableskm_gender <- risktableskm_gender %>%
   relocate(Cancer) %>%
   mutate(across(everything(), as.character))
 
-
-ResultsKM_GENDER <- list("KM_observed_gender" = observedkmcombined_gender, 
-                         "KM_MedianSur_gender" = medkmcombined_gender,
-                         "KM_hazard_rate_gender" = hotkmcombined_gender,
-                         "KM_risktable_gender" = risktableskm_gender)
-
-#write to excel
-openxlsx::write.xlsx(ResultsKM_GENDER, file = here("Results", db.name ,"cancer_KM_observed_results_GENDER.xlsx"))
-
-# observedkmcombined_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 1)
-# medkmcombined_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 2)
-# hotkmcombined_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 3)
-# risktableskm_gender <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_GENDER.xlsx"), sheet = 4)
-
 toc(func.toc=toc_min)
 
 info(logger, 'KM analysis for gender stratification COMPLETE')

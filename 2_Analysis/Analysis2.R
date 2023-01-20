@@ -83,22 +83,6 @@ risktableskm <- dplyr::bind_rows(observedrisktableKM)%>%
   relocate(Cancer) %>%
   mutate(across(everything(), as.character))
 
-
-# once all done can merge all the results together in a rdata file
-# put all the results into a list
-ResultsKM_ALL <- list("KM_observed_all" = observedkmcombined, 
-                    "KM_MedianSur_all" = medkmcombined,
-                    "KM_hazard_rate_all" = hotkmcombined,
-                    "KM_risktable_all" = risktableskm)
-
-#write to excel
-openxlsx::write.xlsx(ResultsKM_ALL, file = here("Results", db.name ,"cancer_KM_observed_results_ALL.xlsx"))
-
-# observedkmcombined_all <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_ALL.xlsx"), sheet = 1)
-# medkmcombined_all <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_ALL.xlsx"), sheet = 2)
-# hotkmcombined_all <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_ALL.xlsx"), sheet = 3)
-# risktableskm_all <- read.xlsx(xlsxFile = here("Results", db.name , "cancer_KM_observed_results_ALL.xlsx"), sheet = 4)
-
 toc(func.toc=toc_min)
 info(logger, 'KM analysis for whole population COMPLETE')
 

@@ -306,37 +306,48 @@ survivalResults <- bind_rows(
   observedkmcombined_age_gender # age gender strat
 )
 
+saveRDS(survivalResults, 
+        here(output.folder, "survival_results.rds"))
 
 #risk table # error with characters and double formats
 riskTableResults <- bind_rows(
-risktableskm , # all
-risktableskm_gender , # gender strat
-risktableskm_age , # age strat
-risktableskm_age_gender # age*gender strat 
+  risktableskm , # all
+  risktableskm_gender , # gender strat
+  risktableskm_age , # age strat
+  risktableskm_age_gender # age*gender strat 
 )
 
+saveRDS(riskTableResults, 
+        here(output.folder, "risktable_results.rds"))
+
 #median results
-medkmcombined # all
-medkmcombined_gender # gender
-medkmcombined_age # age strat
-medkmcombined_age_gender # age*gender strat
+medianKMResults <- bind_rows( 
+  medkmcombined , # all
+  medkmcombined_gender , # gender
+  medkmcombined_age , # age strat
+  medkmcombined_age_gender # age*gender strat 
+)
+
+saveRDS(medianKMResults, 
+        here(output.folder, "median_survival_results.rds"))
+
 
 # hazard over time results
-hotkmcombined # all
-hotkmcombined_gender # gender
-hotkmcombined_age # age strat
+hazOverTimeResults <- bind_rows( 
+hotkmcombined , # all
+hotkmcombined_gender, # gender
+hotkmcombined_age, # age strat
 hotkmcombined_age_gender # age*gender strat
+)
 
-
-
-
-
+saveRDS(hazOverTimeResults, 
+        here(output.folder, "hazard_observed_results.rds"))
 
 # extrapolated results -----
-extrapolatedfinal # all resul
 
 
-# extract results from all and gender and age stratifications and save them as a RData file
+
+# extract results from all and gender and age stratification and save them as a RData file
 
 
 # save(Patient.characteristcis, 
