@@ -170,7 +170,7 @@ Pop<-Pop %>%
  
 # binary death outcome (for survival) ---
 # need to take into account follow up
-# if death date is > 1/1/2019 set death to 0
+# if death date is > 31/12/2019 set death to 0
 Pop<-Pop %>% 
   mutate(status= ifelse(!is.na(death_date), 2, 1 )) %>%
   mutate(status= ifelse(death_date > observation_period_end_date_2019 , 1, status )) %>% 
@@ -296,18 +296,20 @@ if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
 }
 
 # # Tidy up results and save ----
-#survival results ----
 
-# survival data
+# survival data and extrapolated data
 survivalResults <- bind_rows(
   observedkmcombined , # all 
   observedkmcombined_gender , # gender strat 
   observedkmcombined_age , # age strat
-  observedkmcombined_age_gender # age gender strat
+  observedkmcombined_age_gender, # age gender strat
+  extrapolatedfinal,
+  extrapolatedfinalGender,
+  extrapolatedfinalAgeGender
 )
 
 saveRDS(survivalResults, 
-        here(output.folder, "survival_results.rds"))
+        here(output.folder, "survival_extrapolation_results.rds"))
 
 #risk table # error with characters and double formats
 riskTableResults <- bind_rows(
@@ -337,53 +339,59 @@ hazOverTimeResults <- bind_rows(
 hotkmcombined , # all
 hotkmcombined_gender, # gender
 hotkmcombined_age, # age strat
-hotkmcombined_age_gender # age*gender strat
+hotkmcombined_age_gender, # age*gender strat
+hazardotfinal, #extrapolated hot all results
+hazardotfinalGender, #extrpolated hot gender extrap
+hazardotfinalAgeGender #extrpolated hot age*gender
+
 )
 
 saveRDS(hazOverTimeResults, 
-        here(output.folder, "hazard_observed_results.rds"))
+        here(output.folder, "hazard_results.rds"))
 
-# extrapolated results -----
+#GOF results for extrpolated results
+GOFResults <- bind_rows( 
+  goffinal, # all
+  goffinalGender, #gender
+  goffinalAgeGender #genderage
+)
+
+saveRDS(GOFResults, 
+        here(output.folder, "GOF_results.rds"))
+
+#parameters of the extrapolated models
 
 
 
-# extract results from all and gender and age stratification and save them as a RData file
 
 
-# save(Patient.characteristcis, 
-#      file = paste0(output.folder, "/Patient.characteristcis_", db.name, ".RData"))
-# save(Survival.summary, 
-#      file = paste0(output.folder, "/Survival.summary_", db.name, ".RData"))
-# save(Model.estimates, 
-#      file = paste0(output.folder, "/Model.estimates_", db.name, ".RData"))
-# save(Cohort.age.plot.data, 
-#      file = paste0(output.folder, "/Cohort.age.plot.data_", db.name, ".RData"))
-# 
+
+
 # # Time taken
-# x <- abs(as.numeric(Sys.time()-start, units="secs"))
-# info(logger, paste0("Study took: ", 
-#                     sprintf("%02d:%02d:%02d:%02d", 
-#                             x %/% 86400,  x %% 86400 %/% 3600, x %% 3600 %/% 
-#                               60,  x %% 60 %/% 1)))
-# 
-# # # zip results
-# print("Zipping results to output folder")
-# unlink(paste0(output.folder, "/OutputToShare_", db.name, ".zip"))
-# zipName <- paste0(output.folder, "/OutputToShare_", db.name, ".zip")
-# 
-# files<-c(log_file,
-#          paste0(output.folder, "/Patient.characteristcis_", db.name, ".RData"),
-#          paste0(output.folder, "/Survival.summary_", db.name, ".RData"),
-#          paste0(output.folder, "/Model.estimates_", db.name, ".RData") ,
-#          paste0(output.folder, "/Cohort.age.plot.data_", db.name, ".RData") )
-# files <- files[file.exists(files)==TRUE]
-# createZipFile(zipFile = zipName,
-#               rootFolder=output.folder,
-#               files = files)
-# 
-# print("Done!")
-# print("-- If all has worked, there should now be a zip folder with your results in the results to share")
-# print("-- Thank you for running the study!")
-# Sys.time()-start
-# # readLines(log_file)
+x <- abs(as.numeric(Sys.time()-start, units="secs"))
+info(logger, paste0("Study took: ",
+                    sprintf("%02d:%02d:%02d:%02d",
+                            x %/% 86400,  x %% 86400 %/% 3600, x %% 3600 %/%
+                              60,  x %% 60 %/% 1)))
+
+# zip results
+print("Zipping results to output folder")
+unlink(paste0(output.folder, "/OutputToShare_", db.name, ".zip"))
+zipName <- paste0(output.folder, "/OutputToShare_", db.name, ".zip")
+
+# use ed's code to list the files in a directory and 
+
+files <-list.files(here(output.folder), full.names = TRUE)
+
+files <- files[file.exists(files)==TRUE]
+
+createZipFile(zipFile = zipName,
+              rootFolder=output.folder,
+              files = files)
+
+print("Done!")
+print("-- If all has worked, there should now be a zip folder with your results in the results to share")
+print("-- Thank you for running the study!")
+Sys.time()-start
+# readLines(log_file)
 
