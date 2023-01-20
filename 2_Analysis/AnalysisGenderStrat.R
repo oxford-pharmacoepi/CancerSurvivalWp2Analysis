@@ -125,7 +125,8 @@ risktableskm_gender <- risktableskm_gender %>%
   mutate_at(.vars = c(1:(ncol(risktableskm_gender)-4)), funs(ifelse(.== 0, NA, .))) %>%  
   mutate_at(.vars = c(1:(ncol(risktableskm_gender)-4)), funs(ifelse(.<= 5, "<5", .))) %>%
   replace(is.na(.), 0) %>%
-  relocate(Cancer)
+  relocate(Cancer) %>%
+  mutate(across(everything(), as.character))
 
 
 ResultsKM_GENDER <- list("KM_observed_gender" = observedkmcombined_gender, 

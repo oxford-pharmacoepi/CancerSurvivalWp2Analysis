@@ -63,7 +63,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   #create filter function to put into results below
   target_age_gender[[j]] <- filterdatatest$GenderAge
   
-  #filter data removing data groups with > 75% missingness
+  #filter data removing data
   data <- data %>%
     filter((genderAgegp %in% target_age_gender[[j]])) %>%
   droplevels()
@@ -100,7 +100,8 @@ for(j in 1:nrow(outcome_cohorts)) {
              Age = filter4genderage$Age ,
             Gender = filter4genderage$Gender ) %>%
     unite("GenderAge", c(Gender, Age), remove = FALSE) %>%
-      filter((GenderAge %in% target_age_gender[[j]]))
+      filter((GenderAge %in% target_age_gender[[j]])) %>%
+      mutate(across(everything(), as.character))
     
     print(paste0("Extract risk table ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
     

@@ -47,7 +47,9 @@ db.name<-"..."
 
 # Set output folder locations -----
 # the path to a folder where the results from this analysis will be saved
-example.plots.folder <- here("3_ExamplePlots") # for QCing and for troubleshooting
+# to set the location within the project with folder called "CPRD", we can use: here("CPRD")
+# but this file path could be set to somewhere else
+output.folder<-here("Results",db.name)
 
 # database connection details
 server     <- "..."
@@ -69,8 +71,11 @@ results_database_schema<-"..."
 # Note, any existing tables in your results schema with the same name will be overwritten
 cohortTableStem<-"..." # needs to be in lower case
 
+#put in the start date from which you have usable data must be in YYYY-MM-DD
+startdate <- "..."
+
 # number of years of extrapolation
-timeinyrs <- 25 # amount of followup plus 10 years as a numeric
+timeinyrs <- "..." # amount of followup in your database plus 10 years
 
 # run gender stratification (there will be a if statement in the analysis code which will call the analysis for this)
 RunGenderStrat <- TRUE
@@ -90,8 +95,5 @@ tbl(db, sql(paste0("SELECT * FROM ",cdm_database_schema, ".person"))) %>% tally(
 # Run the study ------
 source(here("RunStudy.R"))
 
-
 # after the study is run you should have a zip folder in your results folder to share
-
-
 

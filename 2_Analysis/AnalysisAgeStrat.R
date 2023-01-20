@@ -53,7 +53,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   #create filter function to put into results below
   target_age[[j]] <- filterdatatest$Age
   
-  #filter data removing data with > 75% missingness
+  #filter data removing data
   data <- data %>%
     filter((age_gr %in% target_age[[j]])) %>%
     droplevels()

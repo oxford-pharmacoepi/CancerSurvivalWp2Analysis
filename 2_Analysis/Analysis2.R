@@ -80,7 +80,8 @@ hotkmcombined <- dplyr::bind_rows(observedhazotKM) %>%
 risktableskm <- dplyr::bind_rows(observedrisktableKM)%>%
   mutate(across(everything(), ~replace(., . <=  5 , NA))) %>%
   replace(is.na(.), "<5") %>%
-  relocate(Cancer)
+  relocate(Cancer) %>%
+  mutate(across(everything(), as.character))
 
 
 # once all done can merge all the results together in a rdata file

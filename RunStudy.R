@@ -67,11 +67,11 @@ Pop<-cdm$person %>%
   collect()
 
 
-# only include people with a diagnosis that starts at or after 1st jan 2005 ---
+# only include people with a diagnosis that starts at or after 1st jan 2000 ---
 Pop<-Pop %>% 
-  filter(cohort_start_date >= '2005-01-01') 
+  filter(cohort_start_date >= startdate) 
 
-# Only include people with a diagnosis at or before 31st dec 2019 to remove pandemic effects ---
+# Only include people with a diagnosis at or before 31st dec 2019 ---
 Pop<-Pop %>% 
   filter(cohort_start_date <= '2019-12-31') 
 
@@ -85,7 +85,7 @@ if(sum(is.na(Pop$day_of_birth))==0 & sum(is.na(Pop$month_of_birth))==0){
     mutate(age=floor(as.numeric((ymd(cohort_start_date)-
                                    ymd(paste(year_of_birth,
                                              month_of_birth,
-                                             day_of_birth, sep="-"))))/365.25))
+                                             day_of_birth, sep="-"))))/365))
 } else { 
   Pop<-Pop %>% 
     mutate(age= year(cohort_start_date)-year_of_birth)
@@ -179,10 +179,9 @@ Pop<-Pop %>%
 # calculate follow up in years
 Pop<-Pop %>%  
   mutate(time_days=as.numeric(difftime(observation_period_end_date_2019,
-                                            cohort_start_date,
-                                            units="days"))) %>% 
-#  mutate(time_years=time_days/365) 
-mutate(time_years=time_days/365) 
+                                       cohort_start_date,
+                                       units="days"))) %>% 
+  mutate(time_years=time_days/365) 
 
 
 # remove people with end of observation end date == cohort entry
@@ -191,7 +190,6 @@ Pop<-Pop %>%
 
 
 #plotting frequency of cancers for QC checks --
-
 cancernumb <- as.data.frame(table(Pop$cohort_definition_id))
 cancernumb$name <- gsub("Cancer", "", outcome_cohorts$cohortName)
 cancernumb$name <- gsub("MaleOnly", "", outcome_cohorts$cohortName)
@@ -298,6 +296,45 @@ if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
 }
 
 # # Tidy up results and save ----
+#survival results ----
+
+# survival data
+survivalResults <- bind_rows(
+  observedkmcombined , # all 
+  observedkmcombined_gender , # gender strat 
+  observedkmcombined_age , # age strat
+  observedkmcombined_age_gender # age gender strat
+)
+
+
+#risk table # error with characters and double formats
+riskTableResults <- bind_rows(
+risktableskm , # all
+risktableskm_gender , # gender strat
+risktableskm_age , # age strat
+risktableskm_age_gender # age*gender strat 
+)
+
+#median results
+medkmcombined # all
+medkmcombined_gender # gender
+medkmcombined_age # age strat
+medkmcombined_age_gender # age*gender strat
+
+# hazard over time results
+hotkmcombined # all
+hotkmcombined_gender # gender
+hotkmcombined_age # age strat
+hotkmcombined_age_gender # age*gender strat
+
+
+
+
+
+
+# extrapolated results -----
+extrapolatedfinal # all resul
+
 
 # extract results from all and gender and age stratifications and save them as a RData file
 
