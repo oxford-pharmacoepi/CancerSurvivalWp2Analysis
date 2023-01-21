@@ -371,9 +371,6 @@ Results_Parameters_AGE <- list(
   "Spline3kParametersAge" = Spline3kParametersAge,
   "Spline5kParametersAge" = Spline5kParametersAge)
 
-#write results to excel ---
-openxlsx::write.xlsx(Results_Parameters_AGE, file = here("Results", db.name , "cancer_extrapolation_modelParameters_AGE.xlsx"))
-
 toc(func.toc=toc_min)
 
 info(logger, 'Extrapolation analysis for age stratification COMPLETE')
