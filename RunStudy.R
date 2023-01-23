@@ -9,9 +9,6 @@ if (!file.exists(qc.plots.folder)){
   dir.create(qc.plots.folder, recursive = TRUE)}
 
 start<-Sys.time()
-# extra options for running -----
-# if you have already created the cohorts, you can set this to FALSE to skip instantiating these cohorts again
-create.exposure.cohorts<- FALSE # need to set this up
 
 # start log ----
 log_file <- paste0(output.folder, "/log.txt")
@@ -306,7 +303,8 @@ survivalResults <- bind_rows(
   extrapolatedfinal,
   extrapolatedfinalGender,
   extrapolatedfinalAgeGender
-)
+) %>%
+  mutate(Database = db.name)
 
 saveRDS(survivalResults, 
         here(output.folder, "survival_extrapolation_results.rds"))
@@ -317,7 +315,8 @@ riskTableResults <- bind_rows(
   risktableskm_gender , # gender strat
   risktableskm_age , # age strat
   risktableskm_age_gender # age*gender strat 
-)
+  ) %>%
+  mutate(Database = db.name)
 
 saveRDS(riskTableResults, 
         here(output.folder, "risktable_results.rds"))
@@ -328,7 +327,8 @@ medianKMResults <- bind_rows(
   medkmcombined_gender , # gender
   medkmcombined_age , # age strat
   medkmcombined_age_gender # age*gender strat 
-)
+) %>%
+  mutate(Database = db.name)
 
 saveRDS(medianKMResults, 
         here(output.folder, "median_survival_results.rds"))
@@ -344,7 +344,8 @@ hazardotfinal, #extrapolated hot all results
 hazardotfinalGender, #extrpolated hot gender extrap
 hazardotfinalAgeGender #extrpolated hot age*gender
 
-)
+) %>%
+  mutate(Database = db.name)
 
 saveRDS(hazOverTimeResults, 
         here(output.folder, "hazard_results.rds"))
@@ -354,7 +355,8 @@ GOFResults <- bind_rows(
   goffinal, # all
   goffinalGender, #gender
   goffinalAgeGender #genderage
-)
+) %>%
+  mutate(Database = db.name)
 
 saveRDS(GOFResults, 
         here(output.folder, "GOF_results.rds"))
@@ -365,7 +367,8 @@ ExtrpolationParameters <-bind_rows(
   ParametersAll ,
   ParametersGender ,
   ParametersAgeGender
-)
+) %>%
+  mutate(Database = db.name)
 
 saveRDS(ExtrpolationParameters, 
         here(output.folder, "Extrapolation_parameters.rds"))

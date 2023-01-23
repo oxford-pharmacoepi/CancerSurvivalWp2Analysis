@@ -460,7 +460,8 @@ ParametersAgeGender <- bind_rows(
   GenGammaParametersAgeGender, 
   Spline1kParametersAgeGender ,
   Spline3kParametersAgeGender ,
-  Spline5kParametersAgeGender )
+  Spline5kParametersAgeGender ) %>%
+  mutate(Stratification = "Age*Gender")
 
 toc(func.toc=toc_min)
 

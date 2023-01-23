@@ -369,7 +369,8 @@ Results_Parameters_AGE <- list(
   "GenGammaParametersAge" = GenGammaParametersAge,
   "Spline1kParametersAge" = Spline1kParametersAge,
   "Spline3kParametersAge" = Spline3kParametersAge,
-  "Spline5kParametersAge" = Spline5kParametersAge)
+  "Spline5kParametersAge" = Spline5kParametersAge) %>%
+  mutate(Stratification = "Age")
 
 toc(func.toc=toc_min)
 

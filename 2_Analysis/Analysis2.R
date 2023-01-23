@@ -316,7 +316,8 @@ ParametersAll <- bind_rows(
   GenGammaParametersAll, 
   Spline1kParametersAll ,
   Spline3kParametersAll ,
-  Spline5kParametersAll )
+  Spline5kParametersAll ) %>%
+  mutate(Stratification = "None")
 
 toc(func.toc=toc_min)
 
