@@ -374,7 +374,6 @@ saveRDS(ExtrpolationParameters,
         here(output.folder, "Extrapolation_parameters.rds"))
 
 
-
 # # Time taken
 x <- abs(as.numeric(Sys.time()-start, units="secs"))
 info(logger, paste0("Study took: ",
