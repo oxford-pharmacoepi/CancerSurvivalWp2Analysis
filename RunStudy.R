@@ -270,7 +270,7 @@ if(RunGenderStrat == TRUE){
 
   info(logger, 'RUNNING ANALYSIS FOR GENDER STRATIFICATION')
   source(here("2_Analysis","AnalysisGenderStrat.R"))
-  info(logger, 'ANALYSIS RAN FOR GENDER STRAT')
+  info(logger, 'ANALYSIS RAN FOR GENDER STRATIFICATION')
 
 }
 
@@ -279,7 +279,7 @@ if(RunAgeStrat == TRUE){
 
   info(logger, 'RUNNING ANALYSIS FOR AGE STRATIFICATION')
   source(here("2_Analysis","AnalysisAgeStrat.R"))
-  info(logger, 'ANALYSIS RAN FOR AGE STRAT')
+  info(logger, 'ANALYSIS RAN FOR AGE STRATIFICATION')
 
 }
 
@@ -288,7 +288,7 @@ if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
 
   info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER STRATIFICATION')
   source(here("2_Analysis","AnalysisAgeGenderStrat.R"))
-  info(logger, 'ANALYSIS RAN FOR AGE STRAT')
+  info(logger, 'ANALYSIS RAN FOR AGE*GENDER STRATIFICATION')
 
 }
 
@@ -368,7 +368,8 @@ ExtrpolationParameters <-bind_rows(
   ParametersGender ,
   ParametersAgeGender
 ) %>%
-  mutate(Database = db.name)
+  mutate(Database = db.name) %>%
+  relocate(Cancer, Method, Stratification, Gender, Age, AgeGender, Database)
 
 saveRDS(ExtrpolationParameters, 
         here(output.folder, "Extrapolation_parameters.rds"))
