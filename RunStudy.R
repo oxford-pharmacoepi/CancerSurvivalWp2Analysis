@@ -250,6 +250,35 @@ toc_min <- function(tic,toc,msg="") {
   outmsg <- paste0(mins, " minutes elapsed")
 }
 
+exportSurvivalResultsRDS <- function(result, zipName, outputFolder) {
+  
+  tempDir <- zipName
+  tempDirCreated <- FALSE
+  if (!dir.exists(tempDir)) {
+    dir.create(tempDir)
+    tempDirCreated <- TRUE
+  }
+  
+  # write results to disk
+  lapply(names(result), FUN = function(checkResultName) {
+    checkResult <- result[[checkResultName]]
+    saveRDS(checkResult,
+                     file = file.path(
+                       tempDir,
+                       paste0(checkResultName, ".rds")
+                     )
+    )
+  })
+  zip::zip(zipfile = file.path(outputFolder, paste0(zipName, ".zip")),
+           files = list.files(tempDir, full.names = TRUE))
+  if (tempDirCreated) {
+    unlink(tempDir, recursive = TRUE)
+  }
+  
+  invisible(result)
+}
+
+
 # Setting up information for extrapolation methods to be used
 extrapolations <- c("gompertz", "weibull", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3", "spline5") 
 extrapolations_formatted <- c("Gompertz", "Weibull", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (3 knots)", "Spline (5 knots)")
@@ -306,9 +335,6 @@ survivalResults <- bind_rows(
 ) %>%
   mutate(Database = db.name)
 
-saveRDS(survivalResults, 
-        here(output.folder, "survival_extrapolation_results.rds"))
-
 #risk table # error with characters and double formats
 riskTableResults <- bind_rows(
   risktableskm , # all
@@ -318,8 +344,6 @@ riskTableResults <- bind_rows(
   ) %>%
   mutate(Database = db.name)
 
-saveRDS(riskTableResults, 
-        here(output.folder, "risktable_results.rds"))
 
 #median results
 medianKMResults <- bind_rows( 
@@ -329,9 +353,6 @@ medianKMResults <- bind_rows(
   medkmcombined_age_gender # age*gender strat 
 ) %>%
   mutate(Database = db.name)
-
-saveRDS(medianKMResults, 
-        here(output.folder, "median_survival_results.rds"))
 
 
 # hazard over time results
@@ -347,8 +368,6 @@ hazardotfinalAgeGender #extrpolated hot age*gender
 ) %>%
   mutate(Database = db.name)
 
-saveRDS(hazOverTimeResults, 
-        here(output.folder, "hazard_results.rds"))
 
 #GOF results for extrpolated results
 GOFResults <- bind_rows( 
@@ -357,9 +376,6 @@ GOFResults <- bind_rows(
   goffinalAgeGender #genderage
 ) %>%
   mutate(Database = db.name)
-
-saveRDS(GOFResults, 
-        here(output.folder, "GOF_results.rds"))
 
 
 #parameters of the extrapolated models
@@ -371,8 +387,26 @@ ExtrpolationParameters <-bind_rows(
   mutate(Database = db.name) %>%
   relocate(Cancer, Method, Stratification, Gender, Age, AgeGender, Database)
 
-saveRDS(ExtrpolationParameters, 
-        here(output.folder, "Extrapolation_parameters.rds"))
+# put results all together in a list
+survival_study_results <- list(survivalResults ,
+                               riskTableResults,
+                               medianKMResults ,
+                               hazOverTimeResults,
+                               GOFResults,
+                               ExtrpolationParameters)
+
+names(survival_study_results) <- c(paste0("survival_estimates_", db.name),
+                                   paste0("risk_table_results_", db.name),
+                                   paste0("median_survival_results_", db.name),
+                                   paste0("hazard_overtime_results_", db.name),
+                                   paste0("Goodness_of_fit_results_", db.name),
+                                   paste0("extrapolation_parameters_", db.name))
+
+# zip results
+print("Zipping results to output folder")
+exportSurvivalResultsRDS(result=survival_study_results,
+                      zipName= paste0(db.name, "_SurvivalExtrapolationResults"),
+                      outputFolder=here::here("Results", db.name))
 
 
 # # Time taken
@@ -382,24 +416,8 @@ info(logger, paste0("Study took: ",
                             x %/% 86400,  x %% 86400 %/% 3600, x %% 3600 %/%
                               60,  x %% 60 %/% 1)))
 
-# zip results
-print("Zipping results to output folder")
-unlink(paste0(output.folder, "/OutputToShare_", db.name, ".zip"))
-zipName <- paste0(output.folder, "/OutputToShare_", db.name, ".zip")
-
-# use ed's code to list the files in a directory and 
-
-files <-list.files(here(output.folder), full.names = TRUE)
-
-files <- files[file.exists(files)==TRUE]
-
-createZipFile(zipFile = zipName,
-              rootFolder=output.folder,
-              files = files)
-
 print("Done!")
 print("-- If all has worked, there should now be a zip folder with your results in the results to share")
-print("-- Thank you for running the study!")
+print("-- Thank you for running the study! :)")
 Sys.time()-start
-# readLines(log_file)
-
+readLines(log_file)
