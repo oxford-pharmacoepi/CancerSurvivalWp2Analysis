@@ -228,7 +228,7 @@ parameters_results_temp <- list()
 
 # Run extrapolations for all cancers for age_gender extrapolation ---
 for(j in 1:nrow(outcome_cohorts)) { 
-  
+
   data <- Pop %>%
     filter(cohort_definition_id == j) 
   
@@ -255,13 +255,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       #extrapolation # will need this to check results can remove once checked
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) %>%
+        rename(GenderAge = genderAgegp)
       
       #grab the parameters and knots from the model
       coefs.p <- model[["coefficients"]] %>%
         enframe() %>%
         pivot_wider(value, name) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
       
       knots.p <- model[["knots"]] %>%
         setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
@@ -273,12 +274,13 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both") %>%
+      rename(GenderAge = genderAgegp)
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -291,14 +293,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       #extrapolation # will need this to check results can remove once checked
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) %>%
+        rename(GenderAge = genderAgegp)
       
       #extract parameters
       #grab the parameters and knots from the model
       coefs.p <- model[["coefficients"]] %>%
         enframe() %>%
         pivot_wider(value, name) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
       
       knots.p <- model[["knots"]] %>%
         setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
@@ -310,12 +313,13 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both") %>%
+        rename(GenderAge = genderAgegp)
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -328,13 +332,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       #extrapolation # will need this to check results can remove once checked
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) %>%
+        rename(GenderAge = genderAgegp)
       
       #grab the parameters from the model
       coefs.p <- model[["coefficients"]] %>%
         enframe() %>%
         pivot_wider(value, name) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
       
       knots.p <- model[["knots"]] %>%
         setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
@@ -347,12 +352,13 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both") %>%
+        rename(GenderAge = genderAgegp)
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -366,23 +372,25 @@ for(j in 1:nrow(outcome_cohorts)) {
       #extrapolation # will need this to check results can remove once checked
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) %>%
+        rename(GenderAge = genderAgegp)
       
       #grab the parameters from the model
       parameters_results_temp[[i]] <- model[["coefficients"]] %>%
         enframe() %>%
         pivot_wider(value, name) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
       
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = genderAgegp  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both") %>%
+        rename(GenderAge = genderAgegp)
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", AgeGender = "AgeGender"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))

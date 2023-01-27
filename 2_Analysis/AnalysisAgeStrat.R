@@ -135,7 +135,7 @@ info(logger, 'KM analysis for AGE stratification COMPLETE')
 
 tic("Extrapolation analysis for gender stratification")
 
-info(logger, 'Extrapolation analysis for gender stratification START')
+info(logger, 'Extrapolation analysis for age stratification START')
 
 # Initiate lists to store output within loop ---- 
 extrapolations_age <- list()
@@ -149,7 +149,7 @@ gof_results_temp <- list() # Create empty list goodness of fit (AIC/BIC)
 hazot_results_temp <- list() #Create empty list for hazard over time
 parameters_results_temp <- list() #Create empty list for model parameters
 
-# Run extrapolations for all cancers for gender stratification ---
+# Run extrapolations for all cancers for age stratification ---
 for(j in 1:nrow(outcome_cohorts)) { 
   
   #subset the data by cancer type
@@ -157,7 +157,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   data <- Pop %>%
     filter(cohort_definition_id == j)
   
-  # only run extrapolations where there is enough data (> 75% of complete data for each subgroup analysis)
+  # only run extrapolations where there is enough data (> 60% of complete data for each subgroup analysis)
   data <- data %>%
     filter((age_gr %in% target_age[[j]])) %>%
     droplevels()
@@ -173,7 +173,8 @@ for(j in 1:nrow(outcome_cohorts)) {
         #extrapolation # will need this to check results can remove once checked
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+          rename(Age = age_gr)
         
         #grab the parameters and knots from the model
         coefs.p <- model[["coefficients"]] %>%
@@ -187,7 +188,6 @@ for(j in 1:nrow(outcome_cohorts)) {
           pivot_wider(value, name)
         
         parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
-        
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
@@ -211,7 +211,8 @@ for(j in 1:nrow(outcome_cohorts)) {
         #extrapolation # will need this to check results can remove once checked
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+          rename(Age = age_gr)
         
         #grab the parameters and knots from the model
         coefs.p <- model[["coefficients"]] %>%
@@ -248,7 +249,8 @@ for(j in 1:nrow(outcome_cohorts)) {
         #extrapolation # will need this to check results can remove once checked
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+          rename(Age = age_gr)
         
         #grab the parameters from the model
         coefs.p <- model[["coefficients"]] %>%
@@ -286,7 +288,8 @@ for(j in 1:nrow(outcome_cohorts)) {
         # extrapolations
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = age_gr, Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+          rename(Age = age_gr)
         
         #grab the parameters from the model
         parameters_results_temp[[i]] <- model[["coefficients"]] %>%
