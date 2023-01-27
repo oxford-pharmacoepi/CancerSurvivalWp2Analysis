@@ -186,11 +186,18 @@ for(j in 1:nrow(outcome_cohorts)) {
           mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
           rename(Gender = gender)
         
-        #grab the parameters from the model
-        parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+        #grab the parameters and knots from the model
+        coefs.p <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Gender" ) 
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Gender") 
+        
+        knots.p <- model[["knots"]] %>%
+          setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
+          enframe() %>%
+          pivot_wider(value, name)
+
+        parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
@@ -216,12 +223,19 @@ for(j in 1:nrow(outcome_cohorts)) {
           mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
           rename(Gender = gender)
         
-        #grab the parameters from the model
-        parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+        #grab the parameters and knots from the model
+        coefs.p <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
           mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Gender" ) 
         
+        knots.p <- model[["knots"]] %>%
+          setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
+          enframe() %>%
+          pivot_wider(value, name)
+        
+        parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
+
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
           summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
@@ -247,10 +261,18 @@ for(j in 1:nrow(outcome_cohorts)) {
           rename(Gender = gender)
         
         #grab the parameters from the model
-        parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+        coefs.p <- model[["coefficients"]] %>%
           enframe() %>%
           pivot_wider(value, name) %>%
           mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Gender" ) 
+        
+        knots.p <- model[["knots"]] %>%
+          setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
+                        "SplineInternal4" ,"SplineInternal5" , "SplineUpperB")) %>%
+          enframe() %>%
+          pivot_wider(value, name)
+        
+        parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
         
         # hazard over time
         hazot_results_temp[[i]] <- model %>%
