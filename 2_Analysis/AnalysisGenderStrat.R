@@ -20,7 +20,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   data <- Pop %>%
     filter(cohort_definition_id == j) 
   
-  # add a filter than removes data with 75% missingness
+  # add a filter than removes data with 60% missingness
   grid <- seq(0,floor(max(data$time_years)),by=2)
   filter4gender <- RiskSetCount(grid,data$time_years[data$gender == "Male"])%>%
     rbind(grid) %>% as.data.frame() %>%
@@ -47,7 +47,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   #create filter function to put into results below
   target_gender[[j]] <- filterdatatest$Gender
   
-  #filter data removing data with > 75% missingness
+  #filter data removing data with > 60% missingness
   data <- data %>%
     filter((gender %in% target_gender[[j]]))
   
@@ -160,7 +160,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   data <- Pop %>%
     filter(cohort_definition_id == j)
   
-  # only run extrapolations where there is enough data (> 75% of complete data for each subgroup analysis)
+  # only run extrapolations where there is enough data (> 60% of complete data for each subgroup analysis)
   data <- data %>%
     filter((gender %in% target_gender[[j]])) %>%
     droplevels()

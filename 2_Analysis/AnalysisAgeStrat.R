@@ -131,9 +131,9 @@ info(logger, 'KM analysis for AGE stratification COMPLETE')
 
 ###########################################
 
-# Extrapolation analysis for gender stratification ------
+# Extrapolation analysis for age stratification ------
 
-tic("Extrapolation analysis for gender stratification")
+tic("Extrapolation analysis for age stratification")
 
 info(logger, 'Extrapolation analysis for age stratification START')
 

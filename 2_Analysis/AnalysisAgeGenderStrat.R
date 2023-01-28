@@ -18,7 +18,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   data <- Pop %>%
     filter(cohort_definition_id == j) 
   
-  # add a filter than removes data with 75% missingness
+  # add a filter than removes data with 60% missingness
   grid <- seq(0,floor(max(data$time_years)),by=2)
   filter4genderage <- RiskSetCount(grid,data$time_years[data$genderAgegp == "Female_<30"]) %>%
     rbind(grid) %>% as.data.frame() %>%
