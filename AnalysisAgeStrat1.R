@@ -2,7 +2,7 @@
 # AGE STRATIFICATION
 #######################################
 
-# km survival, risk table, median survival, hazard over time from the observed data for each cancer where both genders are present ----
+# km survival, risk table, median survival, hazard over time from the observed data for each cancer
 tic("KM analysis with age stratification")
 info(logger, 'KM analysis for age stratification START')
 
@@ -75,7 +75,12 @@ for(j in 1:nrow(outcome_cohorts)) {
            Cancer = outcome_cohorts$cohortName[j],
            Age = filter4age$Age ,
            Gender = "Both" ) %>%
-    filter((Age %in% target_age[[j]])) %>%
+    filter((Age %in% target_age[[j]])) 
+  
+  observedrisktableKM_age[[j]] <- observedrisktableKM_age[[j]] %>%
+  mutate_at(.vars = c(1:(ncol(observedrisktableKM_age[[j]])-4)), funs(ifelse(.== 0, NA, .))) %>%  
+    mutate_at(.vars = c(1:(ncol(observedrisktableKM_age[[j]])-4)), funs(ifelse(.<= 5, "<5", .))) %>%
+    replace(is.na(.), 0) %>%
     mutate(across(everything(), as.character))
   
   #put a flag here for log that sub groups were removed due to missingness so can keep a record
