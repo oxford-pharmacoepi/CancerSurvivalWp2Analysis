@@ -307,7 +307,7 @@ if(RunGenderStrat == TRUE){
 if(RunAgeStrat == TRUE){
 
   info(logger, 'RUNNING ANALYSIS FOR AGE STRATIFICATION')
-  source(here("2_Analysis","AnalysisAgeStrat.R"))
+  source(here("2_Analysis","AnalysisAgeStrat1.R"))
   info(logger, 'ANALYSIS RAN FOR AGE STRATIFICATION')
 
 }
