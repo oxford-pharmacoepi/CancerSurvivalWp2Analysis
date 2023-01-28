@@ -186,7 +186,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     if(extrapolations[i] == "spline1") {
       
       # 1knotspline
-      model <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard")
+      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 1, scale = "hazard")
       
       #extrapolation # will need this to check results can remove once checked
       extrap_results_temp[[i]] <- model %>%
@@ -225,7 +225,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     } else if(extrapolations[i] == "spline3") {
       # 3knotspline
       
-      model <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 3, scale = "hazard")
+      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 3, scale = "hazard")
       
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
@@ -262,7 +262,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       
     } else if(extrapolations[i] == "spline5") {
       # 5knotspline
-      model <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 5, scale = "hazard")
+      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 5, scale = "hazard")
       
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
@@ -301,7 +301,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     } else {
       
       #carry out models for different parametric methods survival
-      model <- flexsurvreg(Surv(time_years, status)~1, data=data, dist=extrapolations[i])
+      model <- flexsurvreg(Surv(time_years, status)~age_gr, data=data, dist=extrapolations[i])
       
       # extrapolations
       extrap_results_temp[[i]] <- model %>%

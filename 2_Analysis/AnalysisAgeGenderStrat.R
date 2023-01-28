@@ -102,7 +102,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     unite("GenderAge", c(Gender, Age), remove = FALSE) %>%
       filter((GenderAge %in% target_age_gender[[j]])) 
     
-    observedrisktableKM_age_gender[[j]] tesrt <- observedrisktableKM_age_gender[[j]] %>%
+    observedrisktableKM_age_gender[[j]] <- observedrisktableKM_age_gender[[j]] %>%
       mutate_at(.vars = c(1:(ncol(observedrisktableKM_age_gender[[j]])-5)), funs(ifelse(.== 0, NA, .))) %>%  
       mutate_at(.vars = c(1:(ncol(observedrisktableKM_age_gender[[j]])-5)), funs(ifelse(.<= 5, "<5", .))) %>%
       replace(is.na(.), 0) %>%

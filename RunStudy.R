@@ -1,5 +1,5 @@
 # create folder name for QC plots
-qc.plots.folder <- here("3_QCPlots") # for QCing and for troubleshooting
+qc.plots.folder <- here("3_QCPlots", db.name) # for QCing and for troubleshooting
 
 #Create folder for the results
 if (!file.exists(output.folder)){
@@ -201,7 +201,7 @@ theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
 
 plotname <- paste0("QCSampleNumbers", db.name,".pdf")
 
-pdf(here("3_QCPlots", plotname),
+pdf(here(qc.plots.folder, plotname),
     width = 7, height = 5)
 print(p, newpage = FALSE)
 dev.off()
@@ -224,7 +224,7 @@ q <- gendern %>%
 
 plotname <- paste0("QCSampleGenderStrat", db.name,".pdf")
 
-pdf(here("3_QCPlots", plotname),
+pdf(here(qc.plots.folder, plotname),
     width = 7, height = 5)
 print(q, newpage = FALSE)
 dev.off()
@@ -385,7 +385,7 @@ ExtrpolationParameters <-bind_rows(
   ParametersAgeGender
 ) %>%
   mutate(Database = db.name) %>%
-  relocate(Cancer, Method, Stratification, Gender, Age, AgeGender, Database)
+  relocate(Cancer, Method, Stratification, Gender, Age, GenderAge, Database)
 
 # put results all together in a list
 survival_study_results <- list(survivalResults ,
