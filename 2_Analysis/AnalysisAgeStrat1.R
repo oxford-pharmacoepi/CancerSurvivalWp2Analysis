@@ -81,7 +81,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   mutate_at(.vars = c(1:(ncol(observedrisktableKM_age[[j]])-4)), funs(ifelse(.== 0, NA, .))) %>%  
     mutate_at(.vars = c(1:(ncol(observedrisktableKM_age[[j]])-4)), funs(ifelse(.<= 5, "<5", .))) %>%
     replace(is.na(.), 0) %>%
-    mutate(across(everything(), as.character))
+    mutate(across(everything(), as.character)) 
   
   #put a flag here for log that sub groups were removed due to missingness so can keep a record
   #TBC
@@ -113,7 +113,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     mutate(Method = "Kaplan-Meier", 
            Cancer = outcome_cohorts$cohortName[j], 
            Age = target_age[[j]] ,
-           Gender = "Both" )
+           Gender = "Both")
   
   print(paste0("Median survival from KM from observed data ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
   
@@ -130,16 +130,20 @@ for(j in 1:nrow(outcome_cohorts)) {
 
 # take the results from a list (one element for each cancer) and put into dataframe ----
 observedkmcombined_age <- dplyr::bind_rows(observedkm_age) %>%
-  rename(est = estimate ,ucl = conf.high, lcl = conf.low )
+  rename(est = estimate ,ucl = conf.high, lcl = conf.low ) %>%
+  mutate(Stratification = "Age")
 
-medkmcombined_age <- dplyr::bind_rows(observedmedianKM_age) 
+medkmcombined_age <- dplyr::bind_rows(observedmedianKM_age)  %>%
+  mutate(Stratification = "Age")
 
 hotkmcombined_age <- dplyr::bind_rows(observedhazotKM_age) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, Age = age_gr )
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, Age = age_gr )  %>%
+  mutate(Stratification = "Age")
 
 #generate the risk table and remove entries < 5 patients
 risktableskm_age <- dplyr::bind_rows(observedrisktableKM_age) %>%
-  replace(is.na(.), 0) 
+  replace(is.na(.), 0)  %>%
+  mutate(Stratification = "Age")
 
 toc(func.toc=toc_min)
 
@@ -354,9 +358,12 @@ for(j in 1:nrow(outcome_cohorts)) {
 }
 
 # Merge results together from each cancer and extrapolation into a dataframe ---
-extrapolatedfinal <- dplyr::bind_rows(extrapolations_age) 
-goffinal <- dplyr::bind_rows(gof_haz_age) 
-hazardotfinal <- dplyr::bind_rows(hazot_age)
+extrapolatedfinal <- dplyr::bind_rows(extrapolations_age)  %>%
+  mutate(Stratification = "Age")
+goffinal <- dplyr::bind_rows(gof_haz_age)  %>%
+  mutate(Stratification = "Age")
+hazardotfinal <- dplyr::bind_rows(hazot_age) %>%
+  mutate(Stratification = "Age")
 
 
 # extracting parameters for each model for each cancer
@@ -416,7 +423,7 @@ ParametersAll <- bind_rows(
   Spline1kParametersAll ,
   Spline3kParametersAll ,
   Spline5kParametersAll ) %>%
-  mutate(Stratification = "None")
+  mutate(Stratification = "Age")
 
 toc(func.toc=toc_min)
 

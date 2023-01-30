@@ -112,12 +112,15 @@ for(j in 1:nrow(outcome_cohorts)) {
 
 # take the results from a list (one element for each cancer) and put into dataframe for KM survival
 observedkmcombined_gender <- dplyr::bind_rows(observedkm_gender) %>%
-  rename(est = estimate ,ucl = conf.high, lcl = conf.low )
+  rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%
+  mutate(Stratification = "Gender")
 
-medkmcombined_gender <- dplyr::bind_rows(observedmedianKM_gender) 
+medkmcombined_gender <- dplyr::bind_rows(observedmedianKM_gender) %>%
+  mutate(Stratification = "Gender")
 
 hotkmcombined_gender <- dplyr::bind_rows(observedhazotKM_gender) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, Gender = gender )
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, Gender = gender ) %>%
+  mutate(Stratification = "Gender")
 
 #generate the risk table and remove entries < 5 patients
 risktableskm_gender <- dplyr::bind_rows(observedrisktableKM_gender) 
@@ -126,7 +129,8 @@ risktableskm_gender <- risktableskm_gender %>%
   mutate_at(.vars = c(1:(ncol(risktableskm_gender)-4)), funs(ifelse(.<= 5, "<5", .))) %>%
   replace(is.na(.), 0) %>%
   relocate(Cancer) %>%
-  mutate(across(everything(), as.character))
+  mutate(across(everything(), as.character)) %>%
+  mutate(Stratification = "Gender")
 
 toc(func.toc=toc_min)
 
@@ -352,9 +356,12 @@ for(j in 1:nrow(outcome_cohorts)) {
   }
 
 # Merge results together from each cancer and extrapolation into a dataframe ---
-extrapolatedfinalGender <- dplyr::bind_rows(extrapolations_gender)
-goffinalGender <- dplyr::bind_rows(gof_haz_gender)
-hazardotfinalGender <- dplyr::bind_rows(hazot_gender)
+extrapolatedfinalGender <- dplyr::bind_rows(extrapolations_gender) %>%
+  mutate(Stratification = "Gender")
+goffinalGender <- dplyr::bind_rows(gof_haz_gender) %>%
+  mutate(Stratification = "Gender")
+hazardotfinalGender <- dplyr::bind_rows(hazot_gender) %>%
+  mutate(Stratification = "Gender")
 
 # extracting parameters for each model for each cancer -----
 # create empty lists for parameters extraction

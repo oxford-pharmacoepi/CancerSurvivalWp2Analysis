@@ -411,6 +411,7 @@ exportSurvivalResultsRDS(result=survival_study_results,
 
 # # Time taken
 x <- abs(as.numeric(Sys.time()-start, units="secs"))
+
 info(logger, paste0("Study took: ",
                     sprintf("%02d:%02d:%02d:%02d",
                             x %/% 86400,  x %% 86400 %/% 3600, x %% 3600 %/%
@@ -419,5 +420,7 @@ info(logger, paste0("Study took: ",
 print("Done!")
 print("-- If all has worked, there should now be a zip folder with your results in the results to share")
 print("-- Thank you for running the study! :)")
+
 Sys.time()-start
+
 readLines(log_file)

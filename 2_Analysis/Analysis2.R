@@ -69,19 +69,23 @@ print(paste0("Hazard over time results for KM ", Sys.time()," for ",outcome_coho
 
 # take the results from a list (one element for each cancer) and put into dataframe for KM survival
 observedkmcombined <- dplyr::bind_rows(observedkm) %>%
-  rename(est = estimate ,ucl = conf.high, lcl = conf.low )
+  rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%
+  mutate(Stratification = "None")
 
-medkmcombined <- dplyr::bind_rows(observedmedianKM) 
+medkmcombined <- dplyr::bind_rows(observedmedianKM) %>%
+  mutate(Stratification = "None")
 
 hotkmcombined <- dplyr::bind_rows(observedhazotKM) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci )
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
+  mutate(Stratification = "None")
 
 # generate the risk table and remove entries < 5 patients
 risktableskm <- dplyr::bind_rows(observedrisktableKM)%>%
   mutate(across(everything(), ~replace(., . <=  5 , NA))) %>%
   replace(is.na(.), "<5") %>%
   relocate(Cancer) %>%
-  mutate(across(everything(), as.character))
+  mutate(across(everything(), as.character)) %>%
+  mutate(Stratification = "None")
 
 toc(func.toc=toc_min)
 info(logger, 'KM analysis for whole population COMPLETE')
@@ -279,9 +283,12 @@ for(j in 1:nrow(outcome_cohorts)) {
 }
 
 # Merge results together from each cancer and extrpolation into a dataframe ---
-extrapolatedfinal <- dplyr::bind_rows(extrapolations_all) 
-goffinal <- dplyr::bind_rows(gof_haz_all) 
-hazardotfinal <- dplyr::bind_rows(hazot_all)
+extrapolatedfinal <- dplyr::bind_rows(extrapolations_all)  %>%
+  mutate(Stratification = "None")
+goffinal <- dplyr::bind_rows(gof_haz_all)  %>%
+  mutate(Stratification = "None")
+hazardotfinal <- dplyr::bind_rows(hazot_all)  %>%
+  mutate(Stratification = "None")
 
 
 # extracting parameters for each model for each cancer

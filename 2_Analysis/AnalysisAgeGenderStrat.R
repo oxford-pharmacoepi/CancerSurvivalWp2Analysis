@@ -151,7 +151,7 @@ for(j in 1:nrow(outcome_cohorts)) {
              strata = str_replace(strata, "genderAgegp=", "") ) %>%
       rename("GenderAge" = "strata")
     
-    print(paste0("KM for observed data age strat ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
+    print(paste0("KM for observed data age*gender strat ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
     
     
     # KM median survival---
@@ -174,7 +174,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       ungroup %>%
       mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Gender = "Both", Age = "All")
     
-    print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohortName[j], " age strat completed"))
+    print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohortName[j], " age*gender strat completed"))
     
     
     
@@ -196,16 +196,20 @@ print(paste0("Gender*Age stratification KM analysis not carried out for ", outco
 
 # take the results from a list (one element for each cancer) and put into dataframe ----
 observedkmcombined_age_gender <- dplyr::bind_rows(observedkm_age_gender) %>%
-  rename(est = estimate ,ucl = conf.high, lcl = conf.low )
+  rename(est = estimate ,ucl = conf.high, lcl = conf.low ) %>%
+  mutate(Stratification = "Age*Gender")
 
-medkmcombined_age_gender <- dplyr::bind_rows(observedmedianKM_age_gender) 
+medkmcombined_age_gender <- dplyr::bind_rows(observedmedianKM_age_gender) %>%
+  mutate(Stratification = "Age*Gender")
 
 hotkmcombined_age_gender <- dplyr::bind_rows(observedhazotKM_age_gender) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, GenderAge = genderAgegp )
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, GenderAge = genderAgegp ) %>%
+  mutate(Stratification = "Age*Gender")
 
 #generate the risk table and remove entries < 5 patients
 risktableskm_age_gender <- dplyr::bind_rows(observedrisktableKM_age_gender) %>%
-  replace(is.na(.), 0) 
+  replace(is.na(.), 0) %>%
+  mutate(Stratification = "Age*Gender")
 
 toc(func.toc=toc_min)
 
@@ -438,9 +442,12 @@ for(j in 1:nrow(outcome_cohorts)) {
 }
 
 # Merge results together from each cancer and extrpolation into a dataframe ---
-extrapolatedfinalAgeGender <- dplyr::bind_rows(extrapolations_age_gender) 
-goffinalAgeGender <- dplyr::bind_rows(gof_haz_age_gender) 
-hazardotfinalAgeGender <- dplyr::bind_rows(hazot_age_gender)
+extrapolatedfinalAgeGender <- dplyr::bind_rows(extrapolations_age_gender) %>%
+  mutate(Stratification = "Age*Gender")
+goffinalAgeGender <- dplyr::bind_rows(gof_haz_age_gender) %>%
+  mutate(Stratification = "Age*Gender")
+hazardotfinalAgeGender <- dplyr::bind_rows(hazot_age_gender) %>%
+  mutate(Stratification = "Age*Gender")
 
 # extracting parameters for each model for each cancer ----
 # create empty lists for parameters extraction
