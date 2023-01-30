@@ -373,6 +373,7 @@ hazardotfinalAgeGender #extrpolated hot age*gender
 GOFResults <- bind_rows( 
   goffinal, # all
   goffinalGender, #gender
+  goffinalAge, #age
   goffinalAgeGender #genderage
 ) %>%
   mutate(Database = db.name)
@@ -382,6 +383,7 @@ GOFResults <- bind_rows(
 ExtrpolationParameters <-bind_rows(
   ParametersAll ,
   ParametersGender ,
+  ParametersAge , 
   ParametersAgeGender
 ) %>%
   mutate(Database = db.name) %>%

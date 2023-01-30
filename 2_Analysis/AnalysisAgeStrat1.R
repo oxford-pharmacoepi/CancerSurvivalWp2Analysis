@@ -358,11 +358,11 @@ for(j in 1:nrow(outcome_cohorts)) {
 }
 
 # Merge results together from each cancer and extrapolation into a dataframe ---
-extrapolatedfinal <- dplyr::bind_rows(extrapolations_age)  %>%
+extrapolatedfinalAge <- dplyr::bind_rows(extrapolations_age)  %>%
   mutate(Stratification = "Age")
-goffinal <- dplyr::bind_rows(gof_haz_age)  %>%
+goffinalAge <- dplyr::bind_rows(gof_haz_age)  %>%
   mutate(Stratification = "Age")
-hazardotfinal <- dplyr::bind_rows(hazot_age) %>%
+hazardotfinalAge <- dplyr::bind_rows(hazot_age) %>%
   mutate(Stratification = "Age")
 
 
@@ -400,29 +400,29 @@ for(j in 1:nrow(outcome_cohorts)) {
 
 
 # grab the parameters from the list and row bind
-GompertzParametersAll <- dplyr::bind_rows(GompertzP)
-weibullParametersAll <- dplyr::bind_rows(weibullP)
-weibullPHParametersAll <- dplyr::bind_rows(weibullPHP)
-ExponentialParametersAll <- dplyr::bind_rows(ExponentialP) %>%
+GompertzParametersAge <- dplyr::bind_rows(GompertzP)
+weibullParametersAge <- dplyr::bind_rows(weibullP)
+weibullPHParametersAge <- dplyr::bind_rows(weibullPHP)
+ExponentialParametersAge <- dplyr::bind_rows(ExponentialP) %>%
   rename(rate = 1)
-LoglogParametersAll <- dplyr::bind_rows(LoglogP)
-LognormParametersAll <- dplyr::bind_rows(LognormP)
-GenGammaParametersAll <- dplyr::bind_rows(GenGammaP)
-Spline1kParametersAll <- dplyr::bind_rows(Spline1kP)
-Spline3kParametersAll <- dplyr::bind_rows(Spline3kP)
-Spline5kParametersAll <- dplyr::bind_rows(Spline5kP)
+LoglogParametersAge <- dplyr::bind_rows(LoglogP)
+LognormParametersAge <- dplyr::bind_rows(LognormP)
+GenGammaParametersAge <- dplyr::bind_rows(GenGammaP)
+Spline1kParametersAge <- dplyr::bind_rows(Spline1kP)
+Spline3kParametersAge <- dplyr::bind_rows(Spline3kP)
+Spline5kParametersAge <- dplyr::bind_rows(Spline5kP)
 
-ParametersAll <- bind_rows(
-  GompertzParametersAll ,
-  weibullParametersAll ,
-  weibullPHParametersAll,
-  ExponentialParametersAll, 
-  LoglogParametersAll,
-  LognormParametersAll, 
-  GenGammaParametersAll, 
-  Spline1kParametersAll ,
-  Spline3kParametersAll ,
-  Spline5kParametersAll ) %>%
+ParametersAge <- bind_rows(
+  GompertzParametersAge ,
+  weibullParametersAge ,
+  weibullPHParametersAge,
+  ExponentialParametersAge, 
+  LoglogParametersAge,
+  LognormParametersAge, 
+  GenGammaParametersAge, 
+  Spline1kParametersAge ,
+  Spline3kParametersAge ,
+  Spline5kParametersAge ) %>%
   mutate(Stratification = "Age")
 
 toc(func.toc=toc_min)
