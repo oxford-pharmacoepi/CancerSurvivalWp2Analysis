@@ -331,6 +331,7 @@ survivalResults <- bind_rows(
   observedkmcombined_age_gender, # age gender strat
   extrapolatedfinal,
   extrapolatedfinalGender,
+  extrapolatedfinalAge,
   extrapolatedfinalAgeGender
 ) %>%
   mutate(Database = db.name)
@@ -363,6 +364,7 @@ hotkmcombined_age, # age strat
 hotkmcombined_age_gender, # age*gender strat
 hazardotfinal, #extrapolated hot all results
 hazardotfinalGender, #extrpolated hot gender extrap
+hazardotfinalAge, #extrapolated hot age
 hazardotfinalAgeGender #extrpolated hot age*gender
 
 ) %>%
