@@ -321,6 +321,71 @@ if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
 
 }
 
+
+
+
+############################## updating #####################
+CancersStudu <- c("BreastCancer" , "ColorectalCancer"  , "HeadNeckCancer"  , "LiverCancer" ,"LungCancer", "PancreaticCancer"  , "ProstateCancerMaleOnly", "StomachCancer" )
+GenderStudied <- c("Male", "Female")
+AgeStudied <- c("<30" , "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", ">=90")
+
+# # add a render file for the shiny app for filtering
+
+## ALL
+AnalysisRunAll <- tibble(
+  Cancer = CancersStudy,
+  Age = "All",
+  Gender = "Both") %>%
+  mutate(render = as.numeric(Cancer %in% outcome_cohorts$cohortName ) ) %>%
+  replace(is.na(.), 0)
+
+## GENDER
+names(target_gender) <- CancersStudy # need to set names for this output in code
+runGender <- stack(target_gender) %>%
+  mutate(render = 1)
+
+AnalysisRunGender <- tibble(
+  Cancer = rep(CancersStudy, times = 2),
+  Age = "All",
+  Gender = rep(c("Male", "Female"), each = length(CancersStudy))) %>%
+  left_join(runGender, by = c("Cancer" = "ind", "Gender" = "values")) %>%
+  replace(is.na(.), 0)
+
+
+## AGE 
+names(target_age) <- CancersStudy # need to set names for this output in code
+runAge <- stack(target_age) %>%
+  mutate(render = 1)
+
+AnalysisRunAge <- tibble(
+  Cancer = rep(CancersStudy, times = 8),
+  Gender = "Both",
+  Age = rep(AgeStudied, each = length(CancersStudy))) %>%
+  left_join(runAge, by = c("Cancer" = "ind", "Age" = "values")) %>%
+  replace(is.na(.), 0)
+
+## AGE*GENDER
+names(target_age_gender) <- CancersStudy # need to set names for this output in code
+runGenderAge <- stack(target_age_gender) %>%
+  mutate(render = 1)
+
+AnalysisRunGenderAge <- tibble(
+  Cancer = rep(CancersStudy, each = 16),
+  Age = rep(AgeStudied,times =16),
+  Gender = rep(rep(GenderStudied, each = 8), times = 8)) %>%
+  unite("GenderAge", c(Gender, Age), remove = FALSE) %>%
+  left_join(runGenderAge, by = c("Cancer" = "ind", "GenderAge" = "values")) %>%
+  replace(is.na(.), 0) %>%
+  select(-GenderAge)
+
+AnalysisRunSummary <- bind_rows(AnalysisRunAll,
+                                AnalysisRunGender,
+                                AnalysisRunAge,
+                                AnalysisRunGenderAge) %>%
+  mutate(Database = db.name)
+  
+##################################################################
+
 # # Tidy up results and save ----
 
 # survival data and extrapolated data
@@ -397,14 +462,17 @@ survival_study_results <- list(survivalResults ,
                                medianKMResults ,
                                hazOverTimeResults,
                                GOFResults,
-                               ExtrpolationParameters)
+                               ExtrpolationParameters,
+                               AnalysisRunSummary)
 
 names(survival_study_results) <- c(paste0("survival_estimates_", db.name),
                                    paste0("risk_table_results_", db.name),
                                    paste0("median_survival_results_", db.name),
                                    paste0("hazard_overtime_results_", db.name),
                                    paste0("Goodness_of_fit_results_", db.name),
-                                   paste0("extrapolation_parameters_", db.name))
+                                   paste0("extrapolation_parameters_", db.name),
+                                   paste0("analyses_run_summary", db.name)
+                                   )
 
 # zip results
 print("Zipping results to output folder")
