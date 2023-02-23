@@ -264,8 +264,9 @@ for(j in 1:nrow(outcome_cohorts)) {
       #extrapolation # will need this to check results can remove once checked
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) %>%
-        rename(GenderAge = genderAgegp)
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
       
       #grab the parameters and knots from the model
       coefs.p <- model[["coefficients"]] %>%
@@ -289,7 +290,13 @@ for(j in 1:nrow(outcome_cohorts)) {
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        slice(rep(1:n(), each = (length(target_age_gender[[j]])*(as.numeric(genderlevels))))) %>%
+        mutate(GenderAge = rep(target_age_gender[[j]], each = (as.numeric(genderlevels)))) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"),
+               remove = FALSE ,
+               sep = "_")
+                 
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -302,8 +309,9 @@ for(j in 1:nrow(outcome_cohorts)) {
       #extrapolation # will need this to check results can remove once checked
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) %>%
-        rename(GenderAge = genderAgegp)
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
       
       #extract parameters
       #grab the parameters and knots from the model
@@ -328,7 +336,11 @@ for(j in 1:nrow(outcome_cohorts)) {
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        slice(rep(1:n(), each = (length(target_age_gender[[j]])*(as.numeric(genderlevels))))) %>%
+        mutate(GenderAge = rep(target_age_gender[[j]], each = (as.numeric(genderlevels)))) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
+      
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -341,8 +353,9 @@ for(j in 1:nrow(outcome_cohorts)) {
       #extrapolation # will need this to check results can remove once checked
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) %>%
-        rename(GenderAge = genderAgegp)
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
       
       #grab the parameters from the model
       coefs.p <- model[["coefficients"]] %>%
@@ -367,7 +380,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        slice(rep(1:n(), each = (length(target_age_gender[[j]])*(as.numeric(genderlevels))))) %>%
+        mutate(GenderAge = rep(target_age_gender[[j]], each = (as.numeric(genderlevels)))) %>%
+        separate(col = "GenderAge",
+                 into = c("Gender", "Age"),
+                 remove = FALSE ,
+                 sep = "_")
+      
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -381,8 +401,9 @@ for(j in 1:nrow(outcome_cohorts)) {
       #extrapolation # will need this to check results can remove once checked
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) %>%
-        rename(GenderAge = genderAgegp)
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
       
       #grab the parameters from the model
       parameters_results_temp[[i]] <- model[["coefficients"]] %>%
@@ -399,7 +420,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        slice(rep(1:n(), each = (length(target_age_gender[[j]])*(as.numeric(genderlevels))))) %>%
+        mutate(GenderAge = rep(target_age_gender[[j]], each = (as.numeric(genderlevels)))) %>%
+        separate(col = "GenderAge",
+                 into = c("Gender", "Age"),
+                 remove = FALSE ,
+                 sep = "_")
+      
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -429,8 +457,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   
 } else {
   
-  
-  
+
   
   print(paste0("Gender*Age stratification KM analysis not carried out for ", outcome_cohorts$cohortName[j], " due to only 1 gender present age stratification will have results " , Sys.time()))
   

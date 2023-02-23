@@ -198,7 +198,9 @@ for(j in 1:nrow(outcome_cohorts)) {
         #get the goodness of fit for each model
         gof_results_temp[[i]] <- model %>%
           glance() %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+          slice(rep(1:n(), each = length(target_age[[j]]))) %>%
+          mutate(Gender = target_age[[j]])
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -236,7 +238,9 @@ for(j in 1:nrow(outcome_cohorts)) {
         #get the goodness of fit for each model
         gof_results_temp[[i]] <- model %>%
           glance() %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+          slice(rep(1:n(), each = length(target_age[[j]]))) %>%
+          mutate(Gender = target_age[[j]])
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -275,7 +279,9 @@ for(j in 1:nrow(outcome_cohorts)) {
         #get the goodness of fit for each model
         gof_results_temp[[i]] <- model %>%
           glance() %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+          slice(rep(1:n(), each = length(target_age[[j]]))) %>%
+          mutate(Gender = target_age[[j]])
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -306,7 +312,9 @@ for(j in 1:nrow(outcome_cohorts)) {
         #get the goodness of fit for each model
         gof_results_temp[[i]] <- model %>%
           glance() %>%
-          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" )
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+          slice(rep(1:n(), each = length(target_age[[j]]))) %>%
+          mutate(Gender = target_age[[j]])
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
