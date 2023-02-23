@@ -284,8 +284,9 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both") %>%
-      rename(GenderAge = genderAgegp)
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j]) %>%
+      rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
@@ -330,8 +331,9 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both") %>%
-        rename(GenderAge = genderAgegp)
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j]) %>%
+        rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
@@ -374,8 +376,9 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both") %>%
-        rename(GenderAge = genderAgegp)
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j]) %>%
+        rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
@@ -414,8 +417,9 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both") %>%
-        rename(GenderAge = genderAgegp)
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j]) %>%
+        rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
