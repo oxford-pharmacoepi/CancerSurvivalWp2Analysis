@@ -322,14 +322,10 @@ if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
 }
 
 
-
-
-############################## updating #####################
-CancersStudu <- c("BreastCancer" , "ColorectalCancer"  , "HeadNeckCancer"  , "LiverCancer" ,"LungCancer", "PancreaticCancer"  , "ProstateCancerMaleOnly", "StomachCancer" )
+# # add a render file for the shiny app for filtering
+CancersStudy <- c("BreastCancer" , "ColorectalCancer"  , "HeadNeckCancer"  , "LiverCancer" ,"LungCancer", "PancreaticCancer"  , "ProstateCancerMaleOnly", "StomachCancer" )
 GenderStudied <- c("Male", "Female")
 AgeStudied <- c("<30" , "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", ">=90")
-
-# # add a render file for the shiny app for filtering
 
 ## ALL
 AnalysisRunAll <- tibble(
