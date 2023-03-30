@@ -157,6 +157,43 @@ for(j in 1:nrow(outcome_cohorts)) {
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
       
+      
+    } else if(extrapolations[i] == "spline2") {
+      # 3knotspline
+      
+      model <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 2, scale = "hazard")
+      
+      extrap_results_temp[[i]] <- model %>%
+        summary(t=t/365, tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
+      
+      #extract parameters
+      #grab the parameters and knots from the model
+      coefs.p <- model[["coefficients"]] %>%
+        enframe() %>%
+        pivot_wider(value, name) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" ) 
+      
+      knots.p <- model[["knots"]] %>%
+        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
+        enframe() %>%
+        pivot_wider(value, name)
+      
+      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
+      
+      # hazard over time
+      hazot_results_temp[[i]] <- model %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
+      
+      #get the goodness of fit for each model
+      gof_results_temp[[i]] <- model %>%
+        glance() %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both" )
+      
+      #print out progress               
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+      
     } else if(extrapolations[i] == "spline3") {
       # 3knotspline
       
@@ -282,7 +319,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   
 }
 
-# Merge results together from each cancer and extrpolation into a dataframe ---
+# Merge results together from each cancer and extrapolation into a dataframe ---
 extrapolatedfinal <- dplyr::bind_rows(extrapolations_all)  %>%
   mutate(Stratification = "None")
 goffinal <- dplyr::bind_rows(gof_haz_all)  %>%
@@ -302,6 +339,7 @@ LognormP <- list()
 GenGammaP <- list()
 Spline1kP <- list()
 Spline3kP <- list()
+Spline2kP <- list()
 Spline5kP <- list()
 
 
@@ -318,8 +356,9 @@ for(j in 1:nrow(outcome_cohorts)) {
   LognormP[[j]] <- parameters_all[[j]] %>% pluck(6) 
   GenGammaP[[j]] <- parameters_all[[j]] %>% pluck(7) 
   Spline1kP[[j]] <- parameters_all[[j]] %>% pluck(8) 
-  Spline3kP[[j]] <- parameters_all[[j]] %>% pluck(9) 
-  Spline5kP[[j]] <- parameters_all[[j]] %>% pluck(10) 
+  Spline2kP[[j]] <- parameters_all[[j]] %>% pluck(9) 
+  Spline3kP[[j]] <- parameters_all[[j]] %>% pluck(10) 
+  Spline5kP[[j]] <- parameters_all[[j]] %>% pluck(11) 
   
 }
 
@@ -334,6 +373,7 @@ LoglogParametersAll <- dplyr::bind_rows(LoglogP)
 LognormParametersAll <- dplyr::bind_rows(LognormP)
 GenGammaParametersAll <- dplyr::bind_rows(GenGammaP)
 Spline1kParametersAll <- dplyr::bind_rows(Spline1kP)
+Spline2kParametersAll <- dplyr::bind_rows(Spline2kP)
 Spline3kParametersAll <- dplyr::bind_rows(Spline3kP)
 Spline5kParametersAll <- dplyr::bind_rows(Spline5kP)
 
@@ -346,6 +386,7 @@ ParametersAll <- bind_rows(
   LognormParametersAll, 
   GenGammaParametersAll, 
   Spline1kParametersAll ,
+  Spline2kParametersAll ,
   Spline3kParametersAll ,
   Spline5kParametersAll ) %>%
   mutate(Stratification = "None")

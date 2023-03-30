@@ -38,15 +38,9 @@ cdm <- CDMConnector::generateCohortSet(cdm, outcome_cohorts,
                                        cohortTableName = cohortTableStem,
                                        overwrite = TRUE)
 
-#check it has worked # need to update this to have whatever person has set as name
-cdm$ehdenwp2cancerextrap %>% 
-  group_by(cohort_definition_id) %>%
-  tally()
-# cohortTableStem
-
 # get variables for analysis ---
 Pop<-cdm$person %>% 
-  inner_join(cdm$ehdenwp2cancerextrap,
+  inner_join(cdm[[cohortTableStem]],
              by = c("person_id" = "subject_id" )) %>%
   select(person_id,gender_concept_id, 
          year_of_birth, month_of_birth, day_of_birth,
@@ -280,10 +274,9 @@ exportSurvivalResultsRDS <- function(result, zipName, outputFolder) {
 
 
 # Setting up information for extrapolation methods to be used
-extrapolations <- c("gompertz", "weibull", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3", "spline5") 
-extrapolations_formatted <- c("Gompertz", "Weibull", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (3 knots)", "Spline (5 knots)")
+extrapolations <- c("gompertz", "weibull", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline2", "spline3", "spline5") 
+extrapolations_formatted <- c("Gompertz", "Weibull", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (2 knots)", "Spline (3 knots)", "Spline (5 knots)")
 # setting up time for extrapolation
-#t <- seq(0, timeinyrs*365, by=1)
 t <- seq(0, timeinyrs*365, by=50) # just for debugging 
 
 
@@ -294,30 +287,30 @@ source(here("2_Analysis","Analysis2.R"))
 info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
 
 
-#gender stratification
+#gender adjustment
 if(RunGenderStrat == TRUE){
 
-  info(logger, 'RUNNING ANALYSIS FOR GENDER STRATIFICATION')
+  info(logger, 'RUNNING ANALYSIS FOR GENDER')
   source(here("2_Analysis","AnalysisGenderStrat.R"))
-  info(logger, 'ANALYSIS RAN FOR GENDER STRATIFICATION')
+  info(logger, 'ANALYSIS RAN FOR GENDER')
 
 }
 
-#age stratification
-if(RunAgeStrat == TRUE){
+#age adjustment
+if(RunAgeAnalysis == TRUE){
 
-  info(logger, 'RUNNING ANALYSIS FOR AGE STRATIFICATION')
+  info(logger, 'RUNNING ANALYSIS FOR AGE')
   source(here("2_Analysis","AnalysisAgeStrat1.R"))
-  info(logger, 'ANALYSIS RAN FOR AGE STRATIFICATION')
+  info(logger, 'ANALYSIS RAN FOR AGE')
 
 }
 
-#age*gender stratification
-if(RunGenderStrat == TRUE & RunAgeStrat == TRUE ){
+#age*gender adjustment
+if(RunGenderAnalysis == TRUE & RunAgeStrat == TRUE ){
 
-  info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER STRATIFICATION')
+  info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER')
   source(here("2_Analysis","AnalysisAgeGenderStrat.R"))
-  info(logger, 'ANALYSIS RAN FOR AGE*GENDER STRATIFICATION')
+  info(logger, 'ANALYSIS RAN FOR AGE*GENDER')
 
 }
 

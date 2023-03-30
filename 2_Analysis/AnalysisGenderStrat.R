@@ -219,6 +219,46 @@ for(j in 1:nrow(outcome_cohorts)) {
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
         
+        
+      } else if(extrapolations[i] == "spline2") {
+        # 3knotspline
+        model <- flexsurvspline(formula=Surv(time_years,status-1)~gender,data=data,k = 2, scale = "hazard")
+        
+        #extrapolation # will need this to check results can remove once checked
+        extrap_results_temp[[i]] <- model %>%
+          summary(t=t/365, tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #grab the parameters and knots from the model
+        coefs.p <- model[["coefficients"]] %>%
+          enframe() %>%
+          pivot_wider(value, name) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Gender" ) 
+        
+        knots.p <- model[["knots"]] %>%
+          setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
+          enframe() %>%
+          pivot_wider(value, name)
+        
+        parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
+        
+        # hazard over time
+        hazot_results_temp[[i]] <- model %>%
+          summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All" ) %>%
+          rename(Gender = gender)
+        
+        #get the goodness of fit for each model
+        gof_results_temp[[i]] <- model %>%
+          glance() %>%
+          mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All") %>%
+          slice(rep(1:n(), each = 2)) %>%
+          mutate(Gender = target_gender[[j]])
+        
+        #print out progress               
+        print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+        
       } else if(extrapolations[i] == "spline3") {
         # 3knotspline
         model <- flexsurvspline(formula=Surv(time_years,status-1)~gender,data=data,k = 3, scale = "hazard")
@@ -381,6 +421,7 @@ LoglogP <- list()
 LognormP <- list()
 GenGammaP <- list()
 Spline1kP <- list()
+Spline2kP <- list()
 Spline3kP <- list()
 Spline5kP <- list()
 
@@ -398,8 +439,9 @@ for(j in 1:nrow(outcome_cohorts)) {
   LognormP[[j]] <- parameters_gender[[j]] %>% pluck(6) 
   GenGammaP[[j]] <- parameters_gender[[j]] %>% pluck(7) 
   Spline1kP[[j]] <- parameters_gender[[j]] %>% pluck(8) 
-  Spline3kP[[j]] <- parameters_gender[[j]] %>% pluck(9) 
-  Spline5kP[[j]] <- parameters_gender[[j]] %>% pluck(10) 
+  Spline2kP[[j]] <- parameters_gender[[j]] %>% pluck(9)
+  Spline3kP[[j]] <- parameters_gender[[j]] %>% pluck(10) 
+  Spline5kP[[j]] <- parameters_gender[[j]] %>% pluck(11) 
   
 }
 
@@ -413,6 +455,7 @@ LoglogParametersGender <- dplyr::bind_rows(LoglogP)
 LognormParametersGender <- dplyr::bind_rows(LognormP)
 GenGammaParametersGender <- dplyr::bind_rows(GenGammaP)
 Spline1kParametersGender <- dplyr::bind_rows(Spline1kP)
+Spline2kParametersGender <- dplyr::bind_rows(Spline2kP)
 Spline3kParametersGender <- dplyr::bind_rows(Spline3kP)
 Spline5kParametersGender <- dplyr::bind_rows(Spline5kP)
 
@@ -426,6 +469,7 @@ ParametersGender <- bind_rows(
   GenGammaParametersGender, 
   Spline1kParametersGender ,
   Spline3kParametersGender ,
+  Spline2kParametersGender ,
   Spline5kParametersGender ) %>%
   mutate(Stratification = "Gender")
 
