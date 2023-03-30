@@ -100,13 +100,13 @@ Pop<-Pop %>%
                                    "60-69", "70-79","80-89",">=90"))) 
 table(Pop$age_gr, useNA = "always")
 
-# wider age groups
+# wider age groups (median age of cancer 70 years)
 Pop<-Pop %>% 
-  mutate(age_gr2=ifelse(age<=50,  "<=50",
-                               ifelse(age>50, ">50",
+  mutate(age_gr2=ifelse(age<70,  "<70",
+                               ifelse(age>=70, ">=70",
                                       NA))) %>% 
   mutate(age_gr2= factor(age_gr2, 
-                         levels = c("<=50", ">50")))
+                         levels = c("<70", ">=70")))
 table(Pop$age_gr2, useNA = "always")
 
 
