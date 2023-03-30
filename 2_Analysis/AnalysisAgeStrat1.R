@@ -228,6 +228,47 @@ for(j in 1:nrow(outcome_cohorts)) {
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
       
+    } else if(extrapolations[i] == "spline2") {
+      # 2knotspline
+      
+      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 2, scale = "hazard")
+      
+      extrap_results_temp[[i]] <- model %>%
+        summary(t=t/365, tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+        rename(Age = age_gr )
+      
+      #extract parameters
+      #grab the parameters and knots from the model
+      coefs.p <- model[["coefficients"]] %>%
+        enframe() %>%
+        pivot_wider(value, name) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" ) 
+      
+      knots.p <- model[["knots"]] %>%
+        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
+        enframe() %>%
+        pivot_wider(value, name)
+      
+      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
+      
+      # hazard over time
+      hazot_results_temp[[i]] <- model %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+        rename(Age = age_gr )
+      
+      #get the goodness of fit for each model
+      gof_results_temp[[i]] <- model %>%
+        glance() %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
+        slice(rep(1:n(), each = length(target_age[[j]]))) %>%
+        mutate(Gender = target_age[[j]])
+      
+      #print out progress               
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+      
+      
     } else if(extrapolations[i] == "spline3") {
       # 3knotspline
       

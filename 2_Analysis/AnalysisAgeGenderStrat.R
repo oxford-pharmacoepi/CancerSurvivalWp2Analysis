@@ -213,14 +213,14 @@ risktableskm_age_gender <- dplyr::bind_rows(observedrisktableKM_age_gender) %>%
 
 toc(func.toc=toc_min)
 
-info(logger, 'KM analysis for AGE*GENDER stratification COMPLETE')
+info(logger, 'KM analysis for AGE*GENDER COMPLETE')
 
 
 ###########################################
 
-# Extrapolation analysis for age*gender stratification ------
+# Extrapolation analysis for age*gender ------
 
-info(logger, 'Extrapolation analysis for age*gender stratification START')
+info(logger, 'Extrapolation analysis for age*gender START')
 
 # generating extrapolations ----
 # Initiate templists to store output ---- will have to make folders for each cancer and loop
@@ -298,6 +298,52 @@ for(j in 1:nrow(outcome_cohorts)) {
                remove = FALSE ,
                sep = "_")
                  
+      
+      #print out progress               
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+      
+      
+    } else if (extrapolations[i] == "spline2") {
+      
+      # 2knotspline
+      model <- flexsurvspline(formula=Surv(time_years,status-1)~genderAgegp,data=data,k = 2, scale = "hazard")
+      
+      #extrapolation # will need this to check results can remove once checked
+      extrap_results_temp[[i]] <- model %>%
+        summary(t=t/365, tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
+      
+      #extract parameters
+      #grab the parameters and knots from the model
+      coefs.p <- model[["coefficients"]] %>%
+        enframe() %>%
+        pivot_wider(value, name) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "All", Gender = "Both", GenderAge = "GenderAge"  )
+      
+      knots.p <- model[["knots"]] %>%
+        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
+        enframe() %>%
+        pivot_wider(value, name)
+      
+      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
+      
+      # hazard over time
+      hazot_results_temp[[i]] <- model %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j]) %>%
+        rename(GenderAge = genderAgegp) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
+      
+      #get the goodness of fit for each model
+      gof_results_temp[[i]] <- model %>%
+        glance() %>%
+        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j] ) %>%
+        slice(rep(1:n(), each = (length(target_age_gender[[j]])*(as.numeric(genderlevels))))) %>%
+        mutate(GenderAge = rep(target_age_gender[[j]], each = (as.numeric(genderlevels)))) %>%
+        separate(col = "GenderAge", into = c("Gender", "Age"), remove = FALSE , sep = "_")
+      
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
@@ -490,6 +536,7 @@ LoglogP <- list()
 LognormP <- list()
 GenGammaP <- list()
 Spline1kP <- list()
+Spline2kP <- list()
 Spline3kP <- list()
 Spline5kP <- list()
 
@@ -507,8 +554,9 @@ for(j in 1:nrow(outcome_cohorts)) {
   LognormP[[j]] <- parameters_age_gender[[j]] %>% pluck(6) 
   GenGammaP[[j]] <- parameters_age_gender[[j]] %>% pluck(7) 
   Spline1kP[[j]] <- parameters_age_gender[[j]] %>% pluck(8) 
-  Spline3kP[[j]] <- parameters_age_gender[[j]] %>% pluck(9) 
-  Spline5kP[[j]] <- parameters_age_gender[[j]] %>% pluck(10) 
+  Spline2kP[[j]] <- parameters_age_gender[[j]] %>% pluck(9)
+  Spline3kP[[j]] <- parameters_age_gender[[j]] %>% pluck(10) 
+  Spline5kP[[j]] <- parameters_age_gender[[j]] %>% pluck(11) 
   
 }
 
@@ -522,6 +570,7 @@ LognormParametersAgeGender <- dplyr::bind_rows(LognormP)
 GenGammaParametersAgeGender <- dplyr::bind_rows(GenGammaP)
 Spline1kParametersAgeGender <- dplyr::bind_rows(Spline1kP)
 Spline3kParametersAgeGender <- dplyr::bind_rows(Spline3kP)
+Spline2kParametersAgeGender <- dplyr::bind_rows(Spline2kP)
 Spline5kParametersAgeGender <- dplyr::bind_rows(Spline5kP)
 
 ParametersAgeGender <- bind_rows(
@@ -533,6 +582,7 @@ ParametersAgeGender <- bind_rows(
   LognormParametersAgeGender, 
   GenGammaParametersAgeGender, 
   Spline1kParametersAgeGender ,
+  Spline2kParametersAgeGender ,
   Spline3kParametersAgeGender ,
   Spline5kParametersAgeGender ) %>%
   mutate(Stratification = "Age*Gender")
