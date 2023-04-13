@@ -206,7 +206,7 @@ hotkmcombined_age_gender <- dplyr::bind_rows(observedhazotKM_age_gender) %>%
   rename(est = hazard, ucl = upper.ci, lcl = lower.ci, GenderAge = genderAgegp ) %>%
   mutate(Stratification = "Age*Gender")
 
-#generate the risk table and remove entries < 5 patients
+#generate the risk table 
 risktableskm_age_gender <- dplyr::bind_rows(observedrisktableKM_age_gender) %>%
   replace(is.na(.), 0) %>%
   mutate(Stratification = "Age*Gender")
