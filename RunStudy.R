@@ -293,7 +293,7 @@ info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
 if(RunGenderStrat == TRUE){
 
   info(logger, 'RUNNING ANALYSIS FOR GENDER')
-  source(here("2_Analysis","AnalysisGenderStrat.R"))
+  source(here("2_Analysis","AnalysisGender.R"))
   info(logger, 'ANALYSIS RAN FOR GENDER')
 
 }
@@ -302,16 +302,16 @@ if(RunGenderStrat == TRUE){
 if(RunAgeAnalysis == TRUE){
 
   info(logger, 'RUNNING ANALYSIS FOR AGE')
-  source(here("2_Analysis","AnalysisAgeStrat1.R"))
+  source(here("2_Analysis","AnalysisAge.R"))
   info(logger, 'ANALYSIS RAN FOR AGE')
 
 }
 
 #age*gender adjustment
-if(RunGenderAnalysis == TRUE & RunAgeStrat == TRUE ){
+if(RunGenderAnalysis == TRUE & RunAgeAnalysis == TRUE ){
 
   info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER')
-  source(here("2_Analysis","AnalysisAgeGenderStrat.R"))
+  source(here("2_Analysis","AnalysisAgeGender.R"))
   info(logger, 'ANALYSIS RAN FOR AGE*GENDER')
 
 }
