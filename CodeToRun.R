@@ -42,19 +42,23 @@ library(bshazard)
 library(tibble)
 library(CDMConnector)
 
+# install.packages("remotes")
+# library(remotes)
+# install_version("CDMConnector", "0.4")
+
 # Set the name/ acronym for your database (to be used in the titles of reports, etc) -----
-db.name<-"CPRD_Aurum"
-#db.name<-"CPRD_GOLD"
+#db.name<-"CPRD_Aurum"
+db.name<-"CPRD_GOLD"
 
 # Set output folder locations -----
 # the path to a folder where the results from this analysis will be saved
 output.folder<-here("Results",db.name)
 
 # database connection details
-server     <- Sys.getenv("DB_SERVER_cdm_aurum_202106") # AURUM
-server_dbi <- Sys.getenv("DB_SERVER_cdm_aurum_202106_dbi") #AURUM
-# server     <- Sys.getenv("DB_SERVER_cdmgold202007") # GOLD
-# server_dbi <- Sys.getenv("DB_SERVER_cdmgold202007_dbi") #GOLD
+#server     <- Sys.getenv("DB_SERVER_cdm_aurum_202106") # AURUM
+#server_dbi <- Sys.getenv("DB_SERVER_cdm_aurum_202106_dbi") #AURUM
+server     <- Sys.getenv("DB_SERVER_cdmgold202007") # GOLD
+server_dbi <- Sys.getenv("DB_SERVER_cdmgold202007_dbi") #GOLD
 user       <- Sys.getenv("DB_USER")
 password   <- Sys.getenv("DB_PASSWORD")
 port       <- Sys.getenv("DB_PORT") 
@@ -69,7 +73,7 @@ results_database_schema<-"results"
 # stem for tables to be created in your results schema for this analysis
 # You can keep the above names or change them
 # Note, any existing tables in your results schema with the same name will be overwritten
-cohortTableStem<-"ehdenwp2cancerextrap" # needs to be in lower case
+stem_table <-"ehdenwp2cancer" # needs to be in lower case
 
 #put in the start date from which you have usable data for this study must be in format YYYY-MM-DD
 startdate <- '2000-01-01'

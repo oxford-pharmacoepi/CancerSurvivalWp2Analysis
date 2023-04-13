@@ -18,6 +18,7 @@ level(logger) <- "INFO"
 
 # create study cohorts ----
 # The study cohorts are various cancer cohorts that have been instantiated using CDM connector
+cancer_table <- paste0(stem_table, "_cancer_cohorts")
 
 # set a cdm reference -----
 cdm <- CDMConnector::cdm_from_con(con = db, # connected using DBI dbConnect
@@ -34,13 +35,14 @@ outcome_cohorts <- CDMConnector::readCohortSet(here(
 
 
 #create a cdm reference for your cohorts
-cdm <- CDMConnector::generateCohortSet(cdm, outcome_cohorts,
-                                       cohortTableName = cohortTableStem,
+cdm <- CDMConnector::generateCohortSet(cdm, 
+                                       outcome_cohorts,
+                                       cohortTableName = cancer_table,
                                        overwrite = TRUE)
 
 # get variables for analysis ---
 Pop<-cdm$person %>% 
-  inner_join(cdm[[cohortTableStem]],
+  inner_join(cdm[[cancer_table]],
              by = c("person_id" = "subject_id" )) %>%
   select(person_id,gender_concept_id, 
          year_of_birth, month_of_birth, day_of_birth,

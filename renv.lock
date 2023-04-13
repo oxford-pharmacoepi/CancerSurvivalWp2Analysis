@@ -23,6 +23,13 @@
       "Repository": "CRAN",
       "Hash": "4e348572ffcaa2fb1e610e7a941f6f3a"
     },
+    "CDMConnector": {
+      "Package": "CDMConnector",
+      "Version": "0.4.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d874766c8762d8cbe2330f66e753460b"
+    },
     "CirceR": {
       "Package": "CirceR",
       "Version": "1.2.0",
@@ -39,8 +46,8 @@
       "Package": "CohortGenerator",
       "Version": "0.7.0",
       "Source": "GitHub",
-      "Remotes": "ohdsi/CirceR, ohdsi/Eunomia, ohdsi/ROhdsiWebApi",
       "RemoteType": "github",
+      "Remotes": "ohdsi/CirceR, ohdsi/Eunomia, ohdsi/ROhdsiWebApi",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "CohortGenerator",
       "RemoteUsername": "OHDSI",
@@ -250,6 +257,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "4f57884290cc75ab22f4af9e9d4ca862"
+    },
+    "arrow": {
+      "Package": "arrow",
+      "Version": "11.0.0.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "e861b81e0b87a2f133a688c985953508"
     },
     "askpass": {
       "Package": "askpass",
