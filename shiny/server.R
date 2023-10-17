@@ -544,8 +544,7 @@ server <-	function(input, output, session) {
 
   })
   
-  
-# risk table whole population 
+# risk table
   get_survival_risktable<-reactive({
     
     table<-survival_risk_table %>% 
@@ -583,7 +582,7 @@ server <-	function(input, output, session) {
               ))
   } )
 
-# median survival whole population
+# median/mean survival
   get_survival_median_table<-reactive({
     
     table<-survival_median_table %>% 
@@ -633,7 +632,7 @@ server <-	function(input, output, session) {
               ))
   } )
   
-# survival risk rates whole population
+# survival probabilities
   get_survival_rates_table<-reactive({
     
     table<- survival_rates_table %>%
@@ -701,8 +700,6 @@ server <-	function(input, output, session) {
               ))
   } )
 
-
-
 # table for median and mean follow up
   get_survival_followup_table<-reactive({
     
@@ -755,7 +752,7 @@ server <-	function(input, output, session) {
               ))
   } )
   
-  # table 1
+# table 1
   get_table_one <-reactive({
     
     table<-table_one_results %>% 
