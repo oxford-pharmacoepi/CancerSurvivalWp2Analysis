@@ -420,16 +420,14 @@ server <-	function(input, output, session) {
   # survival estimates: whole population
   get_survival_estimates<-reactive({
     
-    table<-survival_estimates_whole %>% 
+    table<-survival_estimates %>% 
       # first deselect settings which did not vary for this study
-      select(!c(GenderAge, Method)) %>% 
       filter(Database %in% input$survival_database_name_selector)  %>% 
       filter(Age %in% input$survival_age_group_selector)     %>% 
-      #rename(Sex = Gender) %>% 
       filter(Sex %in% input$survival_sex_selector)     %>% 
-      filter(Cancer %in% input$survival_outcome_cohort_name_selector) 
-    #%>%
-      #filter(CalendarYearGp %in% input$calendar_year_selector) 
+      filter(Cancer %in% input$survival_outcome_cohort_name_selector) %>% 
+      filter(Stratification %in% input$survival_strat_selector) %>% 
+      filter(Adjustment %in% input$survival_adjust_selector)
     
     table
   }) 
@@ -445,7 +443,6 @@ server <-	function(input, output, session) {
       mutate(est=nice.num3(est)) %>%
       mutate(ucl=nice.num3(ucl)) %>%
       mutate(lcl=nice.num3(lcl)) %>%
-      select(!c("Stratification", "std.error")) %>%
       relocate(Cancer) %>%
       relocate(Estimate = est, .after = time) %>%
       relocate(upperCI = ucl, .after = Estimate) %>%
@@ -547,113 +544,6 @@ server <-	function(input, output, session) {
 
   })
   
-# survival estimates: calendar year population
-  get_survival_estimates_cy<-reactive({
-    
-    table<-survival_estimates_calendar %>% 
-      # first deselect settings which did not vary for this study
-      select(!c(GenderAge, Method)) %>% 
-      filter(Database %in% input$survival_database_name_selector_cy)  %>% 
-      filter(Age %in% input$survival_age_group_selector_cy)     %>% 
-      filter(Sex %in% input$survival_sex_selector_cy)     %>% 
-      filter(Cancer %in% input$survival_outcome_cohort_name_selector_cy) %>%
-      filter(CalendarYearGp %in% input$calendar_year_selector_cy) 
-    
-    table
-  }) 
-  output$tbl_survival_estimates_cy<-  DT::renderDataTable({
-    
-    table<-get_survival_estimates_cy()
-    
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-    
-    table <- table %>%
-      mutate(time=nice.num3(time)) %>%
-      mutate(est=nice.num3(est)) %>%
-      mutate(ucl=nice.num3(ucl)) %>%
-      mutate(lcl=nice.num3(lcl)) %>%
-      select(!c("Stratification", "std.error")) %>%
-      relocate(Cancer) %>%
-      relocate(Estimate = est, .after = time) %>%
-      relocate(upperCI = ucl, .after = Estimate) %>%
-      relocate(lowerCI = lcl, .after = upperCI) 
-    
-    datatable(table,
-              rownames= FALSE,
-              extensions = 'Buttons',
-              options = list(lengthChange = FALSE,
-                             dom = 'tB',
-                             pageLength = 100000000,
-                             buttons = list(list(extend = "csv", 
-                                                 text = "Download results as csv",
-                                                 filename = "survival_estimates_calendarYears"))
-              ))
-  } )
-  
-# KM plots for calendar year population
-  output$plot_survival_estimates_cy<- renderPlotly({
-    
-    table<-get_survival_estimates_cy()
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-    
-    if(is.null(input$survival_plot_group_cy)){
-      if(!is.null(input$survival_plot_facet_cy)){
-        p<-table %>%
-          unite("facet_var",
-                c(all_of(input$survival_plot_facet_cy)), remove = FALSE, sep = "; ") %>%
-          ggplot(aes_string(x=input$time, y="est", colour="CalendarYearGp")) +
-          geom_line() +
-          facet_wrap(vars(facet_var),ncol = 2)+
-          scale_y_continuous(limits = c(NA, 1) ) +
-          theme_bw()
-      } else{
-        p<-table %>%
-          ggplot(aes_string(x=input$time, y="est", colour="CalendarYearGp")) +
-          scale_y_continuous(
-            limits = c(NA, 1)
-          ) +
-          theme_bw()
-      }
-    }
-    
-    
-    if(!is.null(input$survival_plot_group_cy) ){
-      
-      if(is.null(input$survival_plot_facet_cy) ){
-        p<-table %>%
-          unite("Group",
-                c(all_of(input$survival_plot_group_cy)), remove = FALSE, sep = "; ") %>%
-          ggplot(aes_string(x=input$time, y="est",
-                            group="Group",
-                            colour="Group")) +
-          geom_line() +
-          theme_bw()
-      }
-      
-      if(!is.null(input$survival_plot_facet_cy) ){
-        if(!is.null(input$survival_plot_group_cy) ){
-          p<-table %>%
-            unite("Group",
-                  c(all_of(input$survival_plot_group_cy)), remove = FALSE, sep = "; ") %>%
-            unite("facet_var",
-                  c(all_of(input$survival_plot_facet_cy)), remove = FALSE, sep = "; ") %>%
-            ggplot(aes_string(x=input$time, y="est",
-                              group="Group",
-                              colour="Group")) +
-            geom_line() +
-            facet_wrap(vars(facet_var_cy),ncol = 2)+
-            scale_y_continuous(limits = c(NA, 1) )  +
-            theme_bw()
-        }
-      }
-      
-    }
-    
-    p
-    
-  })    
   
 # risk table whole population 
   get_survival_risktable<-reactive({
@@ -690,90 +580,6 @@ server <-	function(input, output, session) {
                              buttons = list(list(extend = "csv", 
                                                  text = "Download results as csv",
                                                  filename = "survival_risk_table"))
-              ))
-  } )
-  
-# risk table calendar years  
-  get_survival_risktable_cy<-reactive({
-    
-    table<- survival_risk_table_cy %>% 
-      # first deselect settings which did not vary for this study
-      select(!c(GenderAge, Method)) %>% 
-      filter(Database %in% input$survival_database_name_selector_cy)  %>% 
-      filter(Age %in% input$survival_age_group_selector_cy)     %>% 
-      filter(Gender %in% input$survival_sex_selector_cy)     %>% 
-      filter(Cancer %in% input$survival_outcome_cohort_name_selector_cy) %>%
-      filter(CalendarYearGp %in% input$calendar_year_selector_cy) 
-    
-    table
-  }) 
-  output$tbl_survival_risk_table_cy <-  DT::renderDataTable({
-    
-    table<-get_survival_risktable_cy()
-    
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-    
-    table <- table %>%
-      select(!c("Stratification")) %>% 
-      rename(Sex = Gender, 
-             `Calendar Year` = CalendarYearGp )
-    
-    datatable(table,
-              rownames= FALSE,
-              extensions = 'Buttons',
-              options = list(lengthChange = FALSE,
-                             dom = 'tB',
-                             pageLength = 100000000,
-                             buttons = list(list(extend = "csv", 
-                                                 text = "Download results as csv",
-                                                 filename = "survival_risk_table_by_calendaryr"))
-              ))
-  } )
-
-# median survival calendar years
-  get_survival_median_table_cy<-reactive({
-
-    table<- survival_median_table_cy %>%
-      # first deselect settings which did not vary for this study
-      select(!c(GenderAge, Method)) %>%
-      filter(Database %in% input$survival_database_name_selector_cy)  %>%
-      filter(Age %in% input$survival_age_group_selector_cy)     %>%
-      filter(Gender %in% input$survival_sex_selector_cy)     %>%
-      filter(Cancer %in% input$survival_outcome_cohort_name_selector_cy) %>%
-      filter(CalendarYearGp %in% input$calendar_year_selector_cy)
-
-    table
-  })
-  output$tbl_survival_median_table_cy <-  DT::renderDataTable({
-
-    table<-get_survival_median_table_cy()
-
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-
-    table <- table %>%
-      select(!c("Stratification", "n.max", "n.start")) %>%
-    relocate(Cancer) %>% 
-      rename(Sex = Gender) %>% 
-      rename(`Records (n)` = records) %>% 
-      mutate(median= ifelse(!is.na(median),paste0(median, " (",`0.95LCL`," - ",  `0.95UCL`, ")"))) %>% 
-      rename(`Median Survival in Years (95% CI)` = median) %>% 
-      mutate(rmean= ifelse(!is.na(rmean),paste0(rmean, " (",`se(rmean)`,")"))) %>% 
-      rename(`rmean in Years (SE)` = rmean,
-             `Events (n)` = events,
-             `Calendar Year` = CalendarYearGp) %>% 
-      select(!c("0.95LCL", "0.95UCL", "se(rmean)")) 
-      
-    datatable(table,
-              rownames= FALSE,
-              extensions = 'Buttons',
-              options = list(lengthChange = FALSE,
-                             dom = 'tB',
-                             pageLength = 100000000,
-                             buttons = list(list(extend = "csv",
-                                                 text = "Download results as csv",
-                                                 filename = "survival_median_by_calendaryr"))
               ))
   } )
 
@@ -824,72 +630,6 @@ server <-	function(input, output, session) {
                              buttons = list(list(extend = "csv", 
                                                  text = "Download results as csv",
                                                  filename = "survival_median_survival"))
-              ))
-  } )
-
-# survival risk rates calendar years
-  get_survival_rates_table_cy<-reactive({
-    
-    table<- survival_rates_table_cy %>%
-      # first deselect settings which did not vary for this study
-      select(!c(GenderAge, Method)) %>%
-      filter(Database %in% input$survival_database_name_selector_cy)  %>%
-      filter(Age %in% input$survival_age_group_selector_cy)     %>%
-      filter(Sex %in% input$survival_sex_selector_cy)     %>%
-      filter(Cancer %in% input$survival_outcome_cohort_name_selector_cy) %>%
-      filter(CalendarYearGp %in% input$calendar_year_selector_cy)
-    
-    table
-  })
-  output$tbl_survival_rates_table_cy <-  DT::renderDataTable({
-    
-    table<-get_survival_rates_table_cy()
-    
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-    
-    table <- table %>%
-      select(!c("Stratification",
-                "type",
-                "logse",
-                "conf.int",
-                "conf.type",
-                "n.risk",
-                "n.event",
-                "n.censor"
-                
-      )) %>%
-      mutate(surv = surv * 100) %>% 
-      mutate(lower = lower * 100) %>% 
-      mutate(upper = upper * 100) %>% 
-      mutate(surv=nice.num2(surv)) %>%
-      mutate(std.err=nice.num3(std.err)) %>%
-      mutate(cumhaz=nice.num3(cumhaz)) %>%
-      mutate(std.chaz=nice.num3(std.chaz)) %>%      
-      mutate(lower=nice.num2(lower)) %>%
-      mutate(upper=nice.num2(upper)) %>%
-      relocate(Cancer) %>%
-      relocate(surv, .after = time) %>%
-      relocate(lower, .after = surv) %>%
-      relocate(upper, .after = lower) %>% 
-      rename(`Time (years)` = time) %>% 
-      mutate(surv= ifelse(!is.na(surv),paste0(surv, " (",lower," - ",  upper, ")"))) %>% 
-      rename(`% Survival (95% CI)` = surv,
-             `Calendar Year` = CalendarYearGp) %>% 
-      select(!c("lower", "upper",
-                "std.err",
-                "cumhaz",
-                "std.chaz"))
-    
-    datatable(table,
-              rownames= FALSE,
-              extensions = 'Buttons',
-              options = list(lengthChange = FALSE,
-                             dom = 'tB',
-                             pageLength = 100000000,
-                             buttons = list(list(extend = "csv",
-                                                 text = "Download results as csv",
-                                                 filename = "survival_rates_by_calendaryr"))
               ))
   } )
   
@@ -961,137 +701,8 @@ server <-	function(input, output, session) {
               ))
   } )
 
-# table 1
-  get_table_one <-reactive({
-    
-    table<-table_one_results %>% 
-      filter(Cancer %in% input$table1_outcome_cohort_name_selector) %>% 
-      filter(Sex %in% input$table1_sex_selector) 
 
-    table
-  }) 
-  
-  
-  output$tbl_table_one<-  DT::renderDataTable({
-    
-    table<-get_table_one()
-    
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-    
-    table <- table %>% 
-      select(!c("analysis" )) %>% 
-      relocate(Cancer, .after = `CPRD GOLD`) %>% 
-      rename(Database = var)
 
-    datatable(table,
-              rownames= FALSE,
-              extensions = 'Buttons',
-              options = list(lengthChange = FALSE,
-                             dom = 'tB',
-                             pageLength = 100000000,
-                             buttons = list(list(extend = "csv", 
-                                                 text = "Download results as csv",
-                                                 filename = "tableOne"))
-              ))
-  } )
-
-# plot for survival probabilities over calender year
-  output$plot_survival_probs_cy<- renderPlotly({
-    
-    table<-get_survival_rates_table_cy()
-    
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-    
-
-    if(is.null(input$survival_rate_plot_group)){
-      if(!is.null(input$survival_rate_facet_cy)){
-        p <-table %>%
-          unite("facet_var",
-                c(all_of(input$survival_rate_facet_cy)), remove = FALSE, sep = "; ") %>%
-          ggplot(aes_string(x="CalendarYearGp", y="surv", colour = input$time)) +
-          geom_point() +
-          geom_line() +
-          facet_wrap(vars(facet_var),ncol = 2)+
-          scale_y_continuous(limits = c(NA, 1) ) +
-          theme_bw()
-      } else{
-        p <-table %>%
-          ggplot(aes_string(x="CalendarYearGp", y="surv",  colour = input$time)) +
-          geom_point() +
-          geom_line() +
-          scale_y_continuous(
-            limits = c(NA, 1)
-          ) +
-          theme_bw()
-      }
-    }
-    
-    
-    if(!is.null(input$survival_rate_plot_group) ){
-      
-      if(is.null(input$survival_rate_facet_cy) ){
-        p<-table %>%
-          unite("Group",
-                c(all_of(input$survival_rate_plot_group)), remove = FALSE, sep = "; ") %>%
-          ggplot(aes_string(x="CalendarYearGp", y="surv",
-                            group="Group",
-                            colour="Group")) +
-          geom_line() +
-          theme_bw()
-      }
-      
-      if(!is.null(input$survival_rate_facet_cy) ){
-        if(!is.null(input$survival_rate_plot_group) ){
-          p<-table %>%
-            unite("Group",
-                  c(all_of(input$survival_rate_plot_group)), remove = FALSE, sep = "; ") %>%
-            unite("facet_var",
-                  c(all_of(input$survival_rate_facet_cy)), remove = FALSE, sep = "; ") %>%
-            ggplot(aes_string(x="CalendarYearGp", y="surv",
-                              group="Group",
-                              colour="Group")) +
-            geom_line() +
-            facet_wrap(vars(facet_var),ncol = 2)+
-            scale_y_continuous(limits = c(NA, 1) )  +
-            theme_bw()
-        }
-      }
-      
-    } 
-    
-    
-    
-    
-    
-    
-      # if(!is.null(input$survival_rate_facet_cy)){
-      #   p <-table %>%
-      #     unite("facet_var",
-      #           c(all_of(input$survival_rate_facet_cy)), remove = FALSE, sep = "; ") %>%
-      #     ggplot(aes_string(x="CalendarYearGp", y="surv", colour = input$time)) +
-      #     geom_point() +
-      #     geom_line() +
-      #     facet_wrap(vars(facet_var),ncol = 2)+
-      #     scale_y_continuous(limits = c(NA, 1) ) +
-      #     theme_bw()
-      # } else {
-      #   p <-table %>%
-      #     ggplot(aes_string(x="CalendarYearGp", y="surv",  colour = input$time)) +
-      #     geom_point() +
-      #     geom_line() +
-      #     scale_y_continuous(
-      #       limits = c(NA, 1)
-      #     ) +
-      #     theme_bw()
-      # }
-
-    
-    p
-    
-  })  
-  
 # table for median and mean follow up
   get_survival_followup_table<-reactive({
     
@@ -1144,7 +755,52 @@ server <-	function(input, output, session) {
               ))
   } )
   
+  # table 1
+  get_table_one <-reactive({
+    
+    table<-table_one_results %>% 
+      filter(Cancer %in% input$table1_outcome_cohort_name_selector) %>% 
+      filter(Sex %in% input$table1_sex_selector) 
+    
+    table
+  }) 
+  output$tbl_table_one<-  DT::renderDataTable({
+    
+    table<-get_table_one()
+    
+    validate(need(ncol(table)>1,
+                  "No results for selected inputs"))
+    
+    table <- table %>% 
+      select(!c("analysis" )) %>% 
+      relocate(Cancer, .after = `CPRD GOLD`) %>% 
+      rename(Database = var)
+    
+    datatable(table,
+              rownames= FALSE,
+              extensions = 'Buttons',
+              options = list(lengthChange = FALSE,
+                             dom = 'tB',
+                             pageLength = 100000000,
+                             buttons = list(list(extend = "csv", 
+                                                 text = "Download results as csv",
+                                                 filename = "tableOne"))
+              ))
+  } )
   
+# table for extrapolation parameters 
+  
+# gof fit results
+  
+# hazard over time results
+  
+# table for cohort attrition
+
+# table for cdm snapshot
+  
+
+  
+
   
   
   
