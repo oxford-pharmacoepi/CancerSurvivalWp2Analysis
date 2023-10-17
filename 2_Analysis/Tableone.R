@@ -29,6 +29,8 @@ info(logger, "INSTANTIATED CONDITIONS")
 
 
 info(logger, "CREATE TABLE ONE SUMMARY")
+
+suppressWarnings(
 tableone <- cdm$analysis %>%
   summariseCharacteristics(
     strata = list(c("sex"),c("age_gr")),
@@ -48,7 +50,9 @@ tableone <- cdm$analysis %>%
       )
     )
   )
+)
 
+suppressWarnings(
 tableone_all_cancers <- cdm$analysis %>% 
   mutate(cohort_definition_id = 10) %>% 
   summariseCharacteristics(
@@ -70,5 +74,6 @@ tableone_all_cancers <- cdm$analysis %>%
     )
   )  %>% 
   mutate(group_level = "All 8 Cancers")
+)
 
 tableone <- bind_rows(tableone, tableone_all_cancers) 
