@@ -1,479 +1,1743 @@
-########################################
-# AGE STRATIFICATION
-#######################################
+#################################################
+# AGE POPULATION
+#################################################
 
-# km survival, risk table, median survival, hazard over time from the observed data for each cancer
-tic("KM analysis with age stratification")
-info(logger, 'KM analysis for age stratification START')
+# km survival, risk table, median survival, hazard over time from the observed data for each cancer ----
+tic("KM analysis for age population")
+info(logger, 'KM analysis for age population START')
 
-# KM observed
+# capture output in list
 observedkm_age <- list()
 observedmedianKM_age <- list()
 observedhazotKM_age <- list()
 observedrisktableKM_age <- list()
-target_age <- list()
+observedsurprobsKM_age <- list()
+
 
 # loop to carry out for each cancer
-for(j in 1:nrow(outcome_cohorts)) { 
+for(j in 1:nrow(outcome_cohorts)) {
   
-  #subset the data by cancer type
-  data <- Pop %>%
-    filter(cohort_definition_id == j) 
-  
-  # get the risk table ---
-  grid <- seq(0,floor(max(data$time_years)),by=2)
-  filter4age <- RiskSetCount(grid,data$time_years[data$age_gr == "<30"]) %>%
-    rbind(grid) %>% as.data.frame() %>%
-    `colnames<-`(grid) %>%
-    slice(1) %>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "30-39"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "40-49"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "50-59"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "60-69"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "70-79"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "80-89"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == ">=90"]))%>%
-    mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Gender = "Both", Age = c("<30" ,"30-39", "40-49" ,"50-59" ,"60-69", "70-79", "80-89" ,">=90")) 
-  
-  # filter that removes data where 3 or less data points after obscuring results
-  # remove entries < 5 patients turn to zero
-  filterdatatest <- filter4age %>%
-    mutate_at(.vars = c(1:(ncol(filter4age)-4)), funs(ifelse(.== 0, NA, .))) %>%  
-    mutate_at(.vars = c(1:(ncol(filter4age)-4)), funs(ifelse(.<= 5, 0, .))) %>%
-    replace(is.na(.), 0) 
-  
-  # calculate the number of columns 
-  elgcols <- ncol(filterdatatest) - 4 
-  #count the number of zeros across the rows
-  filterdatatest <- filterdatatest %>% 
-    mutate(count=rowSums(.[1:elgcols]==0), percentzero = ((count/elgcols)*100) ) %>%
-    filter(percentzero != 60) %>%
-    filter(percentzero < 60)
-  
-  #create filter function to put into results below
-  target_age[[j]] <- filterdatatest$Age
-  
-  #filter data removing data
-  data <- data %>%
-    filter((age_gr %in% target_age[[j]])) %>%
-    droplevels()
-  
-  #risk table
-  grid <- seq(0,floor(max(data$time_years)),by=2)
-  observedrisktableKM_age[[j]] <- RiskSetCount(grid,data$time_years[data$age_gr == "<30"]) %>%
-    rbind(grid) %>% as.data.frame() %>%
-    `colnames<-`(grid) %>%
-    slice(1) %>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "30-39"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "40-49"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "50-59"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "60-69"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "70-79"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == "80-89"]))%>%
-    rbind(RiskSetCount(grid,data$time_years[data$age_gr == ">=90"]))%>%
-    mutate(Method = "Kaplan-Meier", 
-           Cancer = outcome_cohorts$cohortName[j],
-           Age = filter4age$Age ,
-           Gender = "Both" ) %>%
-    filter((Age %in% target_age[[j]])) 
-  
-  observedrisktableKM_age[[j]] <- observedrisktableKM_age[[j]] %>%
-  mutate_at(.vars = c(1:(ncol(observedrisktableKM_age[[j]])-4)), funs(ifelse(.== 0, NA, .))) %>%  
-    mutate_at(.vars = c(1:(ncol(observedrisktableKM_age[[j]])-4)), funs(ifelse(.<= 5, "<5", .))) %>%
-    replace(is.na(.), 0) %>%
-    mutate(across(everything(), as.character)) 
-  
-  #put a flag here for log that sub groups were removed due to missingness so can keep a record
-  #TBC
-  
-  #carry out km estimate
-  observedkm_age[[j]] <- survfit (Surv(time_years, status) ~ age_gr, data=data) %>%
-    tidy() %>%
-    rename(Age = strata) %>%
-    mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], 
-           Age = str_replace(Age, "age_gr=<30", "<30"),
-           Age = str_replace(Age, "age_gr=30-39", "30-39"),
-           Age = str_replace(Age, "age_gr=40-49", "40-49"),
-           Age = str_replace(Age, "age_gr=50-59", "50-59"),
-           Age = str_replace(Age, "age_gr=60-69", "60-69"),
-           Age = str_replace(Age, "age_gr=70-79", "70-79"),
-           Age = str_replace(Age, "age_gr=80-89", "80-89"),
-           Age = str_replace(Age, "age_gr=>=90", ">=90"),
-           Gender = "Both")
-  
-  print(paste0("KM for observed data age strat ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
-  
-  
-  # KM median survival---
-  modelKM <- survfit(Surv(time_years, status) ~ age_gr, data=data) %>%
-    summary()
-  
-  observedmedianKM_age[[j]] <- modelKM$table %>%
-    as.data.frame() %>%
-    mutate(Method = "Kaplan-Meier", 
-           Cancer = outcome_cohorts$cohortName[j], 
-           Age = target_age[[j]] ,
-           Gender = "Both")
-  
-  print(paste0("Median survival from KM from observed data ", Sys.time()," for ",outcome_cohorts$cohortName[j], " completed"))
-  
-  # hazard function over time ----
-  observedhazotKM_age[[j]] <- group_by(data,age_gr) %>% 
-    do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
-    ungroup %>%
-    mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohortName[j], Gender = "Both")
-  
-  print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohortName[j], " age strat completed"))
-  
-  
-}
-
-# take the results from a list (one element for each cancer) and put into dataframe ----
-observedkmcombined_age <- dplyr::bind_rows(observedkm_age) %>%
-  rename(est = estimate ,ucl = conf.high, lcl = conf.low ) %>%
-  mutate(Stratification = "Age")
-
-medkmcombined_age <- dplyr::bind_rows(observedmedianKM_age)  %>%
-  mutate(Stratification = "Age")
-
-hotkmcombined_age <- dplyr::bind_rows(observedhazotKM_age) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, Age = age_gr )  %>%
-  mutate(Stratification = "Age")
-
-#generate the risk table and remove entries < 5 patients
-risktableskm_age <- dplyr::bind_rows(observedrisktableKM_age) %>%
-  replace(is.na(.), 0)  %>%
-  mutate(Stratification = "Age")
-
-toc(func.toc=toc_min)
-
-info(logger, 'KM analysis for AGE stratification COMPLETE')
-
-###########################################
-
-
-###########################################
-
-# Extrapolation analysis for age stratification ------
-
-tic("Extrapolation analysis for age stratification")
-info(logger, 'Extrapolation analysis for age stratification START')
-
-# Initiate templists to store output ---- will have to make folders for each cancer and loop
-extrapolations_age <- list()
-gof_haz_age <- list()
-hazot_age <- list()
-parameters_age <- list()
-
-# Initiate templists to store output ---- 
-extrap_results_temp <- list() # Create empty list for extrapolations
-gof_results_temp <- list() # required to assess goodness of fit (AIC/BIC)
-hazot_results_temp <- list() #required
-parameters_results_temp <- list() #required
-
-
-# Running analysis for each cancer
-for(j in 1:nrow(outcome_cohorts)) { 
+  options(scipen = 999)
   
   #subset the data by cancer type
   data <- Pop %>%
     filter(cohort_definition_id == j)
   
-  #filter data removing data groups with > 60% missingness
-  data <- data %>%
-    filter((age_gr %in% target_age[[j]])) %>%
-    droplevels()
+  #creates a filter that removes any levels with no people? not sure needed?
+  agelevels <- data %>%
+    group_by(age_gr) %>% summarise(count = n())
   
-  #carry out extrapolation for each cancer
-  for(i in 1:length(extrapolations)) {   # Head of for-loop
+    #carry out km estimate
+    observedkm_age[[j]] <- survfit (Surv(time_years, status) ~ age_gr, data=data) %>%
+      tidy() %>%
+      rename(Age = strata) %>%
+      mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], 
+             Age = str_replace(Age, "age_gr=18 to 29", "18 to 29"),
+             Age = str_replace(Age, "age_gr=30 to 39", "30 to 39"),
+             Age = str_replace(Age, "age_gr=40 to 49", "40 to 49"),
+             Age = str_replace(Age, "age_gr=50 to 59", "50 to 59"),
+             Age = str_replace(Age, "age_gr=60 to 69", "60 to 69"),
+             Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
+             Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
+             Age = str_replace(Age, "age_gr=> 90", "> 90") ,
+             Sex = "Both")
     
-    if(extrapolations[i] == "spline1") {
+    print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed")) 
+    
+    # get risk table for specific times for each age group then combine again ---
+    grid <- seq(0,floor(max(data$time_years)),by=0.5) #get the number of years
+    grid <-  grid[(str_detect(grid, "[1-9]\\.5", negate = TRUE )) & (str_detect(grid, "10.5", negate = TRUE )) &
+                    (str_detect(grid, "20.5", negate = TRUE )) & (str_detect(grid, "30.5", negate = TRUE ))] # remove all the half years apart from the first half year
+    sprob <- survfit(Surv(time_years, status) ~ age_gr, data=data) %>% 
+      summary(times = grid, extend = TRUE)
+    cols <- lapply(c(2:16) , function(x) sprob[x])
+    
+    kmage <- do.call(data.frame, cols) %>%
+      select(c(n.risk, n.event, n.censor, strata)) %>% 
+      rename(Age = strata) %>% 
+      mutate(Age = str_replace(Age, "age_gr=18 to 29", "18 to 29"),
+             Age = str_replace(Age, "age_gr=30 to 39", "30 to 39"),
+             Age = str_replace(Age, "age_gr=40 to 49", "40 to 49"),
+             Age = str_replace(Age, "age_gr=50 to 59", "50 to 59"),
+             Age = str_replace(Age, "age_gr=60 to 69", "60 to 69"),
+             Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
+             Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
+             Age = str_replace(Age, "age_gr=> 90", "> 90"))
+    
+    # risk tables for different ages       
+    kmage_1829 <- kmage %>%
+      filter(Age == "18 to 29") %>%
+      select(!c(Age)) %>%
+      t() %>%
+      as_tibble() %>%
+      `colnames<-`(grid) %>%
+      mutate(Method = "Kaplan-Meier",
+             Cancer = outcome_cohorts$cohort_name[j],
+             Age = "18 to 29",
+             Sex = "Both" ,
+             details = c("n.risk", "n.event", "n.censor")) %>%
+      relocate(details)
+    
+    kmage_3039 <- kmage %>%
+      filter(Age == "30 to 39") %>%
+      select(!c(Age)) %>%
+      t() %>%
+      as_tibble() %>%
+      `colnames<-`(grid) %>%
+      mutate(Method = "Kaplan-Meier",
+             Cancer = outcome_cohorts$cohort_name[j],
+             Age = "30 to 39",
+             Sex = "Both" ,
+             details = c("n.risk", "n.event", "n.censor")) %>%
+      relocate(details)
+    
+    kmage_4049 <- kmage %>%
+      filter(Age == "40 to 49") %>%
+      select(!c(Age)) %>%
+      t() %>%
+      as_tibble() %>%
+      `colnames<-`(grid) %>%
+      mutate(Method = "Kaplan-Meier",
+             Cancer = outcome_cohorts$cohort_name[j],
+             Age = "40 to 49",
+             Sex = "Both" ,
+             details = c("n.risk", "n.event", "n.censor")) %>%
+      relocate(details)
+    
+    kmage_5059 <- kmage %>%
+      filter(Age == "50 to 59") %>%
+      select(!c(Age)) %>%
+      t() %>%
+      as_tibble() %>%
+      `colnames<-`(grid) %>%
+      mutate(Method = "Kaplan-Meier",
+             Cancer = outcome_cohorts$cohort_name[j],
+             Age = "50 to 59",
+             Sex = "Both" ,
+             details = c("n.risk", "n.event", "n.censor")) %>%
+      relocate(details)
+    
+    kmage_6069 <- kmage %>%
+      filter(Age == "60 to 69") %>%
+      select(!c(Age)) %>%
+      t() %>%
+      as_tibble() %>%
+      `colnames<-`(grid) %>%
+      mutate(Method = "Kaplan-Meier",
+             Cancer = outcome_cohorts$cohort_name[j],
+             Age = "60 to 69",
+             Sex = "Both" ,
+             details = c("n.risk", "n.event", "n.censor")) %>%
+      relocate(details)
+    
+    kmage_7079 <- kmage %>%
+      filter(Age == "70 to 79") %>%
+      select(!c(Age)) %>%
+      t() %>%
+      as_tibble() %>%
+      `colnames<-`(grid) %>%
+      mutate(Method = "Kaplan-Meier",
+             Cancer = outcome_cohorts$cohort_name[j],
+             Age = "70 to 79",
+             Sex = "Both" ,
+             details = c("n.risk", "n.event", "n.censor")) %>%
+      relocate(details)
+    
+    kmage_8089 <- kmage %>%
+      filter(Age == "80 to 89") %>%
+      select(!c(Age)) %>%
+      t() %>%
+      as_tibble() %>%
+      `colnames<-`(grid) %>%
+      mutate(Method = "Kaplan-Meier",
+             Cancer = outcome_cohorts$cohort_name[j],
+             Age = "80 to 89",
+             Sex = "Both" ,
+             details = c("n.risk", "n.event", "n.censor")) %>%
+      relocate(details)
+    
+    kmage_90 <- kmage %>%
+      filter(Age == "> 90") %>%
+      select(!c(Age)) %>%
+      t() %>%
+      as_tibble() %>%
+      `colnames<-`(grid) %>%
+      mutate(Method = "Kaplan-Meier",
+             Cancer = outcome_cohorts$cohort_name[j],
+             Age = "> 90",
+             Sex = "Both" ,
+             details = c("n.risk", "n.event", "n.censor")) %>%
+      relocate(details)
+  
+   
+    # bind results for all ages
+    observedrisktableKM_age[[j]] <- bind_rows(kmage_1829, 
+                                              kmage_3039, 
+                                              kmage_4049,
+                                              kmage_5059,
+                                              kmage_6069,
+                                              kmage_7079,
+                                              kmage_8089,
+                                              kmage_90)
+    
+    print(paste0("Extract risk table ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
+    
+    
+    # KM median survival ---
+    modelKM <- survfit(Surv(time_years, status) ~ age_gr, data=data) %>%
+      summary()
+    
+    observedmedianKM_age[[j]] <- modelKM$table %>%
+      as.data.frame() %>%
+      tibble::rownames_to_column() %>%  
+      rename(Age = rowname) %>% 
+      mutate(Method = "Kaplan-Meier", 
+             Cancer = outcome_cohorts$cohort_name[j],
+             Age = str_replace(Age, "age_gr=18 to 29", "18 to 29"),
+             Age = str_replace(Age, "age_gr=30 to 39", "30 to 39"),
+             Age = str_replace(Age, "age_gr=40 to 49", "40 to 49"),
+             Age = str_replace(Age, "age_gr=50 to 59", "50 to 59"),
+             Age = str_replace(Age, "age_gr=60 to 69", "60 to 69"),
+             Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
+             Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
+             Age = str_replace(Age, "age_gr=> 90", "> 90") ,
+             Sex = "Both")
+    
+    print(paste0("Median survival from KM from observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
+    
+    # survival probabilities ----
+    observedsurprobsKM_age[[j]] <- do.call(data.frame, cols) %>%
+      select(c(time, surv, lower, upper, strata)) %>% 
+      rename(Age = strata) %>% 
+      mutate(Age = str_replace(Age, "age_gr=18 to 29", "18 to 29"),
+             Age = str_replace(Age, "age_gr=30 to 39", "30 to 39"),
+             Age = str_replace(Age, "age_gr=40 to 49", "40 to 49"),
+             Age = str_replace(Age, "age_gr=50 to 59", "50 to 59"),
+             Age = str_replace(Age, "age_gr=60 to 69", "60 to 69"),
+             Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
+             Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
+             Age = str_replace(Age, "age_gr=> 90", "> 90") ) %>% 
+      mutate(Method = "Kaplan-Meier", 
+             Cancer = outcome_cohorts$cohort_name[j],
+             Sex = "Both",
+             surv = round((surv*100),4),
+             lower = round((lower*100),4),
+             upper = round((upper*100),4),
+             "Survival Rate % (95% CI)"= ifelse(!is.na(surv),
+                                                paste0(paste0(nice.num1(surv)), " (",
+                                                       paste0(nice.num1(lower)),"-",
+                                                       paste0(nice.num1(upper)), ")"),
+                                                NA)) %>% 
+      relocate("Survival Rate % (95% CI)", .before = Method)
+    
+    
+    
+    data <- Pop %>%
+      filter(cohort_definition_id == j)
+    
+    # hazard over time ---
+    # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
+    # this can fall over with small sample numbers therefore trycatch is in place which tries to perform it and if errors
+    # removes age group sequentially.
+    tryCatch(
+      {
+        cat("Trying all age groups for hazard over time\n")
+        
+        modelhot <- group_by(data,age_gr) %>% 
+          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
+          ungroup %>%
+          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
+          rename(Age = age_gr)
+        
+        cat("Exiting try block\n")
+      },
+      error = function(e) {
+        cat("An error occurred: ")
+        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
+        info(logger, paste0(" First model not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], "start removing age groups and repeat", e))
+      }
+    )
+    
+    # if model is successful with no removal of age groups if not remove 18-29 age group
+    if (exists("modelhot") == TRUE) {
       
-      # 1knotspline
-      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 1, scale = "hazard")
-      
-      #extrapolation # will need this to check results can remove once checked
-      extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        rename(Age = age_gr)
-      
-      #grab the parameters and knots from the model
-      coefs.p <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(value, name) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" ) 
-      
-      knots.p <- model[["knots"]] %>%
-        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
-        enframe() %>%
-        pivot_wider(value, name)
-      
-      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
-      
-      # hazard over time
-      hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        rename(Age = age_gr)
-      
-      #get the goodness of fit for each model
-      gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        slice(rep(1:n(), each = length(target_age[[j]]))) %>%
-        mutate(Gender = target_age[[j]])
-      
+      observedhazotKM_age[[j]] <- modelhot
       
       #print out progress               
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
       
-    } else if(extrapolations[i] == "spline2") {
-      # 2knotspline
-      
-      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 2, scale = "hazard")
-      
-      extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        rename(Age = age_gr )
-      
-      #extract parameters
-      #grab the parameters and knots from the model
-      coefs.p <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(value, name) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" ) 
-      
-      knots.p <- model[["knots"]] %>%
-        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
-        enframe() %>%
-        pivot_wider(value, name)
-      
-      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
-      
-      # hazard over time
-      hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        rename(Age = age_gr )
-      
-      #get the goodness of fit for each model
-      gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        slice(rep(1:n(), each = length(target_age[[j]]))) %>%
-        mutate(Gender = target_age[[j]])
-      
-      #print out progress               
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
-      
-      
-    } else if(extrapolations[i] == "spline3") {
-      # 3knotspline
-      
-      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 3, scale = "hazard")
-      
-      extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        rename(Age = age_gr )
-      
-      #extract parameters
-      #grab the parameters and knots from the model
-      coefs.p <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(value, name) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" ) 
-      
-      knots.p <- model[["knots"]] %>%
-        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
-        enframe() %>%
-        pivot_wider(value, name)
-      
-      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
-      
-      # hazard over time
-      hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        rename(Age = age_gr )
-      
-      #get the goodness of fit for each model
-      gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        slice(rep(1:n(), each = length(target_age[[j]]))) %>%
-        mutate(Gender = target_age[[j]])
-      
-      #print out progress               
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
-      
-    } else if(extrapolations[i] == "spline5") {
-      # 5knotspline
-      model <- flexsurvspline(formula=Surv(time_years,status-1)~age_gr,data=data,k = 5, scale = "hazard")
-      
-      extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j],  Gender = "Both" ) %>%
-        rename(Age = age_gr)
-      
-      coefs.p <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(value, name) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" ) 
-      
-      knots.p <- model[["knots"]] %>%
-        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
-                      "SplineInternal4" ,"SplineInternal5" , "SplineUpperB")) %>%
-        enframe() %>%
-        pivot_wider(value, name)
-      
-      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
-      
-      
-      # hazard over time
-      hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        rename( Age = age_gr )
-      
-      #get the goodness of fit for each model
-      gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        slice(rep(1:n(), each = length(target_age[[j]]))) %>%
-        mutate(Gender = target_age[[j]])
-      
-      #print out progress               
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
-      
+      # if model falls over remove first age group 
       
     } else {
       
-      #carry out models for different parametric methods survival
-      model <- flexsurvreg(Surv(time_years, status)~age_gr, data=data, dist=extrapolations[i])
+      print(paste0("Trying Hazard over time results again removing 18-29 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
-      # extrapolations
-      extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        rename(Age = age_gr)
-      
-      #grab the parameters from the model
-      parameters_results_temp[[i]] <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(value, name) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Age = "Age", Gender = "Both" ) 
-      
-      #extract the hazard function over time
-      hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard",tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        rename(Age = age_gr)
-      
-      #get the goodness of fit for each model
-      gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohortName[j], Gender = "Both" ) %>%
-        slice(rep(1:n(), each = length(target_age[[j]]))) %>%
-        mutate(Gender = target_age[[j]])
-      
-      
-      #print out progress               
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohortName[j], " completed"))
+      data <- data %>% 
+        filter(age_gr != "18 to 29") 
+    
+    
+    tryCatch(
+      {
+        cat("Retrying hazard over time after removal of 18-29 age group \n")
+        
+        modelhot <- group_by(data,age_gr) %>% 
+          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
+          ungroup %>%
+          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
+          rename(Age = age_gr)
+        
+      },
+      error = function(e) {
+        cat("An error occurred: ")
+        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
+        info(logger, paste0(" after removal of 18-29 age group:  Second attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
+      }
+    )
       
     }
     
-    #combine all results
+    # if model successful after removal of 18-29 age group if not remove 30-39 age group
+    if (exists("modelhot") == TRUE) {
+      observedhazotKM_age[[j]] <- modelhot
+      rm(modelhot)
+      #print out progress               
+      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
+      
+      # if model falls over remove second age group
+    } else {
+  
+  print(paste0("Trying Hazard over time results again removing 30-39 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+  
+  data <- data %>% 
+    filter(age_gr != "18 to 29") %>% 
+    filter(age_gr != "30 to 39")
+  
+
+
+    tryCatch(
+      {
+        cat("Retrying hazard over time after removal of 30-39 age group \n")
+        
+        modelhot <- group_by(data,age_gr) %>% 
+          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
+          ungroup %>%
+          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
+          rename(Age = age_gr)
+        
+      },
+      error = function(e) {
+        cat("An error occurred: ")
+        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
+        info(logger, paste0(" after removal of 30-39 age group: 3rd attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
+      }
+    ) }
+    
+ 
+    if (exists("modelhot") == TRUE) {
+      observedhazotKM_age[[j]] <- modelhot
+      #print out progress               
+      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
+      #rm(modelhot)
+      
+    }  else  {
+      
+      print(paste0("Trying Hazard over time results again removing 40-49 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+      
+      data <- data %>% 
+        filter(age_gr != "18 to 29") %>% 
+        filter(age_gr != "30 to 39") %>% 
+        filter(age_gr != "40 to 49")
+      
+    
+    
+    tryCatch(
+      {
+        cat("Retrying hazard over time after removal of 40-49 age group \n")
+        
+        modelhot <- group_by(data,age_gr) %>% 
+          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
+          ungroup %>%
+          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
+          rename(Age = age_gr)
+        
+      },
+      error = function(e) {
+        cat("An error occurred: ")
+        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
+        info(logger, paste0(" after removal of 40-49 age group: 4th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
+      }
+    ) }
+    
+    
+    if (exists("modelhot") == TRUE) {
+      observedhazotKM_age[[j]] <- modelhot
+      #print out progress               
+      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
+      #rm(modelhot)
+      
+    }  else  {
+      
+      print(paste0("Trying Hazard over time results again removing 50-59 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+      
+      data <- data %>% 
+        filter(age_gr != "18 to 29") %>% 
+        filter(age_gr != "30 to 39") %>% 
+        filter(age_gr != "40 to 49") %>% 
+        filter(age_gr != "50 to 59")
+      
+    
+    
+    tryCatch(
+      {
+        cat("Retrying hazard over time after removal of 50-59 age group \n")
+        
+        modelhot <- group_by(data,age_gr) %>% 
+          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
+          ungroup %>%
+          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
+          rename(Age = age_gr)
+        
+      },
+      error = function(e) {
+        cat("An error occurred: ")
+        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
+        info(logger, paste0("after removal of 50-59 age group: 5th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
+      }
+    ) }
+    
+    
+    if (exists("modelhot") == TRUE) {
+      observedhazotKM_age[[j]] <- modelhot
+      #print out progress               
+      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
+     # rm(modelhot)
+      
+    }  else  {
+      
+      print(paste0("Trying Hazard over time results again removing 60-69 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+      
+      data <- data %>% 
+        filter(age_gr != "18 to 29") %>% 
+        filter(age_gr != "30 to 39") %>% 
+        filter(age_gr != "40 to 49") %>% 
+        filter(age_gr != "50 to 59") %>% 
+        filter(age_gr != "60 to 69")
+    
+    
+    tryCatch(
+      {
+        cat("Retrying hazard over time after removal of 60-69 age group \n")
+        
+        modelhot <- group_by(data,age_gr) %>% 
+          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
+          ungroup %>%
+          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
+          rename(Age = age_gr)
+        
+      },
+      error = function(e) {
+        cat("An error occurred: ")
+        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
+        info(logger, paste0("after removal of 60-69 age group:  6th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
+      }
+    )
+    }    
+    
+    if (exists("modelhot") == TRUE) {
+      observedhazotKM_age[[j]] <- modelhot
+      #print out progress               
+      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
+      #rm(modelhot)
+      
+    }  else  {
+      
+      print(paste0("Trying Hazard over time results again removing 70-79 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+      
+      data <- data %>% 
+        filter(age_gr != "18 to 29") %>% 
+        filter(age_gr != "30 to 39") %>% 
+        filter(age_gr != "40 to 49") %>% 
+        filter(age_gr != "50 to 59") %>% 
+        filter(age_gr != "60 to 69") %>% 
+        filter(age_gr != "70 to 79")
+    
+    
+    tryCatch(
+      {
+        cat("Retrying hazard over time after removal of 70-79 age group \n")
+        
+        modelhot <- group_by(data,age_gr) %>% 
+          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
+          ungroup %>%
+          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
+          rename(Age = age_gr)
+        
+      },
+      error = function(e) {
+        cat("An error occurred: ")
+        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
+        info(logger, paste0("after removal of 70-79 age group: 7th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
+      }
+    ) }
+    
+    
+    if (exists("modelhot") == TRUE) {
+      observedhazotKM_age[[j]] <- modelhot
+      #print out progress               
+      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
+      #rm(modelhot)
+      
+    } else {
+      
+      print(paste0("Trying Hazard over time results again removing 80-89 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+      
+      data <- data %>% 
+        filter(age_gr != "18 to 29") %>% 
+        filter(age_gr != "30 to 39") %>% 
+        filter(age_gr != "40 to 49") %>% 
+        filter(age_gr != "50 to 59") %>% 
+        filter(age_gr != "60 to 69") %>% 
+        filter(age_gr != "70 to 79") %>% 
+        filter(age_gr != "80 to 89")
+    
+    
+    tryCatch(
+      {
+        cat("Retrying hazard over time after removal of 80-89 age group \n")
+        
+        modelhot <- group_by(data,age_gr) %>% 
+          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
+          ungroup %>%
+          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
+          rename(Age = age_gr)
+        
+      },
+      error = function(e) {
+        cat("An error occurred: ")
+        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
+        info(logger, paste0(" after removal of 80-89 age group: 8th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
+      }
+    )
+      
+    }
+    
+    
+    if (exists("modelhot") == TRUE) {
+      observedhazotKM_age[[j]] <- modelhot
+      #print out progress               
+      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
+      #rm(modelhot)
+      
+    } else {
+      
+      print(paste0("hazard over time age stratification not carried due to low sample numbers in all age groups ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+      info(logger, paste0("hazard over time age stratification not carried due to low sample numbers in all age groups ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+      
+    }
+    if (exists("modelhot") == TRUE) {
+      rm(modelhot)
+    }
+}
+
+# take the results from a list (one element for each cancer) and put into dataframe for KM survival
+observedkmcombined_age <- dplyr::bind_rows(observedkm_age) %>%
+  rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%
+  mutate(Stratification = "Age", Adjustment = "None")
+
+medkmcombined_age <- dplyr::bind_rows(observedmedianKM_age) %>%
+  mutate(Stratification = "Age", Adjustment = "None")
+
+hotkmcombined_age <- dplyr::bind_rows(observedhazotKM_age) %>%
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
+  mutate(Stratification = "Age", Adjustment = "None")
+
+#generate the risk table and remove entries < 5 patients
+risktableskm_age <- dplyr::bind_rows(observedrisktableKM_age) %>% 
+  filter(details != "n.censor") %>% 
+  mutate(Stratification = "Age", Adjustment = "None") %>% 
+  mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
+  mutate(across(where(is.numeric), ~replace(., .<  5 , "<5"))) %>% 
+  mutate(across(everything(), as.character)) %>%
+  replace(is.na(.), "0")
+
+# generate results for survival probabilities
+survprobtablekm_age <- dplyr::bind_rows(observedsurprobsKM_age) %>% 
+  mutate(Stratification = "Age", Adjustment = "None") %>% 
+  filter(time != 0.0)
+
+#################################################################################
+# duplicate results for shiny dashboard
+observedkmcombined_ageA <- dplyr::bind_rows(observedkm_age) %>%
+  rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%
+  mutate(Stratification = "None", Adjustment = "Age")
+
+medkmcombined_ageA <- dplyr::bind_rows(observedmedianKM_age) %>%
+  mutate(Stratification = "None", Adjustment = "Age")
+
+hotkmcombined_ageA <- dplyr::bind_rows(observedhazotKM_age) %>%
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
+  mutate(Stratification = "None", Adjustment = "Age")
+
+#generate the risk table and remove entries < 5 patients
+risktableskm_ageA <- dplyr::bind_rows(observedrisktableKM_age) %>% 
+  filter(details != "n.censor") %>% 
+  mutate(Stratification = "None", Adjustment = "Age") %>% 
+  mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
+  mutate(across(where(is.numeric), ~replace(., .<  5 , "<5"))) %>% 
+  mutate(across(everything(), as.character)) %>%
+  replace(is.na(.), "0")
+
+# generate results for survival probabilities
+survprobtablekm_ageA <- dplyr::bind_rows(observedsurprobsKM_age) %>% 
+  mutate(Stratification = "None", Adjustment = "Age") %>% 
+  filter(time != 0.0)
+toc(func.toc=toc_min)
+
+info(logger, 'KM analysis for age stratification COMPLETE')
+
+#########################################################
+# Extrapolation analysis for age adjustment ------
+#########################################################
+
+tic("Extrapolation analysis for age adjustment")
+
+info(logger, 'Extrapolation analysis for age adjustment START')
+
+# Initiate lists to store output within loop ---- 
+extrapolations_age <- list() # extrapolation over time
+gof_haz_age <- list() # goodness of fit
+hazot_age <- list() # hazard over time
+parameters_age <- list() # parameters from each model
+pred_median_mean_age <- list() # extract the predicted median and RMST from extrapolation methods
+pred_survival_prob_age <- list() # extract the predicted survival times from extrapolation methods
+
+
+for(j in 1:nrow(outcome_cohorts)) {
+  
+  options(scipen = 999)
+
+  # set up temp tables
+  extrap_results_temp <- list() 
+  gof_results_temp <- list()
+  hazot_results_temp <- list() 
+  parameters_results_temp <- list()
+  pred_median_mean_results_temp <- list() 
+  pred_survival_prob_results_temp <- list()
+  
+  #subset the data by cancer type
+  data <- Pop %>%
+    filter(cohort_definition_id == j) 
+  
+  #create a reference level in this case we are using 70-79 (for most cancers highest numbers of people diagnosed)
+  data$age_gr <- as.factor(data$age_gr)
+  data$age_gr <-  relevel(data$age_gr, "70 to 79")
+  
+  agelevels <- data %>%
+    group_by(age_gr) %>% summarise(count = n())
+  
+
+    #carry out extrapolation for each cancer
+    for(i in 1:length(extrapolations)) {   # Head of for-loop
+      
+      if(extrapolations[i] == "spline1") {
+        
+        # 1knotspline
+        tryCatch(
+          model <- flexsurvspline(formula=Surv(time_years,status-1) ~ age_gr ,data=data,k = 1, scale = "hazard"),
+          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        )
+        
+        if (exists("model") == TRUE) {
+          #extrapolation
+          extrap_results_temp[[i]] <- model %>%
+            summary(t=t/365, tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i],
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ) %>% 
+            rename(Age = age_gr)
+          
+          #get the goodness of fit for each model
+          gof_results_temp[[i]] <- model %>%
+            glance() %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          #grab the parameters and knots from the model
+          coefs.p <- model[["coefficients"]] %>%
+            enframe() %>%
+            pivot_wider(names_from = name, values_from = value) %>%
+            mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Sex = "Both" ) 
+          
+          knots.p <- model[["knots"]] %>%
+            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
+            enframe() %>%
+            pivot_wider(names_from = name, values_from = value)
+          
+          parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          # hazard over time
+          hazot_results_temp[[i]] <- model %>%
+            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ) %>% 
+            rename(Age = age_gr)
+          
+          # median and mean predicted survival
+          pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pr_mean <- predict(model, type = "rmst") %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pred_median_mean_results_temp[[i]] <- left_join(pr_mean, pr_median, by = join_by(Age))
+          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ,
+                   .pred_rmst = round(.pred_rmst,4) ,
+                   .pred_quantile = round(.pred_quantile, 4)) %>% 
+            rename("RMST time" = .time,
+                   "rmean" = .pred_rmst ,
+                   "median" = .pred_quantile) %>% 
+            select(!c(.quantile))
+          
+          # survival predicted probabilities from extrapolations
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct()
+          pred_survival_prob_results_temp[[i]] <-  pred_survival_prob_results_temp[[i]] %>% 
+            tidyr::unnest(.pred) %>% 
+            filter(.time != 0.0) %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j],
+                   Sex = "Both" ,
+                   .pred_survival = round((.pred_survival*100),4),
+                   "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                           paste0(nice.num1(.pred_survival)),
+                                                           NA)) %>% 
+            rename(time = .time,
+                   "surv" = .pred_survival )
+          
+          
+          rm(model)
+          #print out progress               
+          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+        }
+        
+        
+        
+      } else if(extrapolations[i] == "spline2") {
+        # 2knotspline
+        
+        tryCatch(
+          model <- flexsurvspline(formula=Surv(time_years,status-1) ~ age_gr , data=data , k = 2, scale = "hazard"),
+          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        )
+        
+        if (exists("model") == TRUE) {
+          
+          extrap_results_temp[[i]] <- model %>%
+            summary(t=t/365, tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both") %>% 
+            rename(Age = age_gr)
+          
+          #get the goodness of fit for each model
+          gof_results_temp[[i]] <- model %>%
+            glance() %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j],
+                   Sex = "Both" ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          #extract parameters
+          #grab the parameters and knots from the model
+          coefs.p <- model[["coefficients"]] %>%
+            enframe() %>%
+            pivot_wider(names_from = name, values_from = value) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both") 
+          
+          knots.p <- model[["knots"]] %>%
+            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
+            enframe() %>%
+            pivot_wider(names_from = name, values_from = value)
+          
+          parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          # hazard over time
+          hazot_results_temp[[i]] <- model %>%
+            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both") %>% 
+            rename(Age = age_gr)
+          
+          # median and mean predicted survival
+          pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pr_mean <- predict(model, type = "rmst") %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pred_median_mean_results_temp[[i]] <- left_join(pr_mean, pr_median, by = join_by(Age))
+          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ,
+                   .pred_rmst = round(.pred_rmst,4) ,
+                   .pred_quantile = round(.pred_quantile, 4)) %>% 
+            rename("RMST time" = .time,
+                   "rmean" = .pred_rmst ,
+                   "median" = .pred_quantile) %>% 
+            select(!c(.quantile))
+          
+          # survival predicted probabilities from extrapolations
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct()
+          
+            pred_survival_prob_results_temp[[i]] <-  pred_survival_prob_results_temp[[i]] %>% 
+            tidyr::unnest(.pred) %>% 
+            filter(.time != 0.0) %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j],
+                   Sex = "Both" ,
+                   .pred_survival = round((.pred_survival*100),4),
+                   "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                      paste0(nice.num1(.pred_survival)),
+                                                      NA)) %>% 
+              rename(time = .time,
+                     "surv" = .pred_survival )
+          
+          
+          #print out progress
+          rm(model)
+          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          
+        }
+        
+      } else if(extrapolations[i] == "spline3") {
+        # 3knotspline
+        
+        tryCatch(
+          model <- flexsurvspline(formula=Surv(time_years,status-1) ~ age_gr, data=data, k = 3, scale = "hazard"),
+          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        )
+        
+        if (exists("model") == TRUE) {
+          
+          extrap_results_temp[[i]] <- model %>%
+            summary(t=t/365, tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j],
+                   Sex = "Both")%>% 
+            rename(Age = age_gr)
+          
+          #get the goodness of fit for each model
+          gof_results_temp[[i]] <- model %>%
+            glance() %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          #extract parameters
+          #grab the parameters and knots from the model
+          coefs.p <- model[["coefficients"]] %>%
+            enframe() %>%
+            pivot_wider(names_from = name, values_from = value) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both") 
+          
+          knots.p <- model[["knots"]] %>%
+            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
+            enframe() %>%
+            pivot_wider(names_from = name, values_from = value)
+          
+          parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          # hazard over time
+          hazot_results_temp[[i]] <- model %>%
+            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both") %>% 
+            rename(Age = age_gr)
+          
+          # median and mean predicted survival
+          pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pr_mean <- predict(model, type = "rmst") %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pred_median_mean_results_temp[[i]] <- left_join(pr_mean, pr_median, by = join_by(Age))
+          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ,
+                   .pred_rmst = round(.pred_rmst,4) ,
+                   .pred_quantile = round(.pred_quantile, 4)) %>% 
+            rename("RMST time" = .time,
+                   "rmean" = .pred_rmst ,
+                   "median" = .pred_quantile) %>% 
+            select(!c(.quantile))
+          
+          # survival predicted probabilities from extrapolations
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct()
+          
+            pred_survival_prob_results_temp[[i]] <-  pred_survival_prob_results_temp[[i]] %>% 
+            tidyr::unnest(.pred) %>% 
+            filter(.time != 0.0) %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j],
+                   Sex = "Both" ,
+                   .pred_survival = round((.pred_survival*100),4),
+                   "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                      paste0(nice.num1(.pred_survival)),
+                                                      NA)) %>% 
+              rename(time = .time,
+                     "surv" = .pred_survival )
+          
+          
+          rm(model)
+          #print out progress               
+          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+        }
+        
+      } else if(extrapolations[i] == "spline5") {
+        # 5knotspline
+        
+        tryCatch(
+          model <- flexsurvspline(formula=Surv(time_years,status-1) ~ age_gr , data=data, k = 5, scale = "hazard"),
+          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        )
+        
+        if (exists("model") == TRUE) {
+          
+          extrap_results_temp[[i]] <- model %>%
+            summary(t=t/365, tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both") %>% 
+            rename(Age = age_gr)
+          
+          #get the goodness of fit for each model
+          gof_results_temp[[i]] <- model %>%
+            glance() %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          coefs.p <- model[["coefficients"]] %>%
+            enframe() %>%
+            pivot_wider(names_from = name, values_from = value) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both") 
+          
+          knots.p <- model[["knots"]] %>%
+            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
+                          "SplineInternal4" ,"SplineInternal5" , "SplineUpperB")) %>%
+            enframe() %>%
+            pivot_wider(names_from = name, values_from = value)
+          
+          parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          # hazard over time
+          hazot_results_temp[[i]] <- model %>%
+            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both") %>% 
+            rename(Age = age_gr)
+          
+          # median and mean predicted survival
+          pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pr_mean <- predict(model, type = "rmst") %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pred_median_mean_results_temp[[i]] <- left_join(pr_mean, pr_median, by = join_by(Age))
+          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ,
+                   .pred_rmst = round(.pred_rmst,4) ,
+                   .pred_quantile = round(.pred_quantile, 4)) %>% 
+            rename("RMST time" = .time,
+                   "rmean" = .pred_rmst ,
+                   "median" = .pred_quantile) %>% 
+            select(!c(.quantile))
+          
+          # survival predicted probabilities from extrapolations
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct()
+          
+            pred_survival_prob_results_temp[[i]] <-  pred_survival_prob_results_temp[[i]] %>% 
+            tidyr::unnest(.pred) %>% 
+            filter(.time != 0.0) %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j],
+                   Sex = "Both" ,
+                   .pred_survival = round((.pred_survival*100),4),
+                   "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                      paste0(nice.num1(.pred_survival)),
+                                                      NA)) %>% 
+              rename(time = .time,
+                     "surv" = .pred_survival )
+          
+          
+          rm(model)
+          #print out progress               
+          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+        }
+        
+      } else {
+        
+        #carry out models for different parametric methods survival
+        tryCatch(
+          model <- flexsurvreg(Surv(time_years, status) ~ age_gr, data=data, dist=extrapolations[i]),
+          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        )
+        
+        if (exists("model") == TRUE) {
+          
+          # extrapolations
+          extrap_results_temp[[i]] <- model %>%
+            summary(t=t/365, tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j],
+                   Sex = "Both") %>% 
+            rename(Age = age_gr)
+          
+          #get the goodness of fit for each model
+          gof_results_temp[[i]] <- model %>%
+            glance() %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          #grab the parameters from the model
+          parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+            enframe() %>%
+            pivot_wider(names_from = name, values_from = value) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ) %>% 
+            slice(rep(1:n(), each = nrow(agelevels))) %>% 
+            mutate(Age = levels(as.factor(data$age_gr)))
+          
+          #extract the hazard function over time
+          hazot_results_temp[[i]] <- model %>%
+            summary(t=(t + 1)/365, type = "hazard",tidy = TRUE) %>%
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ) %>% 
+            rename(Age = age_gr)
+          
+          # median and mean predicted survival
+          pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pr_mean <- predict(model, type = "rmst") %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct() 
+          
+          pred_median_mean_results_temp[[i]] <- left_join(pr_mean, pr_median, by = join_by(Age))
+          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j], 
+                   Sex = "Both" ,
+                   .pred_rmst = round(.pred_rmst,4) ,
+                   .pred_quantile = round(.pred_quantile, 4)) %>% 
+            rename("RMST time" = .time,
+                   "rmean" = .pred_rmst ,
+                   "median" = .pred_quantile) %>% 
+            select(!c(.quantile))
+          
+          # survival predicted probabilities from extrapolations
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            mutate(Age = data$age_gr) %>% 
+            distinct()
+          
+            pred_survival_prob_results_temp[[i]] <-  pred_survival_prob_results_temp[[i]] %>% 
+            tidyr::unnest(.pred) %>% 
+            filter(.time != 0.0) %>% 
+            mutate(Method = extrapolations_formatted[i], 
+                   Cancer = outcome_cohorts$cohort_name[j],
+                   Sex = "Both",
+                   .pred_survival = round((.pred_survival*100),4),
+                   "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                      paste0(nice.num1(.pred_survival)),
+                                                      NA)) %>% 
+              rename(time = .time,
+                     "surv" = .pred_survival )
+          
+          rm(model)
+          #print out progress               
+          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          
+        }
+        
+        
+      }
+      
+      
+    }
+    
     extrapolatedcombined <- dplyr::bind_rows(extrap_results_temp)
     gofcombined <- dplyr::bind_rows(gof_results_temp)
-    hotcombined <- dplyr::bind_rows(hazot_results_temp) %>%
-      filter(time > 0) # remove rows with inf/NAs
+    hotcombined <- dplyr::bind_rows(hazot_results_temp)   
+    parcombined <- dplyr::bind_rows(parameters_results_temp)
+    surcombined <- dplyr::bind_rows(pred_survival_prob_results_temp)
+    medcombined <- dplyr::bind_rows(pred_median_mean_results_temp)
     
-    
-    #put the results from each cancer in separate list
     extrapolations_age[[j]] <- extrapolatedcombined
     gof_haz_age[[j]] <- gofcombined
     hazot_age[[j]] <- hotcombined
-    parameters_age[[j]] <-  parameters_results_temp
+    parameters_age[[j]] <-  parcombined
+    pred_median_mean_age[[j]] <- medcombined
+    pred_survival_prob_age[[j]] <- surcombined
     
-  }
+    #print out progress               
+    print(paste0(outcome_cohorts$cohort_name[j]," Extrapolation Analysis Completed ", Sys.time()))
+
+  } 
   
+# Merge results together from each cancer and extrapolation into a dataframe ---
+extrapolatedfinalage <- dplyr::bind_rows(extrapolations_age) %>%
+  mutate(Stratification = "None", Adjustment = "Age")
+goffinalage <- dplyr::bind_rows(gof_haz_age) %>%
+  mutate(Stratification = "None", Adjustment = "Age")
+hazardotfinalage <- dplyr::bind_rows(hazot_age) %>%
+  mutate(Stratification = "None", Adjustment = "Age")
+parametersfinalage <- dplyr::bind_rows(parameters_age)  %>%
+  mutate(Stratification = "None", Adjustment = "Age") %>% 
+  relocate(shape, .after = Age) %>% 
+  relocate(rate, .after = Age) 
+predsurvivalprobfinalage <- dplyr::bind_rows(pred_survival_prob_age)  %>%
+  mutate(Stratification = "None", Adjustment = "Age")
+predmedmeanfinalage <- dplyr::bind_rows(pred_median_mean_age)  %>%
+  mutate(Stratification = "None", Adjustment = "Age")
+
+toc(func.toc=toc_min)
+
+info(logger, 'Extrapolation analysis for age adjustment COMPLETE')
+
+
+########################################
+# AGE STRATIFICATION EXTRAPOLATION
+#######################################
+
+tic("extrapolation analysis with age stratification")
+info(logger, 'extrapolation analysis for age stratification START')
+
+extrapolations_ageS <- list()
+gof_haz_ageS <- list()
+hazot_ageS <- list()
+parameters_ageS <- list()
+pred_median_mean_ageS <- list()
+pred_survival_prob_ageS <- list()
+
+for(j in 1:nrow(outcome_cohorts)) { 
   
-  #print out progress               
-  print(paste0(outcome_cohorts$cohortName[j]," Extrapolation Analysis Completed ", Sys.time()))
+  options(scipen = 999)
+  
+  #temp results
+  extrap_results_temp <- list() 
+  gof_results_temp <- list() 
+  hazot_results_temp <- list()
+  parameters_results_temp <- list() 
+  pred_median_mean_results_temp <- list() 
+  pred_survival_prob_results_temp <- list()
+  
+  #for each age 
+  extrap_age <- list()
+  gof_age <- list()
+  hot_age <- list()   
+  par_age <- list()
+  med_age <- list()   
+  surprob_age <- list()
+  
+  #subset the data by cancer type
+  data <- Pop %>%
+    filter(cohort_definition_id == j) 
+  
+  agelevels <- data %>%
+    group_by(age_gr) %>% summarise(count = n()) %>% tally()
+  
+  agevalues <- data %>%
+    group_by(age_gr) %>% summarise(count = n())
+  
+    for (agel in 1:nrow(agevalues)) {
+      
+      data_age <- data %>% 
+        filter(age_gr == agevalues$age_gr[agel])
+      
+      #split per gender then run extrapolations
+      print(paste0("extrapolations for stratification"," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j]," ", agevalues$age_gr[agel] ," started"))
+      
+      #carry out extrapolation for each cancer
+      for(i in 1:length(extrapolations)) {   # Head of for-loop
+        
+        if(extrapolations[i] == "spline1") {
+          
+          # 1knotspline
+          tryCatch(
+            model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1 ,data=data_age ,k = 1, scale = "hazard"),
+            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          )
+          
+          if (exists("model") == TRUE) {
+            #extrapolation
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            #grab the parameters and knots from the model
+            coefs.p <- model[["coefficients"]] %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value) %>%
+              mutate(Method = extrapolations_formatted[i],
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ) 
+            
+            knots.p <- model[["knots"]] %>%
+              setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value)
+            
+            parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p ) %>% 
+              mutate(Age = names(table(data_age$age_gr)))
+            
+            # hazard over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both" ,
+                     Age = names(table(data_age$age_gr)))
+            
+            # median and mean survival predictions from extrapolation
+            pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+              distinct()  
+            
+            pr_mean <- predict(model, type = "rmst") %>% 
+              distinct()  
+            
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both", 
+                     Age = names(table(data_age$age_gr)),
+                     .pred_rmst = round(.pred_rmst,4) ,
+                     .pred_quantile = round(.pred_quantile, 4)) %>% 
+              rename("RMST time" = .time,
+                     "rmean" = .pred_rmst ,
+                     "median" = .pred_quantile) %>% 
+              select(!c(.quantile))
+            
+            # survival predicted probabilities from extrapolations
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+              distinct() %>% 
+              tidyr::unnest(.pred) %>% 
+              filter(.time != 0.0) %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)) ,
+                     .pred_survival = round((.pred_survival*100),4),
+                     "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                        paste0(nice.num1(.pred_survival)),
+                                                        NA)) %>% 
+              rename(time = .time,
+                     "surv" = .pred_survival )
+            
+            
+            rm(model)
+            #print out progress               
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          }
+          
+          
+          
+        } else if(extrapolations[i] == "spline2") {
+          # 2knotspline
+          
+          tryCatch(
+            model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_age , k = 2, scale = "hazard"),
+            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          )
+          
+          if (exists("model") == TRUE) {
+            
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            #extract parameters
+            #grab the parameters and knots from the model
+            coefs.p <- model[["coefficients"]] %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both") 
+            
+            knots.p <- model[["knots"]] %>%
+              setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value)
+            
+            parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p ) %>% 
+              mutate(Age = names(table(data_age$age_gr)))
+            
+            # hazard over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            # median and mean survival predictions from extrapolation
+            pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+              distinct()  
+            
+            pr_mean <- predict(model, type = "rmst") %>% 
+              distinct()  
+            
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)),
+                     .pred_rmst = round(.pred_rmst,4) ,
+                     .pred_quantile = round(.pred_quantile, 4)) %>% 
+              rename("RMST time" = .time,
+                     "rmean" = .pred_rmst ,
+                     "median" = .pred_quantile) %>% 
+              select(!c(.quantile))
+            
+            # survival predicted probabilities from extrapolations
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+              distinct() %>% 
+              tidyr::unnest(.pred) %>% 
+              filter(.time != 0.0) %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)),
+                     .pred_survival = round((.pred_survival*100),4),
+                     "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                        paste0(nice.num1(.pred_survival)),
+                                                        NA)) %>% 
+              rename(time = .time,
+                     "surv" = .pred_survival )
+            
+            #print out progress
+            rm(model)
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+            
+          }
+          
+        } else if(extrapolations[i] == "spline3") {
+          # 3knotspline
+          
+          tryCatch(
+            model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1, data=data_age, k = 3, scale = "hazard"),
+            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          )
+          
+          if (exists("model") == TRUE) {
+            
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i],
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              mutate(Method = extrapolations_formatted[i],
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ,
+                     Age = names(table(data_age$age_gr)))
+            
+            #extract parameters
+            #grab the parameters and knots from the model
+            coefs.p <- model[["coefficients"]] %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both") 
+            
+            knots.p <- model[["knots"]] %>%
+              setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value)
+            
+            parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p ) %>% 
+              mutate(Age = names(table(data_age$age_gr)))
+            
+            # hazard over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            # median and mean survival predictions from extrapolation
+            pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+              distinct()  
+            
+            pr_mean <- predict(model, type = "rmst") %>% 
+              distinct()  
+            
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)),
+                     .pred_rmst = round(.pred_rmst,4) ,
+                     .pred_quantile = round(.pred_quantile, 4)) %>% 
+              rename("RMST time" = .time,
+                     "rmean" = .pred_rmst ,
+                     "median" = .pred_quantile) %>% 
+              select(!c(.quantile))
+            
+            # survival predicted probabilities from extrapolations
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+              distinct() %>% 
+              tidyr::unnest(.pred) %>% 
+              filter(.time != 0.0) %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)),
+                     .pred_survival = round((.pred_survival*100),4),
+                     "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                        paste0(nice.num1(.pred_survival)),
+                                                        NA)) %>% 
+              rename(time = .time,
+                     "surv" = .pred_survival )
+            
+            rm(model)
+            #print out progress               
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          }
+          
+        } else if(extrapolations[i] == "spline5") {
+          # 5knotspline
+          
+          tryCatch(
+            model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_age, k = 5, scale = "hazard"),
+            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          )
+          
+          if (exists("model") == TRUE) {
+            
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ,
+                     Age = names(table(data_age$age_gr)))
+            
+            coefs.p <- model[["coefficients"]] %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both") 
+            
+            knots.p <- model[["knots"]] %>%
+              setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
+                            "SplineInternal4" ,"SplineInternal5" , "SplineUpperB")) %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value)
+            
+            parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p ) %>% 
+              mutate(Age = names(table(data_age$age_gr)))
+            
+            # hazard over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            # median and mean survival predictions from extrapolation
+            pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+              distinct()  
+            
+            pr_mean <- predict(model, type = "rmst") %>% 
+              distinct()  
+            
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both", 
+                     Age = names(table(data_age$age_gr)),
+                     .pred_rmst = round(.pred_rmst,4) ,
+                     .pred_quantile = round(.pred_quantile, 4)) %>% 
+              rename("RMST time" = .time,
+                     "rmean" = .pred_rmst ,
+                     "median" = .pred_quantile) %>% 
+              select(!c(.quantile))
+            
+            # survival predicted probabilities from extrapolations
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+              distinct() %>% 
+              tidyr::unnest(.pred) %>% 
+              filter(.time != 0.0) %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)) ,
+                     .pred_survival = round((.pred_survival*100),4),
+                     "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                        paste0(nice.num1(.pred_survival)),
+                                                        NA)) %>% 
+              rename(time = .time,
+                     "surv" = .pred_survival )
+            
+            rm(model)
+            #print out progress               
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          }
+          
+        } else {
+          
+          #carry out models for different parametric methods survival
+          tryCatch(
+            model <- flexsurvreg(Surv(time_years, status) ~ 1, data=data_age, dist=extrapolations[i]),
+            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          )
+          
+          if (exists("model") == TRUE) {
+            
+            # extrapolations
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)))
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ,
+                     Age = names(table(data_age$age_gr)))
+            
+            #grab the parameters from the model
+            parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ,
+                     Age = names(table(data_age$age_gr)))
+            
+            #extract the hazard function over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard",tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ,
+                     Age = names(table(data_age$age_gr)))
+            
+            # median and mean survival predictions from extrapolation
+            pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+              distinct()  
+            
+            pr_mean <- predict(model, type = "rmst") %>% 
+              distinct()  
+            
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both", 
+                     Age = names(table(data_age$age_gr)),
+                     .pred_rmst = round(.pred_rmst,4) ,
+                     .pred_quantile = round(.pred_quantile, 4)) %>% 
+              rename("RMST time" = .time,
+                     "rmean" = .pred_rmst ,
+                     "median" = .pred_quantile) %>% 
+              select(!c(.quantile))
+            
+            # survival predicted probabilities from extrapolations
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+              distinct() %>% 
+              tidyr::unnest(.pred) %>% 
+              filter(.time != 0.0) %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both",
+                     Age = names(table(data_age$age_gr)) ,
+                     .pred_survival = round((.pred_survival*100),4),
+                     "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
+                                                        paste0(nice.num1(.pred_survival)),
+                                                        NA)) %>% 
+              rename(time = .time,
+                     "surv" = .pred_survival )
+            
+            rm(model)
+            #print out progress               
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+            
+          }
+          
+          
+        }
+        
+        
+      }
+      
+      #put results for age here
+      extrap_age[[agel]] <- dplyr::bind_rows(extrap_results_temp)
+      gof_age[[agel]] <- dplyr::bind_rows(gof_results_temp)
+      hot_age[[agel]] <- dplyr::bind_rows(hazot_results_temp)   
+      par_age[[agel]] <- dplyr::bind_rows(parameters_results_temp)
+      med_age[[agel]] <- dplyr::bind_rows(pred_median_mean_results_temp)
+      surprob_age[[agel]] <- dplyr::bind_rows(pred_survival_prob_results_temp)
+      
+      # clear the lists again ready for next iteration
+      extrap_results_temp <- list() 
+      gof_results_temp <- list() 
+      hazot_results_temp <- list() 
+      parameters_results_temp <- list() 
+      pred_median_mean_results_temp <- list() 
+      pred_survival_prob_results_temp <- list()
+      
+    }
+    
+    extrapolatedcombined <- dplyr::bind_rows(extrap_age)
+    gofcombined <- dplyr::bind_rows(gof_age)
+    hotcombined <- dplyr::bind_rows(hot_age)   
+    parcombined <- dplyr::bind_rows(par_age)
+    surcombined <- dplyr::bind_rows(surprob_age)
+    medcombined <- dplyr::bind_rows(med_age)
+    
+    extrapolations_ageS[[j]] <- extrapolatedcombined
+    gof_haz_ageS[[j]] <- gofcombined
+    hazot_ageS[[j]] <- hotcombined
+    parameters_ageS[[j]] <-  parcombined
+    pred_median_mean_ageS[[j]] <- medcombined
+    pred_survival_prob_ageS[[j]] <- surcombined
+    
+    #print out progress               
+    print(paste0(outcome_cohorts$cohort_name[j]," Extrapolation Analysis Completed ", Sys.time()))
   
 }
 
 # Merge results together from each cancer and extrapolation into a dataframe ---
-extrapolatedfinalAge <- dplyr::bind_rows(extrapolations_age)  %>%
-  mutate(Stratification = "Age")
-goffinalAge <- dplyr::bind_rows(gof_haz_age)  %>%
-  mutate(Stratification = "Age")
-hazardotfinalAge <- dplyr::bind_rows(hazot_age) %>%
-  mutate(Stratification = "Age")
-
-
-# extracting parameters for each model for each cancer
-# create empty lists for parameters extraction
-GompertzP <- list()
-weibullP <- list()
-weibullPHP <- list()
-ExponentialP <- list()
-LoglogP <- list()
-LognormP <- list()
-GenGammaP <- list()
-Spline1kP <- list()
-Spline3kP <- list()
-Spline5kP <- list()
-
-
-# pull out the extrapolation parameters in a separate list for each cancer 
-# (so for example all exponential parameters for all cancers will be in same list)
-
-for(j in 1:nrow(outcome_cohorts)) { 
-  
-  GompertzP[[j]] <- parameters_age[[j]] %>% pluck(1) 
-  weibullP[[j]] <- parameters_age[[j]] %>% pluck(2) 
-  weibullPHP[[j]] <- parameters_age[[j]] %>% pluck(3) 
-  ExponentialP[[j]] <- parameters_age[[j]] %>% pluck(4) 
-  LoglogP[[j]] <- parameters_age[[j]] %>% pluck(5) 
-  LognormP[[j]] <- parameters_age[[j]] %>% pluck(6) 
-  GenGammaP[[j]] <- parameters_age[[j]] %>% pluck(7) 
-  Spline1kP[[j]] <- parameters_age[[j]] %>% pluck(8) 
-  Spline3kP[[j]] <- parameters_age[[j]] %>% pluck(9) 
-  Spline5kP[[j]] <- parameters_age[[j]] %>% pluck(10) 
-  
-}
-
-
-# grab the parameters from the list and row bind
-GompertzParametersAge <- dplyr::bind_rows(GompertzP)
-weibullParametersAge <- dplyr::bind_rows(weibullP)
-weibullPHParametersAge <- dplyr::bind_rows(weibullPHP)
-ExponentialParametersAge <- dplyr::bind_rows(ExponentialP) %>%
-  rename(rate = 1)
-LoglogParametersAge <- dplyr::bind_rows(LoglogP)
-LognormParametersAge <- dplyr::bind_rows(LognormP)
-GenGammaParametersAge <- dplyr::bind_rows(GenGammaP)
-Spline1kParametersAge <- dplyr::bind_rows(Spline1kP)
-Spline3kParametersAge <- dplyr::bind_rows(Spline3kP)
-Spline5kParametersAge <- dplyr::bind_rows(Spline5kP)
-
-ParametersAge <- bind_rows(
-  GompertzParametersAge ,
-  weibullParametersAge ,
-  weibullPHParametersAge,
-  ExponentialParametersAge, 
-  LoglogParametersAge,
-  LognormParametersAge, 
-  GenGammaParametersAge, 
-  Spline1kParametersAge ,
-  Spline3kParametersAge ,
-  Spline5kParametersAge ) %>%
-  mutate(Stratification = "Age")
+extrapolatedfinalageS <- dplyr::bind_rows(extrapolations_ageS) %>%
+  mutate(Stratification = "Age", Adjustment = "None")
+goffinalageS <- dplyr::bind_rows(gof_haz_ageS) %>%
+  mutate(Stratification = "Age" , Adjustment = "None")
+hazardotfinalageS <- dplyr::bind_rows(hazot_ageS) %>%
+  mutate(Stratification = "Age", Adjustment = "None")
+parametersfinalageS <- dplyr::bind_rows(parameters_ageS)  %>%
+  mutate(Stratification = "Age", Adjustment = "None") %>% 
+  relocate(shape, .after = Sex) %>% 
+  relocate(rate, .after = Sex) %>% 
+  mutate(rate = coalesce(rate, `1`)) %>% 
+  select(!c(`1`))
+predsurvivalprobfinalageS <- dplyr::bind_rows(pred_survival_prob_ageS)  %>%
+  mutate(Stratification = "Age", Adjustment = "None")
+predmedmeanfinalageS <- dplyr::bind_rows(pred_median_mean_ageS)  %>%
+  mutate(Stratification = "Age", Adjustment = "None")
 
 toc(func.toc=toc_min)
 
-info(logger, 'Extrapolation analysis for age extrapolation COMPLETED')
+info(logger, 'Extrapolation analysis for age stratification COMPLETE')

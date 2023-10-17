@@ -3,100 +3,104 @@
 renv::activate()
 renv::restore()
 
+# install.packages("devtools")
+# devtools::install_github("darwin-eu-dev/CDMConnector")
+
 # Load packages ------
-library(SqlRender)
-library(DatabaseConnector)
-library(FeatureExtraction) 
+library(CirceR)
 library(here)
-library(lubridate)
-library(stringr)
-library(ggplot2)
 library(DBI)
 library(dbplyr)
 library(dplyr)
-library(tidyr)
-library(kableExtra)
-library(RSQLite) 
-library(rmarkdown)
-library(tableone) 
-library(scales)
-library(forcats) 
-library(RPostgres)
-library(cmprsk) 
-library(mstate)
-library(broom) 
-library(rms)
-library(glue) 
-library(remotes)
 library(readr)
-library(log4r) 
+library(log4r)
+library(tidyr)
+library(stringr)
+library(CDMConnector)
+library(ggplot2)
+library(broom)
 library(survival)
+library(bshazard)
 library(flexsurv)
 library(tictoc)
-library(purrr)
-library(CirceR)
-library(CohortGenerator)
-library(survminer)
-library(openxlsx)
-library(bshazard)
 library(tibble)
-library(CDMConnector)
+library(RPostgres)
+library(purrr)
+library(PatientProfiles)
+library(CodelistGenerator)
 
-# install.packages("remotes")
-# library(remotes)
-# install_version("CDMConnector", "0.4")
-
-# Set the name/ acronym for your database (to be used in the titles of reports, etc) -----
-#db.name<-"CPRD_Aurum"
-db.name<-"CPRD_GOLD"
+# Set the short name/acronym for your database (to be used in the titles of reports, etc) -----
+db.name <-"CPRD_GOLD"
 
 # Set output folder locations -----
 # the path to a folder where the results from this analysis will be saved
-output.folder<-here("Results",db.name)
+output.folder <- here("Results",db.name)
 
 # database connection details
-#server     <- Sys.getenv("DB_SERVER_cdm_aurum_202106") # AURUM
-#server_dbi <- Sys.getenv("DB_SERVER_cdm_aurum_202106_dbi") #AURUM
-server     <- Sys.getenv("DB_SERVER_cdmgold202007") # GOLD
-server_dbi <- Sys.getenv("DB_SERVER_cdmgold202007_dbi") #GOLD
+server     <- Sys.getenv("DB_SERVER_cdm_gold_202207") # GOLD
+server_dbi <- Sys.getenv("DB_SERVER_cdm_gold_202207_dbi") #GOLD
 user       <- Sys.getenv("DB_USER")
 password   <- Sys.getenv("DB_PASSWORD")
 port       <- Sys.getenv("DB_PORT") 
 host       <- Sys.getenv("DB_HOST") 
 
-# schema that contains the OMOP CDM with patient-level data
-cdm_database_schema<-"public"
+# Specify cdm_reference via DBI connection details -----
+# In this study we also use the DBI package to connect to the database
+# set up the dbConnect details below (see https://dbi.r-dbi.org/articles/dbi for more details)
+# you may need to install another package for this (although RPostgres is included with renv in case you are using postgres)
+db <- dbConnect(RPostgres::Postgres(),
+                dbname = server_dbi,
+                port = port,
+                host = host, 
+                user = user, 
+                password = password)
 
-# schema where a results table will be created 
-results_database_schema<-"results"
+# Set database details -----
+# The name of the schema that contains the OMOP CDM with patient-level data
+cdm_database_schema <- "public"
+#cdm_database_schema <- "public_100k"
 
-# stem for tables to be created in your results schema for this analysis
-# You can keep the above names or change them
-# Note, any existing tables in your results schema with the same name will be overwritten
-stem_table <-"ehdenwp2cancer" # needs to be in lower case
+# The name of the schema that contains the vocabularies 
+# (often this will be the same as cdm_database_schema)
+vocabulary_database_schema <- cdm_database_schema
 
-#put in the start date from which you have usable data for this study must be in format YYYY-MM-DD
-startdate <- '2000-01-01'
+# The name of the schema where results tables will be created 
+results_database_schema <- "results"
 
-# number of years of extrapolation
-timeinyrs <- 30 # amount of followup in your database plus 10 years so if your databses has 20 years of followup you would put 30 here
+# stem table description use something short and informative such as ehdenwp2 or your initials
+# Note, if there is an existing table in your results schema with the same names it will be overwritten 
+# needs to be in lower case and NOT more than 10 characters
+table_stem <-"ehdenwp2"
 
-# run gender analysis
-RunGenderAnalysis <- TRUE
+# create cdm reference ----
+cdm <- CDMConnector::cdm_from_con(con = db, 
+                                  cdm_schema = cdm_database_schema,
+                                  write_schema = c("schema" = results_database_schema, 
+                                                   "prefix" = table_stem),
+                                  cdm_name = db.name)
 
-# run age analysis (10 year age bands)
-RunAgeAnalysis <- TRUE
+# to check whether the DBI connection is correct, 
+# running the next line should give you a count of your person table
+cdm$person %>% 
+  tally() %>% 
+  computeQuery()
 
-# connect to the database
-db <- DBI::dbConnect(RPostgres::Postgres(), dbname = server_dbi, port = port, host = host, user = user,
-                     password = password)
+# Set study details -----
+# put in the start date from which you have usable data for this study
+# must be in format YYYY-MM-DD
+startdate <- "2000-01-01" 
 
-
-# to check the DBI worked, uncomment and run the below line
-tbl(db, sql(paste0("SELECT * FROM ",cdm_database_schema, ".person"))) %>% tally()
-# you should have a count of people in the database printed back in the console
+# calculating the number of years of extrapolation for your database ----
+# amount of followup in your database plus 10 years
+# so if your databases has 20 years of followup you would be 30 here
+timeinyrs <- as.numeric(floor(((as.Date("2019-12-31") - as.Date(startdate)) / 365))) + 10
 
 # Run the study ------
 source(here("RunStudy.R"))
+# after the study is run you should have a zip folder in your output folder to share
 
-# after the study is run you should have a zip folder in your results folder to share
+# drop the permanent tables from the study
+#CDMConnector::dropTable(cdm, dplyr::starts_with(table_stem))
+
+# Disconnect from database
+#dbDisconnect(db)

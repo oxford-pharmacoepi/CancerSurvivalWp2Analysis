@@ -11,183 +11,199 @@ if (!file.exists(qc.plots.folder)){
 start<-Sys.time()
 
 # start log ----
-log_file <- paste0(output.folder, "/log.txt")
+log_file <- paste0(output.folder, "/", db.name, "_log.txt")
 logger <- create.logger()
 logfile(logger) <- log_file
 level(logger) <- "INFO"
 
 # create study cohorts ----
-# The study cohorts are various cancer cohorts that have been instantiated using CDM connector
-cancer_table <- paste0(stem_table, "_cancer_cohorts")
 
-# set a cdm reference -----
-cdm <- CDMConnector::cdm_from_con(con = db, # connected using DBI dbConnect
-                                  cdm_schema = cdm_database_schema, #schema of the database
-                                  cdm_tables = tbl_group("clinical"), # which sets of tables needed
-                                  write_schema = results_database_schema) # need this to show where to write results to
+# get concept sets from cohorts----
+cancerconcepts <- CodelistGenerator::codesFromCohort(
+  path = here("1_InstantiateCohorts", "Cohorts" ) ,
+  cdm = cdm,
+  withConceptDetails = FALSE)
 
 
-# read the cohorts using CDM connector
+# read the cohorts using CDM connector (need this for analysis) ----
 outcome_cohorts <- CDMConnector::readCohortSet(here(
   "1_InstantiateCohorts",
   "Cohorts" 
 ))
 
+# Other settings ---- for troubleshooting
+# if you have instantiated outcome cohorts already set this to TRUE
+instantiatedCancerCohorts <- FALSE
 
-#create a cdm reference for your cohorts
-cdm <- CDMConnector::generateCohortSet(cdm, 
-                                       outcome_cohorts,
-                                       cohortTableName = cancer_table,
-                                       overwrite = TRUE)
-
-# get variables for analysis ---
-Pop<-cdm$person %>% 
-  inner_join(cdm[[cancer_table]],
-             by = c("person_id" = "subject_id" )) %>%
-  select(person_id,gender_concept_id, 
-         year_of_birth, month_of_birth, day_of_birth,
-         cohort_start_date,
-         cohort_definition_id)  %>% 
-  left_join(cdm$observation_period %>% 
-              select("person_id",  "observation_period_start_date", "observation_period_end_date") %>% 
-              distinct(),
-            by = "person_id") %>% 
-  left_join(cdm$death %>% 
-              select("person_id",  "death_date") %>% 
-              distinct(),
-            by = "person_id") %>% 
+if(instantiatedCancerCohorts == TRUE){
   
-  collect()
+cdm <- CDMConnector::cdm_from_con(con = db,
+                                    cdm_schema = cdm_database_schema,
+                                    write_schema = results_database_schema,
+                                    cohort_tables = c(outcome))  
+  
+  
+} else {
+#create a cdm reference for your cohorts ----
+  # using generate concept cohort set
+cdm <- CDMConnector::generateConceptCohortSet(
+  cdm,
+  conceptSet = cancerconcepts,
+  name = "outcome",
+  limit = "first",
+  requiredObservation = c(365, 0),
+  end = "observation_period_end_date",
+  overwrite = TRUE )
 
-
-# only include people with a diagnosis that starts at or after 1st jan 2000 ---
-Pop<-Pop %>% 
-  filter(cohort_start_date >= startdate) 
-
-# Only include people with a diagnosis at or before 31st dec 2019 ---
-Pop<-Pop %>% 
-  filter(cohort_start_date <= '2019-12-31') 
-
-
-# format data -----
-# add age -----
-Pop$age<- NA
-if(sum(is.na(Pop$day_of_birth))==0 & sum(is.na(Pop$month_of_birth))==0){
-  # if we have day and month 
-  Pop<-Pop %>%
-    mutate(age=floor(as.numeric((ymd(cohort_start_date)-
-                                   ymd(paste(year_of_birth,
-                                             month_of_birth,
-                                             day_of_birth, sep="-"))))/365))
-} else { 
-  Pop<-Pop %>% 
-    mutate(age= year(cohort_start_date)-year_of_birth)
 }
 
 
-# age age groups ----
-Pop<-Pop %>% 
-  mutate(age_gr=ifelse(age<30,  "<30",
-                       ifelse(age>=30 &  age<=39,  "30-39",
-                              ifelse(age>=40 & age<=49,  "40-49",
-                                     ifelse(age>=50 & age<=59,  "50-59",
-                                            ifelse(age>=60 & age<=69, "60-69", 
-                                                   ifelse(age>=70 & age<=79, "70-79", 
-                                                   
-                                                   ifelse(age>=80 & age<=89, "80-89",      
-                                                          ifelse(age>=90, ">=90",
-                                                                 NA))))))))) %>% 
-  mutate(age_gr= factor(age_gr, 
-                        levels = c("<30","30-39","40-49", "50-59",
-                                   "60-69", "70-79","80-89",">=90"))) 
-table(Pop$age_gr, useNA = "always")
+info(logger, "SUBSETTING CDM")
+cdm <- cdmSubsetCohort(cdm, "outcome")
+info(logger, "SUBSETTED CDM")
 
-# wider age groups (median age of cancer 70 years)
-Pop<-Pop %>% 
-  mutate(age_gr2=ifelse(age<70,  "<70",
-                               ifelse(age>=70, ">=70",
-                                      NA))) %>% 
-  mutate(age_gr2= factor(age_gr2, 
-                         levels = c("<70", ">=70")))
-table(Pop$age_gr2, useNA = "always")
+# instantiate exclusion
+info(logger, "INSTANTIATE EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CANCER)")
+
+codelistExclusion <- codesFromConceptSet(here("1_InstantiateCohorts", "Exclusion"), cdm)
+
+cdm <- CDMConnector::generateConceptCohortSet(cdm = cdm, 
+                                              conceptSet = codelistExclusion, 
+                                              name = "exclusion",
+                                              overwrite = TRUE)
+
+info(logger, "INSTANTIATED EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CANCER)")
+
+# use patient profiles to create a flag of anyone with MALIGNANT NEOPLASTIC DISEASE (excluding skin cancer) prior to cancer diagnoses in our cohorts
+cdm$outcome <- cdm$outcome %>% 
+  addCohortIntersect(
+    cdm = cdm,
+    targetCohortTable = "exclusion", 
+    targetStartDate = "cohort_start_date",
+    targetEndDate = "cohort_end_date",
+    flag = TRUE,
+    count = FALSE,
+    date = FALSE,
+    days = FALSE,
+    window = list(c(-Inf, -1))
+  )
 
 
-# reformat gender
-# add gender -----
-#8507 male
-#8532 female
-Pop<-Pop %>% 
-  mutate(gender= ifelse(gender_concept_id==8507, "Male",
-                        ifelse(gender_concept_id==8532, "Female", NA ))) %>% 
-  mutate(gender= factor(gender, 
-                        levels = c("Male", "Female")))
-table(Pop$gender, useNA = "always")
 
-# if missing (or unreasonable) age or gender, drop ----
-Pop<-Pop %>% 
-  filter(!is.na(age)) %>% 
-  filter(age>=18) %>% 
-  filter(age<=110) %>%
-  filter(!is.na(gender))
+# get variables for analysis ---
+cdm$analysis <- cdm$outcome %>% 
+# this section uses patient profiles to add in age and age groups as well as
+# sex and prior history
+  addDemographics(
+    age = TRUE,
+    ageName = "age",
+    ageGroup =  list(
+      "age_gr" =
+        list(
+          "18 to 29" = c(18, 29),
+          "30 to 39" = c(30, 39),
+          "40 to 49" = c(40, 49),
+          "50 to 59" = c(50, 59),
+          "60 to 69" = c(60, 69),
+          "70 to 79" = c(70, 79),
+          "80 to 89" = c(80, 89),
+          "> 90" = c(90, 150)
+        )
+    )
+  ) %>% 
 
-# create sex:agegp categorical variables
-Pop <- Pop %>%
-  unite('genderAgegp', c(gender,age_gr), remove = FALSE) %>%
-  mutate(genderAgegp= factor(genderAgegp, 
-                      levels = c("Female_<30","Female_30-39","Female_40-49", "Female_50-59",
-                                 "Female_60-69", "Female_70-79","Female_80-89","Female_>=90",
-                                 "Male_<30","Male_30-39","Male_40-49", "Male_50-59",
-                                 "Male_60-69", "Male_70-79","Male_80-89","Male_>=90"))) 
-
-# drop if missing observation period end date ----
-Pop<-Pop %>% 
-  filter(!is.na(observation_period_end_date))
-
-# add prior observation time -----
-Pop<-Pop %>%  
-  mutate(prior_obs_days=as.numeric(difftime(cohort_start_date,
-                                            observation_period_start_date,
-                                            units="days"))) %>% 
-  mutate(prior_obs_years=prior_obs_days/365)
-
-# make sure all have year of prior history ---
-Pop<-Pop %>%
-  filter(prior_obs_years>=1)
-
-# need to make new end of observation period to 31/12/2019 ----
-Pop<-Pop %>% 
+  # this section adds in date of death, removes those with a diagnosis outside the study period and
+  # date.
+  # Also code sets the end date 31 dec 19 for those with observation period past this date
+  # and removes death date for people with death past dec 2019 (end of study period)
+  
+  left_join(cdm$death %>% 
+              select("person_id",  "death_date") %>% 
+              distinct(),
+            by = c("subject_id"= "person_id")) %>% 
+  left_join(cdm$observation_period %>% 
+              select("person_id",  "observation_period_end_date") %>% 
+              distinct(),
+            by = c("subject_id"= "person_id")) %>% 
+  compute_query() %>% 
+  filter(cohort_start_date >= startdate) %>% 
+  filter(cohort_start_date <= '2019-12-31') %>% 
   mutate(observation_period_end_date_2019 = ifelse(observation_period_end_date >= '2019-12-31', '2019-12-31', NA)) %>%
   mutate(observation_period_end_date_2019 = as.Date(observation_period_end_date_2019) ) %>%
-  mutate(observation_period_end_date_2019 = coalesce(observation_period_end_date_2019, observation_period_end_date))
-  
- 
-# binary death outcome (for survival) ---
-# need to take into account follow up
-# if death date is > 31/12/2019 set death to 0
-Pop<-Pop %>% 
-  mutate(status= ifelse(!is.na(death_date), 2, 1 )) %>%
-  mutate(status= ifelse(death_date > observation_period_end_date_2019 , 1, status )) %>% 
-  mutate(status= ifelse(is.na(status), 1, status ))
+  mutate(observation_period_end_date_2019 = coalesce(observation_period_end_date_2019, observation_period_end_date)) %>% 
+  mutate(status = death_date) %>% 
+  mutate(status = ifelse(death_date > '2019-12-31', NA, status)) %>% 
+  mutate(status = ifelse(death_date > observation_period_end_date_2019, NA, status)) %>% 
+  mutate(status = ifelse(is.na(status), 1, 2 )) %>% 
+  mutate(time_days = observation_period_end_date_2019 - cohort_start_date ) %>% 
+  mutate(time_years=time_days/365) %>% 
+  filter(age_gr != "None") %>% 
+  mutate(sex_age_gp = str_c(age_gr, sex, sep = "_")) %>%
+  rename(anymalignacy = flag_cancerexcludnonmelaskincancer_minf_to_m1) %>% 
+  compute_query()
 
-# calculate follow up in years
-Pop<-Pop %>%  
-  mutate(time_days=as.numeric(difftime(observation_period_end_date_2019,
-                                       cohort_start_date,
-                                       units="days"))) %>% 
-  mutate(time_years=time_days/365) 
+# use this to show the SQL code
+#%>% 
+  #show_query()
+
+# remove females from prostate cancer cohort (misdiagnosis)
+# get cohort definition id for prostate cancer
+prostateID <- outcome_cohorts %>% 
+  filter(outcome_cohorts$cohort_name == "IncidentProstateCancer") %>% 
+  select(cohort_definition_id) %>% 
+  as.numeric()
+
+# remove females from prostate cancer cohort (misdiagnosis)
+cdm$analysis <- cdm$analysis %>% 
+  filter(!(sex == "Female" & cohort_definition_id == prostateID))
 
 
-# remove people with end of observation end date == cohort entry
-Pop<-Pop %>%
+# remove those with any a prior malignancy (apart from skin cancer in prior history)
+cdm$analysis <- cdm$analysis %>% 
+  filter(anymalignacy != 1)
+
+#update the attrition
+cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
+                                      reason="Exclude patients with any prior history of maglinancy (ex skin cancer)" )
+
+
+# remove those with date of death and cancer diagnosis on same date
+cdm$analysis <- cdm$analysis %>% 
   filter(time_days != 0)
 
+cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
+                                       reason="Exclude patients with death date same as cancer diagnosis date" )
+
+# take the first cancer in history to make sure incident cases
+cdm$analysis <- cdm$analysis %>% 
+  group_by(subject_id) %>%
+  slice_min(order_by = c(cohort_start_date)) %>%
+  ungroup() %>% 
+  compute_query()
+
+# update cohort attrition table with reason
+cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
+                                       reason="Excluding patients with other selected cancers" )
+
+# remove any people who have multiple cancer diagnosis on the same day
+cdm$analysis <- cdm$analysis %>% 
+  group_by(subject_id) %>% 
+  filter( n() == 1 ) %>% 
+  ungroup() %>% 
+  compute_query()
+
+cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
+                                      reason="Exclude patients with multiple cancers on different sites diagnosed on same day" )
+
+# collect to use for analysis
+Pop <- cdm$analysis %>% collect() 
 
 #plotting frequency of cancers for QC checks --
 cancernumb <- as.data.frame(table(Pop$cohort_definition_id))
-cancernumb$name <- gsub("Cancer", "", outcome_cohorts$cohortName)
-cancernumb$name <- gsub("MaleOnly", "", outcome_cohorts$cohortName)
+cancernumb$name <- gsub("Cancer", "", outcome_cohorts$cohort_name)
+cancernumb$name <- gsub("MaleOnly", "", outcome_cohorts$cohort_name)
 
-p<-ggplot(data=cancernumb, aes(x=name, y=Freq)) +
+p <-ggplot(data=cancernumb, aes(x=name, y=Freq)) +
   geom_bar(stat="identity", fill = "cadetblue2") +
   geom_text(aes(label=Freq), vjust=0.5, hjust = 0.8, color="black", size=3.5) +
 theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
@@ -203,17 +219,17 @@ print(p, newpage = FALSE)
 dev.off()
 
 # plot numbers by gender
-gendern <- Pop %>%
-  group_by(cohort_definition_id, gender) %>%
+sexn <- Pop %>%
+  group_by(cohort_definition_id, sex) %>%
   tally() %>% 
   rename(name = cohort_definition_id) %>%
-  inner_join(outcome_cohorts[,c(1:2)], by = c("name" = "cohortId")) %>%
-  mutate(cohortName = str_replace_all(cohortName, 'Cancer', '')) %>%
-  mutate(cohortName = str_replace_all(cohortName, 'MaleOnly', '')) %>%
+  inner_join(outcome_cohorts[,c(1:2)], by = c("name" = "cohort_definition_id")) %>%
+  mutate(cohort_name = str_replace_all(cohort_name, 'Cancer', '')) %>%
+  mutate(cohort_name = str_replace_all(cohort_name, 'MaleOnly', '')) %>%
   collect()
 
-q <- gendern %>%
-  ggplot(aes(fill = gender, y = n, x = as.factor(cohortName) )) +
+q <- sexn %>%
+  ggplot(aes(fill = sex, y = n, x = as.factor(cohort_name) )) +
   geom_bar(position = "dodge", stat = "identity") +
   xlab("Cancer") +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
@@ -246,231 +262,268 @@ toc_min <- function(tic,toc,msg="") {
   outmsg <- paste0(mins, " minutes elapsed")
 }
 
-exportSurvivalResultsRDS <- function(result, zipName, outputFolder) {
-  
-  tempDir <- zipName
-  tempDirCreated <- FALSE
-  if (!dir.exists(tempDir)) {
-    dir.create(tempDir)
-    tempDirCreated <- TRUE
-  }
-  
-  # write results to disk
-  lapply(names(result), FUN = function(checkResultName) {
-    checkResult <- result[[checkResultName]]
-    saveRDS(checkResult,
-                     file = file.path(
-                       tempDir,
-                       paste0(checkResultName, ".rds")
-                     )
-    )
-  })
-  zip::zip(zipfile = file.path(outputFolder, paste0(zipName, ".zip")),
-           files = list.files(tempDir, full.names = TRUE))
-  if (tempDirCreated) {
-    unlink(tempDir, recursive = TRUE)
-  }
-  
-  invisible(result)
-}
+nice.num1<-function(x) {
+  trimws(format(round(x,1),
+                big.mark=",", nsmall = 1, digits=1, scientific=FALSE))}
+
+nice.num2<-function(x) {
+  trimws(format(round(x,2),
+                big.mark=",", nsmall = 2, digits=2, scientific=FALSE))}
+
+# Setting up information for extrapolation methods to be used ---
+extrapolations <- c("gompertz", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3", "spline5") 
+extrapolations_formatted <- c("Gompertz", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (3 knots)", "Spline (5 knots)")
 
 
-# Setting up information for extrapolation methods to be used
-extrapolations <- c("gompertz", "weibull", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline2", "spline3", "spline5") 
-extrapolations_formatted <- c("Gompertz", "Weibull", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (2 knots)", "Spline (3 knots)", "Spline (5 knots)")
-# setting up time for extrapolation
-t <- seq(0, timeinyrs*365, by=50) # just for debugging 
-
+# setting up time for extrapolation ----
+t <- seq(0, timeinyrs*365.25, by=90) # can make smaller can plot to see if it affects results
 
 #Run analysis ----
+# set up so notation doesnt include scientific
+options(scipen = 999)
+
 #whole population
 info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
-source(here("2_Analysis","Analysis2.R"))
+source(here("2_Analysis","Analysis.R"))
 info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
 
+#sex analysis
+info(logger, 'RUNNING ANALYSIS FOR SEX')
+source(here("2_Analysis","AnalysisSex.R"))
+info(logger, 'ANALYSIS RAN FOR SEX')
 
-#gender adjustment
-if(RunGenderStrat == TRUE){
+#age analysis
+info(logger, 'RUNNING ANALYSIS FOR AGE')
+source(here("2_Analysis","AnalysisAge.R"))
+info(logger, 'ANALYSIS RAN FOR AGE')
 
-  info(logger, 'RUNNING ANALYSIS FOR GENDER')
-  source(here("2_Analysis","AnalysisGender.R"))
-  info(logger, 'ANALYSIS RAN FOR GENDER')
+#set option back to zero
+options(scipen = 0)
 
-}
-
-#age adjustment
-if(RunAgeAnalysis == TRUE){
-
-  info(logger, 'RUNNING ANALYSIS FOR AGE')
-  source(here("2_Analysis","AnalysisAge.R"))
-  info(logger, 'ANALYSIS RAN FOR AGE')
-
-}
-
-#age*gender adjustment
-if(RunGenderAnalysis == TRUE & RunAgeAnalysis == TRUE ){
-
-  info(logger, 'RUNNING ANALYSIS FOR AGE*GENDER')
-  source(here("2_Analysis","AnalysisAgeGender.R"))
-  info(logger, 'ANALYSIS RAN FOR AGE*GENDER')
-
-}
-
-
-# # add a render file for the shiny app for filtering
-CancersStudy <- c("BreastCancer" , "ColorectalCancer"  , "HeadNeckCancer"  , "LiverCancer" ,"LungCancer", "PancreaticCancer"  , "ProstateCancerMaleOnly", "StomachCancer" )
-GenderStudied <- c("Male", "Female")
-AgeStudied <- c("<30" , "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", ">=90")
-
-## ALL
-AnalysisRunAll <- tibble(
-  Cancer = CancersStudy,
-  Age = "All",
-  Gender = "Both") %>%
-  mutate(render = as.numeric(Cancer %in% outcome_cohorts$cohortName ) ) %>%
-  replace(is.na(.), 0)
-
-## GENDER
-names(target_gender) <- CancersStudy # need to set names for this output in code
-runGender <- stack(target_gender) %>%
-  mutate(render = 1)
-
-AnalysisRunGender <- tibble(
-  Cancer = rep(CancersStudy, times = 2),
-  Age = "All",
-  Gender = rep(c("Male", "Female"), each = length(CancersStudy))) %>%
-  left_join(runGender, by = c("Cancer" = "ind", "Gender" = "values")) %>%
-  replace(is.na(.), 0)
-
-
-## AGE 
-names(target_age) <- CancersStudy # need to set names for this output in code
-runAge <- stack(target_age) %>%
-  mutate(render = 1)
-
-AnalysisRunAge <- tibble(
-  Cancer = rep(CancersStudy, times = 8),
-  Gender = "Both",
-  Age = rep(AgeStudied, each = length(CancersStudy))) %>%
-  left_join(runAge, by = c("Cancer" = "ind", "Age" = "values")) %>%
-  replace(is.na(.), 0)
-
-## AGE*GENDER
-names(target_age_gender) <- CancersStudy # need to set names for this output in code
-runGenderAge <- stack(target_age_gender) %>%
-  mutate(render = 1)
-
-AnalysisRunGenderAge <- tibble(
-  Cancer = rep(CancersStudy, each = 16),
-  Age = rep(AgeStudied,times =16),
-  Gender = rep(rep(GenderStudied, each = 8), times = 8)) %>%
-  unite("GenderAge", c(Gender, Age), remove = FALSE) %>%
-  left_join(runGenderAge, by = c("Cancer" = "ind", "GenderAge" = "values")) %>%
-  replace(is.na(.), 0) %>%
-  select(-GenderAge)
-
-AnalysisRunSummary <- bind_rows(AnalysisRunAll,
-                                AnalysisRunGender,
-                                AnalysisRunAge,
-                                AnalysisRunGenderAge) %>%
-  mutate(Database = db.name)
+#running tableone characterisation
+info(logger, 'RUNNING TABLE ONE ANALYSIS')
+source(here("2_Analysis","Tableone.R"))
+info(logger, 'TABLE ONE ANALYSIS RAN')
   
 ##################################################################
 
-# # Tidy up results and save ----
+# Tidy up results and save ----
 
-# survival data and extrapolated data
+# survival KM and extrapolated data -----
 survivalResults <- bind_rows(
-  observedkmcombined , # all 
-  observedkmcombined_gender , # gender strat 
-  observedkmcombined_age , # age strat
-  observedkmcombined_age_gender, # age gender strat
+  observedkmcombined ,  
+  observedkmcombined_sex , 
+  observedkmcombined_sexA , 
+  observedkmcombined_age , 
+  observedkmcombined_ageA , 
   extrapolatedfinal,
-  extrapolatedfinalGender,
-  extrapolatedfinalAge,
-  extrapolatedfinalAgeGender
+  extrapolatedfinalsex,
+  extrapolatedfinalsexS,
+  extrapolatedfinalage,
+  extrapolatedfinalageS
 ) %>%
-  mutate(Database = db.name)
+  mutate(Database = db.name) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
 
-#risk table # error with characters and double formats
+#risk table ----
 riskTableResults <- bind_rows(
-  risktableskm , # all
-  risktableskm_gender , # gender strat
-  risktableskm_age , # age strat
-  risktableskm_age_gender # age*gender strat 
+  risktableskm , 
+  risktableskm_sex , 
+  risktableskm_sexA , 
+  risktableskm_age ,
+  risktableskm_ageA 
   ) %>%
-  mutate(Database = db.name)
+  mutate(Database = db.name) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
 
 
-#median results
-medianKMResults <- bind_rows( 
-  medkmcombined , # all
-  medkmcombined_gender , # gender
-  medkmcombined_age , # age strat
-  medkmcombined_age_gender # age*gender strat 
-) %>%
-  mutate(Database = db.name)
+# median results KM and predicted median and mean extrapolations ----
+medianResults <- bind_rows( 
+  medkmcombined ,
+  medkmcombined_sex , 
+  medkmcombined_sexA , 
+  medkmcombined_age ,
+  medkmcombined_ageA ,
+  predmedmeanfinal,
+  predmedmeanfinalsexS,
+  predmedmeanfinalageS) %>%
+  mutate(Database = db.name) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
 
-
-# hazard over time results
+# hazard over time results -----
 hazOverTimeResults <- bind_rows( 
-hotkmcombined , # all
-hotkmcombined_gender, # gender
-hotkmcombined_age, # age strat
-hotkmcombined_age_gender, # age*gender strat
-hazardotfinal, #extrapolated hot all results
-hazardotfinalGender, #extrpolated hot gender extrap
-hazardotfinalAge, #extrapolated hot age
-hazardotfinalAgeGender #extrpolated hot age*gender
-
+  hotkmcombined , 
+  hotkmcombined_sex, 
+  hotkmcombined_sexA, 
+  hotkmcombined_age, 
+  hotkmcombined_ageA,
+  hazardotfinal, 
+  hazardotfinalsex, 
+  hazardotfinalsexS,
+  hazardotfinalage,
+  hazardotfinalageS
 ) %>%
-  mutate(Database = db.name)
+  mutate(Database = db.name) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex,  "Male"))
 
-
-#GOF results for extrpolated results
+# GOF results for extrapolated results (adjusted and stratified)
 GOFResults <- bind_rows( 
-  goffinal, # all
-  goffinalGender, #gender
-  goffinalAge, #age
-  goffinalAgeGender #genderage
+  goffinal,
+  goffinalsex, 
+  goffinalsexS,
+  goffinalage,
+  goffinalageS
 ) %>%
-  mutate(Database = db.name)
+  mutate(Database = db.name) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
 
 
-#parameters of the extrapolated models
+# parameters of the extrapolated models
 ExtrpolationParameters <-bind_rows(
-  ParametersAll ,
-  ParametersGender ,
-  ParametersAge , 
-  ParametersAgeGender
+  parametersfinal ,
+  parametersfinalsex,
+  parametersfinalsexS,
+  parametersfinalage,
+  parametersfinalageS
 ) %>%
   mutate(Database = db.name) %>%
-  relocate(Cancer, Method, Stratification, Gender, Age, GenderAge, Database)
+  relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
 
-# put results all together in a list
-survival_study_results <- list(survivalResults ,
-                               riskTableResults,
-                               medianKMResults ,
-                               hazOverTimeResults,
-                               GOFResults,
-                               ExtrpolationParameters,
-                               AnalysisRunSummary)
+# survival probabilities km and predicted probabilities
+survivalProbabilities <- bind_rows(
+  survprobtablekm ,
+  survprobtablekm_sex ,
+  survprobtablekm_sexA ,
+  survprobtablekm_age,
+  survprobtablekm_ageA,
+  predsurvivalprobfinal,
+  predsurvivalprobfinalsex,
+  predsurvivalprobfinalage,
+  predsurvivalprobfinalsexS,
+  predsurvivalprobfinalageS
+) %>%
+  mutate(Database = db.name) %>%
+  relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+  filter(time == 1.0 | time == 5.0 | time == 10.0)
 
-names(survival_study_results) <- c(paste0("survival_estimates_", db.name),
-                                   paste0("risk_table_results_", db.name),
-                                   paste0("median_survival_results_", db.name),
-                                   paste0("hazard_overtime_results_", db.name),
-                                   paste0("Goodness_of_fit_results_", db.name),
-                                   paste0("extrapolation_parameters_", db.name),
-                                   paste0("analyses_run_summary", db.name)
-                                   )
 
-# zip results
-print("Zipping results to output folder")
-exportSurvivalResultsRDS(result=survival_study_results,
-                      zipName= paste0(db.name, "_SurvivalExtrapolationResults"),
-                      outputFolder=here::here("Results", db.name))
+# add a render file for the shiny app for filtering ----
+CancerStudied <- c("IncidentBreastCancer" , "IncidentColorectalCancer"  , 
+                   "IncidentHeadNeckCancer"  , "IncidentLiverCancer" ,
+                   "IncidentLungCancer", "IncidentPancreaticCancer"  ,
+                   "IncidentProstateCancer", "IncidentStomachCancer" )
+Method <- c("Kaplan-Meier", extrapolations_formatted)
+SexStudied <- (rep(rep(c("Male", "Female"), each = length(Method)), length(CancerStudied)))
+AgeStudied <- (rep(rep(c("> 90" , "18 to 29", "30 to 39", "40 to 49", "50 to 59", "60 to 69", "70 to 79", "80 to 89"), each = length(Method)), length(CancerStudied)))
 
+
+# what has been run
+runs <- survivalProbabilities %>% 
+  select(c("Cancer",
+            "Method" ,
+            "Stratification",
+            "Adjustment",
+            "Sex",
+            "Age" )) %>% 
+  distinct() %>% 
+  mutate(Run = "Yes") %>% 
+  unite(ID, c( Cancer, Method, Age, Sex, Adjustment, Stratification ), remove = FALSE) %>% 
+  select(c(ID, Run))
+
+# ALL
+AnalysisRunAll <- tibble(
+  Cancer = rep(CancerStudied, each = length(Method)),
+  Method = rep(Method, length(CancerStudied)),
+  Age = rep("All", by = (length(CancerStudied)*length(Method))),
+  Sex = rep("Both", by = (length(CancerStudied)*length(Method))),
+  Adjustment = rep("None", by = (length(CancerStudied)*length(Method))),
+  Stratification = rep("None", by = (length(CancerStudied)*length(Method))) ) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)),Sex, "Male"))
+
+# SEX STRATIFICATION
+AnalysisRunSexS <- tibble(
+  Cancer = rep(CancerStudied, each = (length(Method)*2)),
+  Method = rep(Method, (length(CancerStudied)*2)),
+  Age = rep("All", by = ((length(CancerStudied))*(length(Method))*2)),
+  Sex = SexStudied,
+  Adjustment = rep("None", by = ((length(CancerStudied))*(length(Method))*2)),
+  Stratification = rep("Sex", by = ((length(CancerStudied))*(length(Method))*2))) %>% 
+  filter(Cancer != "IncidentProstateCancer")
+
+# SEX ADJUSTED
+AnalysisRunSexA <- tibble(
+  Cancer = rep(CancerStudied, each = (length(Method)*2)),
+  Method = rep(Method, (length(CancerStudied)*2)),
+  Age = rep("All", by = ((length(CancerStudied))*(length(Method))*2)),
+  Sex = SexStudied,
+  Stratification = rep("None", by = ((length(CancerStudied))*(length(Method))*2)),
+  Adjustment = rep("Sex", by = ((length(CancerStudied))*(length(Method))*2))) %>% 
+  filter(Cancer != "IncidentProstateCancer")
+
+# AGE STRATIFICATION
+AnalysisRunAgeS <- tibble(
+  Cancer = rep(CancerStudied, each = (length(Method)*8)),
+  Method = rep(Method, (length(CancerStudied)*8)),
+  Sex = rep("Both", by = ((length(CancerStudied))*(length(Method))*8)),
+  Age = AgeStudied,
+  Adjustment = rep("None", by = ((length(CancerStudied))*(length(Method))*8)),
+  Stratification = rep("Age", by = ((length(CancerStudied))*(length(Method))*8))) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)),Sex, "Male"))
+
+# AGE ADJUSTED
+AnalysisRunAgeA <- tibble(
+  Cancer = rep(CancerStudied, each = (length(Method)*8)),
+  Method = rep(Method, (length(CancerStudied)*8)),
+  Sex = rep("Both", by = ((length(CancerStudied))*(length(Method))*8)),
+  Age = AgeStudied,
+  Stratification = rep("None", by = ((length(CancerStudied))*(length(Method))*8)),
+  Adjustment = rep("Age", by = ((length(CancerStudied))*(length(Method))*8))) %>% 
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)),Sex, "Male"))
+
+# combine results
+AnalysisRunSummary <- bind_rows(AnalysisRunAll,
+                                AnalysisRunSexS ,
+                                AnalysisRunSexA,
+                                AnalysisRunAgeS,
+                                AnalysisRunAgeA ) %>% 
+  unite(ID, c( Cancer, Method, Age, Sex, Adjustment, Stratification ), remove = FALSE)
+
+
+# combine with what has been run to get a rendered file of results summary
+AnalysisRunSummary <- 
+  left_join(AnalysisRunSummary , runs, by = "ID") %>% 
+  select(!c(ID)) %>% 
+  mutate(Database = cdm_name(cdm))
+
+# snapshot the cdm
+snapshotcdm <- snapshot(cdm)
+
+#get attrition for the cohorts and add cohort identification
+attritioncdm <- cohort_attrition(cdm$analysis) %>% 
+  left_join(outcome_cohorts, 
+            by = join_by(cohort_definition_id),
+            relationship = "many-to-many",
+            keep = FALSE
+            ) %>% 
+  select(!c(cohort, json)) %>% 
+  relocate(cohort_name)
+
+# save results as csv for data partner can review
+info(logger, "SAVING RESULTS")
+write_csv(survivalResults, paste0(here(output.folder),"/", cdm_name(cdm), "_survival_estimates.csv"))
+write_csv(riskTableResults, paste0(here(output.folder),"/", cdm_name(cdm), "_risk_table.csv"))
+write_csv(medianResults, paste0(here(output.folder),"/", cdm_name(cdm), "_median_mean_survival.csv"))
+write_csv(hazOverTimeResults, paste0(here(output.folder),"/", cdm_name(cdm), "_hazard_overtime.csv"))
+write_csv(GOFResults, paste0(here(output.folder),"/", cdm_name(cdm), "_goodness_of_fit.csv"))
+write_csv(ExtrpolationParameters, paste0(here(output.folder),"/", cdm_name(cdm), "_extrapolation_parameters.csv"))
+write_csv(survivalProbabilities, paste0(here(output.folder),"/", cdm_name(cdm), "_survival_probabilities.csv"))
+write_csv(AnalysisRunSummary, paste0(here(output.folder),"/", cdm_name(cdm), "_analyses_run_summary.csv"))
+write_csv(tableone, paste0(here(output.folder),"/", cdm_name(cdm), "_tableone_summary.csv"))
+write_csv(snapshotcdm, paste0(here(output.folder),"/", cdm_name(cdm), "_cdm_snapshot.csv"))
+write_csv(attritioncdm, paste0(here(output.folder),"/", cdm_name(cdm), "_cohort_attrition.csv"))
+info(logger, "SAVED RESULTS")
 
 # # Time taken
 x <- abs(as.numeric(Sys.time()-start, units="secs"))
@@ -480,8 +533,48 @@ info(logger, paste0("Study took: ",
                             x %/% 86400,  x %% 86400 %/% 3600, x %% 3600 %/%
                               60,  x %% 60 %/% 1)))
 
-print("Done!")
-print("-- If all has worked, there should now be a zip folder with your results in the results to share")
+# zip results
+print("Zipping results to output folder")
+
+zip::zip(
+zipfile = here(output.folder, paste0("Results_", cdmName(cdm), ".zip")),
+files = list.files(output.folder),
+root = output.folder)
+
+# for saving in rds format for dashboard
+survival_study_results <- list(survivalResults ,
+                               riskTableResults,
+                               medianResults ,
+                               hazOverTimeResults,
+                               GOFResults,
+                               ExtrpolationParameters,
+                               survivalProbabilities,
+                               AnalysisRunSummary,
+                               tableone,
+                               snapshotcdm,
+                               attritioncdm)
+
+names(survival_study_results) <- c(paste0(cdm_name(cdm), "_survival_estimates"),
+                                   paste0(cdm_name(cdm), "_risk_table_results"),
+                                   paste0(cdm_name(cdm), "_median_survival_results"),
+                                   paste0(cdm_name(cdm), "_hazard_overtime_results"),
+                                   paste0(cdm_name(cdm), "_goodness_of_fit_results"),
+                                   paste0(cdm_name(cdm), "_extrapolation_parameters"),
+                                   paste0(cdm_name(cdm), "_survival_probabilities"),
+                                   paste0(cdm_name(cdm), "_analyses_run_summary"),
+                                   paste0(cdm_name(cdm), "_tableone_summary"),
+                                   paste0(cdm_name(cdm), "_cdm_snapshot"),
+                                   paste0(cdm_name(cdm), "_cohort_attrition"))
+
+
+saveRDS(survival_study_results, file = paste0(here::here("shiny", "data"), "/Results_", cdm_name(cdm), ".rds"))
+
+print("Study done!")
+print(paste0("Study took: ",
+                         sprintf("%02d:%02d:%02d:%02d",
+                                 x %/% 86400,  x %% 86400 %/% 3600, x %% 3600 %/%
+                                   60,  x %% 60 %/% 1)))
+print("-- If all has worked, there should now be a zip folder with your results in the Results folder to share")
 print("-- Thank you for running the study! :)")
 
 Sys.time()-start
