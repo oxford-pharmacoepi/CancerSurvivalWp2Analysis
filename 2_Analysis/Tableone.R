@@ -67,4 +67,5 @@ tableone_all_cancers <- cdm$analysis %>%
   )  %>% 
   mutate(group_level = "All 8 Cancers")
 
-tableone <- bind_rows(tableone, tableone_all_cancers)
+tableone <- bind_rows(tableone, tableone_all_cancers) %>% 
+  select(!c(result_type, group_name, strata_name, strata_level))
