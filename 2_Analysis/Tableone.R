@@ -31,6 +31,8 @@ info(logger, "INSTANTIATED CONDITIONS")
 info(logger, "CREATE TABLE ONE SUMMARY")
 tableone <- cdm$analysis %>%
   summariseCharacteristics(
+    strata = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+    minCellCount = 5,
     ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
     tableIntersect = list(
       "Visits" = list(

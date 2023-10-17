@@ -143,8 +143,10 @@ cdm$analysis <- cdm$outcome %>%
   mutate(time_days = observation_period_end_date_2019 - cohort_start_date ) %>% 
   mutate(time_years=time_days/365) %>% 
   filter(age_gr != "None") %>% 
-  mutate(sex_age_gp = str_c(age_gr, sex, sep = "_")) %>%
-  rename(anymalignacy = flag_cancerexcludnonmelaskincancer_minf_to_m1) %>% 
+  mutate(sex_age_gp = str_c(age_gr, sex, sep = "_"),
+         future_observation = time_days) %>%
+  rename(anymalignacy = flag_cancerexcludnonmelaskincancer_minf_to_m1 ) %>% 
+  
   compute_query()
 
 # use this to show the SQL code
