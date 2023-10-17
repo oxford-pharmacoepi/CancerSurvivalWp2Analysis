@@ -16,7 +16,8 @@ library(tidyr)
 library(ggalt)
 
 #### UI -----
-ui <-  fluidPage(theme = shinytheme("spacelab"),
+#ui <-  fluidPage(theme = shinytheme("spacelab"),
+ui <-  fluidPage(theme = shinytheme("cerulean"),
                  
                  # title ------ 
                  # shown across tabs
@@ -305,7 +306,6 @@ of patients with an cancer outcome. All results have been stratified by age grou
                                                                  label = "X axis",
                                                                  choices = c("denominator_age_group", 
                                                                              "denominator_sex",
-                                                                            # "denominator_days_prior_history",
                                                                              "outcome_cohort_name",
                                                                              "database_name",
                                                                              "incidence_start_date"),
@@ -321,7 +321,6 @@ of patients with an cancer outcome. All results have been stratified by age grou
                                                                  label = "Facet by",
                                                                  choices = c("denominator_age_group", 
                                                                              "denominator_sex",
-                                                                             #"denominator_days_prior_history",
                                                                              "outcome_cohort_name",
                                                                              "database_name",
                                                                              "incidence_start_date"),
@@ -338,7 +337,6 @@ of patients with an cancer outcome. All results have been stratified by age grou
                                                                  label = "Colour by",
                                                                  choices = c("denominator_age_group", 
                                                                              "denominator_sex",
-                                                                             #"denominator_days_prior_history",
                                                                              "outcome_cohort_name",
                                                                              "database_name",
                                                                              "incidence_start_date"),

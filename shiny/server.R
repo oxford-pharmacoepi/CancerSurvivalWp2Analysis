@@ -1,5 +1,6 @@
 #### SERVER ------
 server <-	function(input, output, session) {
+  
   # prevalence
   get_prevalence_estimates<-reactive({
     
