@@ -554,20 +554,20 @@ survival_study_results <- list(survivalResults ,
                                snapshotcdm,
                                attritioncdm)
 
-names(survival_study_results) <- c(paste0(cdm_name(cdm), "_survival_estimates"),
-                                   paste0(cdm_name(cdm), "_risk_table_results"),
-                                   paste0(cdm_name(cdm), "_median_survival_results"),
-                                   paste0(cdm_name(cdm), "_hazard_overtime_results"),
-                                   paste0(cdm_name(cdm), "_goodness_of_fit_results"),
-                                   paste0(cdm_name(cdm), "_extrapolation_parameters"),
-                                   paste0(cdm_name(cdm), "_survival_probabilities"),
-                                   paste0(cdm_name(cdm), "_analyses_run_summary"),
-                                   paste0(cdm_name(cdm), "_tableone_summary"),
-                                   paste0(cdm_name(cdm), "_cdm_snapshot"),
-                                   paste0(cdm_name(cdm), "_cohort_attrition"))
+names(survival_study_results) <- c(paste0("survival_estimates"),
+                                   paste0("risk_table_results"),
+                                   paste0("median_survival_results"),
+                                   paste0("hazard_overtime_results"),
+                                   paste0("goodness_of_fit_results"),
+                                   paste0("extrapolation_parameters"),
+                                   paste0("survival_probabilities"),
+                                   paste0("analyses_run_summary"),
+                                   paste0("tableone_summary"),
+                                   paste0("cdm_snapshot"),
+                                   paste0("cohort_attrition"))
 
 
-saveRDS(survival_study_results, file = paste0(here::here("shiny", "data"), "/Results_", cdm_name(cdm), ".rds"))
+saveRDS(survival_study_results, file = paste0(here::here("shiny", "data"), "/Results.rds"))
 
 print("Study done!")
 print(paste0("Study took: ",
