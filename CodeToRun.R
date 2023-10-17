@@ -90,11 +90,6 @@ cdm$person %>%
 # must be in format YYYY-MM-DD
 startdate <- "2000-01-01" 
 
-# calculating the number of years of extrapolation for your database ----
-# amount of followup in your database plus 10 years
-# so if your databases has 20 years of followup you would be 30 here
-timeinyrs <- as.numeric(floor(((as.Date("2019-12-31") - as.Date(startdate)) / 365))) + 10
-
 # Run the study ------
 source(here("RunStudy.R"))
 # after the study is run you should have a zip folder in your output folder to share

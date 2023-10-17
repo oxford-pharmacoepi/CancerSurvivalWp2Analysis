@@ -323,7 +323,9 @@ survivalResults <- bind_rows(
   extrapolatedfinalageS
 ) %>%
   mutate(Database = db.name) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+  select(!c(n.risk, n.event, n.censor, std.error)) %>% 
+  filter(time != 0)
 
 #risk table ----
 riskTableResults <- bind_rows(
@@ -348,7 +350,8 @@ medianResults <- bind_rows(
   predmedmeanfinalsexS,
   predmedmeanfinalageS) %>%
   mutate(Database = db.name) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+  select(!c(n.max, n.start))
 
 # hazard over time results -----
 hazOverTimeResults <- bind_rows( 
@@ -375,7 +378,8 @@ GOFResults <- bind_rows(
   goffinalageS
 ) %>%
   mutate(Database = db.name) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+  select(!c(N, events, censored))
 
 
 # parameters of the extrapolated models
