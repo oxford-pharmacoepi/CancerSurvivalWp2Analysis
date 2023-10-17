@@ -20,7 +20,7 @@ ui <-  fluidPage(theme = shinytheme("spacelab"),
                  
                  # title ------ 
                  # shown across tabs
-                 titlePanel("Incidence, Prevalence and Survival of Different Cancers"),
+                 titlePanel("Extrapolating survival for common cancers: a multinational cohort study"),
                  
                  # set up: pages along the side -----  
                  navlistPanel(
@@ -45,27 +45,19 @@ of patients with an cancer outcome. All results have been stratified by age grou
 
                            # HTML('<br>'),
 
-                        tags$h5("The results for each cancer are now published in the following journals:"
+                        tags$h5("The results of this study are published in the following journal:"
                                 ),
  tags$ol(
-   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" ), 
-   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" ),
-   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" ),
-   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" ),
-   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" ),
-   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" ),
-   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" ),
-   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" ),
    tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" )),
  
  tags$h5("The analysis code used to generate these results can be found",
          tags$a(href="https://github.com/oxford-pharmacoepi", "here"),
-         ".The cohort diagnostics including the clinical codelists for each of the 9 cancers can be found",
-         tags$a(href="https://dpa-pde-oxford.shinyapps.io/EHDENCancerIncPrevCohortDiagShiny/", "here")
+         ".The cohort diagnostics including the clinical codelists for each of the 8 cancers can be found",
+         tags$a(href="https://dpa-pde-oxford.shinyapps.io/CancerExtrapolationDiagnostics/", "here")
          
          ),
  
- tags$h5("Any questions regarding these studies or problems with the app please contact",
+ tags$h5("Any questions regarding these results or problems with the app please contact",
          tags$a(href="mailto:danielle.newby@ndorms.ox.ac.uk", "Danielle Newby")
          
  ),

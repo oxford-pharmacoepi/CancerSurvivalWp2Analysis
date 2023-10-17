@@ -22,8 +22,13 @@ nice.num.count<-function(x) {
 
 
 
-#### Load data -----
+#### Load and extract data -----
 #data
+study_results <- readRDS(here("data","Results.rds"))
+# extract each element from the list
+list2env(study_results,globalenv())
+
+
 prevalence_estimates <- readRDS(here("data","prevalence_estimates.rds"))
 prevalence_attrition <- readRDS(here("data","prevalence_attrition.rds"))
 incidence_estimates <- readRDS(here("data","incidence_estimates.rds"))
