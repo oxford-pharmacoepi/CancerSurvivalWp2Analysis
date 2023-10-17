@@ -3,16 +3,11 @@
 # so if your databases has 20 years of followup you would be 30 here
 timeinyrs <- as.numeric(floor(((as.Date("2019-12-31") - as.Date(startdate)) / 365))) + 10
 
-# create folder name for QC plots
-qc.plots.folder <- here("3_QCPlots", db.name) # for QCing and for troubleshooting
-
 #Create folder for the results
 if (!file.exists(output.folder)){
   dir.create(output.folder, recursive = TRUE)}
 
-if (!file.exists(qc.plots.folder)){
-  dir.create(qc.plots.folder, recursive = TRUE)}
-
+#start the clock
 start<-Sys.time()
 
 # start log ----
