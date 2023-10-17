@@ -31,7 +31,7 @@ info(logger, "INSTANTIATED CONDITIONS")
 info(logger, "CREATE TABLE ONE SUMMARY")
 tableone <- cdm$analysis %>%
   summariseCharacteristics(
-    strata = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+    strata = list(c("sex"),c("age_gr")),
     minCellCount = 5,
     ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
     tableIntersect = list(
@@ -52,6 +52,8 @@ tableone <- cdm$analysis %>%
 tableone_all_cancers <- cdm$analysis %>% 
   mutate(cohort_definition_id = 10) %>% 
   summariseCharacteristics(
+    strata = list(c("sex"),c("age_gr")),
+    minCellCount = 5,
     ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
     tableIntersect = list(
       "Visits" = list(
@@ -69,5 +71,4 @@ tableone_all_cancers <- cdm$analysis %>%
   )  %>% 
   mutate(group_level = "All 8 Cancers")
 
-tableone <- bind_rows(tableone, tableone_all_cancers) %>% 
-  select(!c(result_type, group_name, strata_name, strata_level))
+tableone <- bind_rows(tableone, tableone_all_cancers) 
