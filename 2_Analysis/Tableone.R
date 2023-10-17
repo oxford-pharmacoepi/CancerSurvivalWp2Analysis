@@ -53,6 +53,7 @@ tableone <- cdm$analysis %>%
 )
 
 suppressWarnings(
+  
 tableone_all_cancers <- cdm$analysis %>% 
   mutate(cohort_definition_id = 10) %>% 
   summariseCharacteristics(
@@ -74,6 +75,7 @@ tableone_all_cancers <- cdm$analysis %>%
     )
   )  %>% 
   mutate(group_level = "All 8 Cancers")
+
 )
 
 tableone <- bind_rows(tableone, tableone_all_cancers) 

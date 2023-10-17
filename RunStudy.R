@@ -159,6 +159,12 @@ prostateID <- outcome_cohorts %>%
 cdm$analysis <- cdm$analysis %>% 
   filter(!(sex == "Female" & cohort_definition_id == prostateID))
 
+# take the first cancer in history to make sure incident cases
+cdm$analysis <- cdm$analysis %>% 
+  group_by(subject_id) %>%
+  slice_min(order_by = c(cohort_start_date)) %>%
+  ungroup() %>% 
+  compute_query()
 
 # remove those with any a prior malignancy (apart from skin cancer in prior history)
 cdm$analysis <- cdm$analysis %>% 
@@ -176,16 +182,6 @@ cdm$analysis <- cdm$analysis %>%
 cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
                                        reason="Exclude patients with death date same as cancer diagnosis date" )
 
-# take the first cancer in history to make sure incident cases
-cdm$analysis <- cdm$analysis %>% 
-  group_by(subject_id) %>%
-  slice_min(order_by = c(cohort_start_date)) %>%
-  ungroup() %>% 
-  compute_query()
-
-# update cohort attrition table with reason
-cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
-                                       reason="Excluding patients with other selected cancers" )
 
 # remove any people who have multiple cancer diagnosis on the same day
 cdm$analysis <- cdm$analysis %>% 
@@ -199,49 +195,6 @@ cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
 
 # collect to use for analysis
 Pop <- cdm$analysis %>% collect() 
-
-#plotting frequency of cancers for QC checks --
-cancernumb <- as.data.frame(table(Pop$cohort_definition_id))
-cancernumb$name <- gsub("Cancer", "", outcome_cohorts$cohort_name)
-cancernumb$name <- gsub("MaleOnly", "", outcome_cohorts$cohort_name)
-
-p <-ggplot(data=cancernumb, aes(x=name, y=Freq)) +
-  geom_bar(stat="identity", fill = "cadetblue2") +
-  geom_text(aes(label=Freq), vjust=0.5, hjust = 0.8, color="black", size=3.5) +
-theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  coord_flip()+
-  theme_bw()
-
-
-plotname <- paste0("QCSampleNumbers", db.name,".pdf")
-
-pdf(here(qc.plots.folder, plotname),
-    width = 7, height = 5)
-print(p, newpage = FALSE)
-dev.off()
-
-# plot numbers by gender
-sexn <- Pop %>%
-  group_by(cohort_definition_id, sex) %>%
-  tally() %>% 
-  rename(name = cohort_definition_id) %>%
-  inner_join(outcome_cohorts[,c(1:2)], by = c("name" = "cohort_definition_id")) %>%
-  mutate(cohort_name = str_replace_all(cohort_name, 'Cancer', '')) %>%
-  mutate(cohort_name = str_replace_all(cohort_name, 'MaleOnly', '')) %>%
-  collect()
-
-q <- sexn %>%
-  ggplot(aes(fill = sex, y = n, x = as.factor(cohort_name) )) +
-  geom_bar(position = "dodge", stat = "identity") +
-  xlab("Cancer") +
-  theme(axis.text.x = element_text(angle = 45, hjust=1))
-
-plotname <- paste0("QCSampleGenderStrat", db.name,".pdf")
-
-pdf(here(qc.plots.folder, plotname),
-    width = 7, height = 5)
-print(q, newpage = FALSE)
-dev.off()
 
 # Functions for analysis -----
 
@@ -278,7 +231,7 @@ extrapolations_formatted <- c("Gompertz", "WeibullPH" ,"Exponential", "Log-logis
 
 
 # setting up time for extrapolation ----
-t <- seq(0, timeinyrs*365.25, by=90) # can make smaller can plot to see if it affects results
+t <- seq(0, timeinyrs*365.25, by=60) # can make smaller can plot to see if it affects results
 
 #Run analysis ----
 # set up so notation doesnt include scientific

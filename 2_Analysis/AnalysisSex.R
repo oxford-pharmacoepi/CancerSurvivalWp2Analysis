@@ -35,8 +35,12 @@ for(j in 1:nrow(outcome_cohorts)) {
     observedkm_sex[[j]] <- survfit (Surv(time_years, status) ~ sex, data=data) %>%
       tidy() %>%
       rename(Sex = strata) %>%
-      mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = str_replace(Sex, "sex=Male", "Male"), Sex = str_replace(Sex,"sex=Female", "Female"))
-      print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed")) 
+      mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = str_replace(Sex, "sex=Male", "Male"), 
+             Sex = str_replace(Sex,"sex=Female", "Female")) %>% 
+     filter(row_number() %% 2 == 1)
+    
+      print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
+        
 
     # get risk table for specific times for each sex then combine again ---
       grid <- seq(0,floor(max(data$time_years)),by=0.5) #get the number of years
@@ -124,7 +128,8 @@ for(j in 1:nrow(outcome_cohorts)) {
       do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
       ungroup %>%
       mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All") %>% 
-      rename(Sex = sex)
+      rename(Sex = sex) %>% 
+      filter(row_number() %% 2 == 1)
     
     print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], "sex strat completed"))
     

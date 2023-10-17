@@ -23,7 +23,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   data <- Pop %>%
     filter(cohort_definition_id == j)
   
-  #creates a filter that removes any levels with no people? not sure needed?
+  #age levels
   agelevels <- data %>%
     group_by(age_gr) %>% summarise(count = n())
   
@@ -40,12 +40,13 @@ for(j in 1:nrow(outcome_cohorts)) {
              Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
              Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
              Age = str_replace(Age, "age_gr=> 90", "> 90") ,
-             Sex = "Both")
+             Sex = "Both") %>% 
+      filter(row_number() %% 2 == 1)
     
     print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed")) 
     
     # get risk table for specific times for each age group then combine again ---
-    grid <- seq(0,floor(max(data$time_years)),by=0.5) #get the number of years
+    grid <- seq(0,floor(max(data$time_years)),by=0.5) # get the number of years
     grid <-  grid[(str_detect(grid, "[1-9]\\.5", negate = TRUE )) & (str_detect(grid, "10.5", negate = TRUE )) &
                     (str_detect(grid, "20.5", negate = TRUE )) & (str_detect(grid, "30.5", negate = TRUE ))] # remove all the half years apart from the first half year
     sprob <- survfit(Surv(time_years, status) ~ age_gr, data=data) %>% 
@@ -230,26 +231,20 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                 NA)) %>% 
       relocate("Survival Rate % (95% CI)", .before = Method)
     
-    
-    
-    data <- Pop %>%
-      filter(cohort_definition_id == j)
-    
     # hazard over time ---
     # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
     # this can fall over with small sample numbers therefore trycatch is in place which tries to perform it and if errors
     # removes age group sequentially.
+    print(paste0("Trying Hazard over time results for all age groups ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+    
     tryCatch(
       {
-        cat("Trying all age groups for hazard over time\n")
-        
-        modelhot <- group_by(data,age_gr) %>% 
+        modelhot <- group_by(data, age_gr) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
           mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
-          rename(Age = age_gr)
-        
-        cat("Exiting try block\n")
+          rename(Age = age_gr) 
+
       },
       error = function(e) {
         cat("An error occurred: ")
@@ -261,11 +256,11 @@ for(j in 1:nrow(outcome_cohorts)) {
     # if model is successful with no removal of age groups if not remove 18-29 age group
     if (exists("modelhot") == TRUE) {
       
-      observedhazotKM_age[[j]] <- modelhot
+      observedhazotKM_age[[j]] <- modelhot %>% 
+        filter(row_number() %% 2 == 1)
       
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-      
       # if model falls over remove first age group 
       
     } else {
@@ -275,11 +270,8 @@ for(j in 1:nrow(outcome_cohorts)) {
       data <- data %>% 
         filter(age_gr != "18 to 29") 
     
-    
     tryCatch(
       {
-        cat("Retrying hazard over time after removal of 18-29 age group \n")
-        
         modelhot <- group_by(data,age_gr) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
@@ -298,8 +290,10 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     # if model successful after removal of 18-29 age group if not remove 30-39 age group
     if (exists("modelhot") == TRUE) {
-      observedhazotKM_age[[j]] <- modelhot
-      rm(modelhot)
+      
+      observedhazotKM_age[[j]] <- modelhot %>% 
+        filter(row_number() %% 2 == 1)
+
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
       
@@ -311,13 +305,9 @@ for(j in 1:nrow(outcome_cohorts)) {
   data <- data %>% 
     filter(age_gr != "18 to 29") %>% 
     filter(age_gr != "30 to 39")
-  
-
 
     tryCatch(
       {
-        cat("Retrying hazard over time after removal of 30-39 age group \n")
-        
         modelhot <- group_by(data,age_gr) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
@@ -334,10 +324,12 @@ for(j in 1:nrow(outcome_cohorts)) {
     
  
     if (exists("modelhot") == TRUE) {
-      observedhazotKM_age[[j]] <- modelhot
+      
+      observedhazotKM_age[[j]] <- modelhot %>% 
+        filter(row_number() %% 2 == 1)
+      
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-      #rm(modelhot)
       
     }  else  {
       
@@ -348,12 +340,8 @@ for(j in 1:nrow(outcome_cohorts)) {
         filter(age_gr != "30 to 39") %>% 
         filter(age_gr != "40 to 49")
       
-    
-    
     tryCatch(
       {
-        cat("Retrying hazard over time after removal of 40-49 age group \n")
-        
         modelhot <- group_by(data,age_gr) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
@@ -370,10 +358,12 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     
     if (exists("modelhot") == TRUE) {
-      observedhazotKM_age[[j]] <- modelhot
+      
+      observedhazotKM_age[[j]] <- modelhot %>% 
+        filter(row_number() %% 2 == 1)
+      
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-      #rm(modelhot)
       
     }  else  {
       
@@ -385,12 +375,8 @@ for(j in 1:nrow(outcome_cohorts)) {
         filter(age_gr != "40 to 49") %>% 
         filter(age_gr != "50 to 59")
       
-    
-    
     tryCatch(
       {
-        cat("Retrying hazard over time after removal of 50-59 age group \n")
-        
         modelhot <- group_by(data,age_gr) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
@@ -407,10 +393,12 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     
     if (exists("modelhot") == TRUE) {
-      observedhazotKM_age[[j]] <- modelhot
+      
+      observedhazotKM_age[[j]] <- modelhot %>% 
+        filter(row_number() %% 2 == 1)
+      
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-     # rm(modelhot)
       
     }  else  {
       
@@ -426,14 +414,11 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     tryCatch(
       {
-        cat("Retrying hazard over time after removal of 60-69 age group \n")
-        
         modelhot <- group_by(data,age_gr) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
           mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
           rename(Age = age_gr)
-        
       },
       error = function(e) {
         cat("An error occurred: ")
@@ -444,10 +429,12 @@ for(j in 1:nrow(outcome_cohorts)) {
     }    
     
     if (exists("modelhot") == TRUE) {
-      observedhazotKM_age[[j]] <- modelhot
+      
+      observedhazotKM_age[[j]] <- modelhot %>% 
+        filter(row_number() %% 2 == 1)
+      
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-      #rm(modelhot)
       
     }  else  {
       
@@ -464,28 +451,27 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     tryCatch(
       {
-        cat("Retrying hazard over time after removal of 70-79 age group \n")
-        
         modelhot <- group_by(data,age_gr) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
           mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
           rename(Age = age_gr)
-        
       },
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
         info(logger, paste0("after removal of 70-79 age group: 7th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
       }
-    ) }
-    
+    ) 
+      }
     
     if (exists("modelhot") == TRUE) {
-      observedhazotKM_age[[j]] <- modelhot
+      
+      observedhazotKM_age[[j]] <- modelhot %>% 
+        filter(row_number() %% 2 == 1)
+      
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-      #rm(modelhot)
       
     } else {
       
@@ -503,14 +489,11 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     tryCatch(
       {
-        cat("Retrying hazard over time after removal of 80-89 age group \n")
-        
         modelhot <- group_by(data,age_gr) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
           mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
           rename(Age = age_gr)
-        
       },
       error = function(e) {
         cat("An error occurred: ")
@@ -518,15 +501,15 @@ for(j in 1:nrow(outcome_cohorts)) {
         info(logger, paste0(" after removal of 80-89 age group: 8th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
       }
     )
-      
     }
     
-    
     if (exists("modelhot") == TRUE) {
-      observedhazotKM_age[[j]] <- modelhot
+      
+      observedhazotKM_age[[j]] <- modelhot %>% 
+        filter(row_number() %% 2 == 1)
+      
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-      #rm(modelhot)
       
     } else {
       

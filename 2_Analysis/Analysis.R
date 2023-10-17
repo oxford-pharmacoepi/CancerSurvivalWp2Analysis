@@ -24,9 +24,12 @@ data <- Pop %>%
   filter(cohort_definition_id == j)
 
 #carry out km estimate ---
-observedkm[[j]] <- survfit (Surv(time_years, status) ~ 1, data=data) %>%
+#take every other row from results
+observedkm[[j]] <- 
+  test <- survfit (Surv(time_years, status) ~ 1, data=data) %>%
   tidy() %>%
-  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both")
+  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") %>% 
+  filter(row_number() %% 2 == 1)
 
 print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
 
@@ -93,7 +96,8 @@ print(paste0("Median survival from KM from observed data ", Sys.time()," for ",o
 # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
 
 observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>%
-  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both")
+  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") %>% 
+  filter(row_number() %% 2 == 1)
 
 print(paste0("Hazard over time results for KM ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
 
