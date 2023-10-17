@@ -1,0 +1,13 @@
+name: IncidencePrevalenceCancers
+title: IncidencePrevalenceCancers
+username:
+account: dpa-pde-oxford
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8055613
+bundleId: 7684890
+url: https://dpa-pde-oxford.shinyapps.io/IncidencePrevalenceCancers/
+when: 1694703596.65872
+lastSyncTime: 1694703596.65873
+asMultiple: FALSE
+asStatic: FALSE
