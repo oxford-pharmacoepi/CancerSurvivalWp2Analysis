@@ -3,18 +3,20 @@ server <-	function(input, output, session) {
   
   # survival estimates: whole population
   get_survival_estimates<-reactive({
-    
-    table<-survival_estimates %>% 
+
+    table <- survival_estimates %>%
       # first deselect settings which did not vary for this study
-      filter(Database %in% input$survival_database_name_selector)  %>% 
-      filter(Age %in% input$survival_age_group_selector)     %>% 
-      filter(Sex %in% input$survival_sex_selector)     %>% 
-      filter(Cancer %in% input$survival_outcome_cohort_name_selector) %>% 
-      filter(Stratification %in% input$survival_strat_selector) %>% 
-      filter(Adjustment %in% input$survival_adjust_selector)
-    
+      filter(Database %in% input$survival_database_name_selector)  %>%
+      filter(Cancer %in% input$survival_outcome_cohort_name_selector) %>%
+      filter(Stratification %in% input$survival_strat_selector) %>%
+      filter(Adjustment %in% input$survival_adjust_selector) %>% 
+      filter(Method %in% input$survival_method_selector) %>% 
+      filter(Age %in% input$survival_age_group_selector)     %>%
+      filter(Sex %in% input$survival_sex_selector)    
+
+
     table
-  }) 
+  })
   output$tbl_survival_estimates<-  DT::renderDataTable({
 
     table<-get_survival_estimates()
@@ -30,15 +32,15 @@ server <-	function(input, output, session) {
       relocate(Cancer) %>%
       relocate(Estimate = est, .after = time) %>%
       relocate(upperCI = ucl, .after = Estimate) %>%
-      relocate(lowerCI = lcl, .after = upperCI) 
-    
+      relocate(lowerCI = lcl, .after = upperCI)
+
     datatable(table,
               rownames= FALSE,
               extensions = 'Buttons',
               options = list(lengthChange = FALSE,
                              dom = 'tB',
                              pageLength = 100000000,
-                             buttons = list(list(extend = "csv", 
+                             buttons = list(list(extend = "csv",
                                                  text = "Download results as csv",
                                                  filename = "survival_estimates"))
               ))
@@ -127,183 +129,183 @@ server <-	function(input, output, session) {
     p
 
   })
-  
-# risk table
-  get_survival_risktable<-reactive({
-    
-    table<-survival_risk_table %>% 
-      # first deselect settings which did not vary for this study
-      select(!c(GenderAge, Method)) %>% 
-      filter(Database %in% input$survival_database_name_selector)  %>% 
-      filter(Age %in% input$survival_age_group_selector)     %>% 
-      filter(Gender %in% input$survival_sex_selector)     %>% 
-      filter(Cancer %in% input$survival_outcome_cohort_name_selector) %>%
-      relocate(`20`, .after = `18`)
-     # filter(CalendarYearGp %in% input$calendar_year_selector) 
-    
-    table
-  }) 
-  output$tbl_survival_risk_table<-  DT::renderDataTable({
-    
-    table<-get_survival_risktable()
-    
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-    
-    table <- table %>%
-      select(!c("Stratification")) %>% 
-      rename(Sex = Gender, `Calendar Year` = CalendarYearGp)
 
-    datatable(table,
-              rownames= FALSE,
-              extensions = 'Buttons',
-              options = list(lengthChange = FALSE,
-                             dom = 'tB',
-                             pageLength = 100000000,
-                             buttons = list(list(extend = "csv", 
-                                                 text = "Download results as csv",
-                                                 filename = "survival_risk_table"))
-              ))
-  } )
-
-# median/mean survival
-  get_survival_median_table<-reactive({
-    
-    table<-survival_median_table %>% 
-      # first deselect settings which did not vary for this study
-      select(!c(GenderAge, Method)) %>% 
-      filter(Database %in% input$survival_database_name_selector)  %>% 
-      filter(Age %in% input$survival_age_group_selector)     %>% 
-      filter(Gender %in% input$survival_sex_selector)     %>% 
-      filter(Cancer %in% input$survival_outcome_cohort_name_selector) 
-    
-    table
-  }) 
-  output$tbl_survival_median_table<-  DT::renderDataTable({
-    
-    table<-get_survival_median_table()
-    
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-    
-    table <- table %>%
-      select(!c("Stratification", "n.max", "n.start")) %>%
-      relocate(Cancer) %>% 
-      rename(Sex = Gender) %>% 
-      rename(`Records (n)` = records) %>% 
-      mutate(median= ifelse(!is.na(median),paste0(median, " (",`0.95LCL`," - ",  `0.95UCL`, ")"))) %>% 
-      rename(`Median Survival in Years (95% CI)` = median) %>% 
-      mutate(rmean= ifelse(!is.na(rmean),paste0(rmean, " (",`se(rmean)`,")"))) %>% 
-      rename(`rmean in Years (SE)` = rmean,
-             `Events (n)` = events,
-             `Calendar Year` = CalendarYearGp) %>% 
-      select(!c("0.95LCL", "0.95UCL", "se(rmean)")) 
-      
-    # 
-    # table <- table %>%
-    #   mutate(across(everything(), as.character)) %>%
-    #   mutate(across(everything(), ~replace_na(.x, " ")))
-    # 
-    datatable(table,
-              rownames= FALSE,
-              extensions = 'Buttons',
-              options = list(lengthChange = FALSE,
-                             dom = 'tB',
-                             pageLength = 100000000,
-                             buttons = list(list(extend = "csv", 
-                                                 text = "Download results as csv",
-                                                 filename = "survival_median_survival"))
-              ))
-  } )
-  
-# survival probabilities
-  get_survival_rates_table<-reactive({
-    
-    table<- survival_rates_table %>%
-      # first deselect settings which did not vary for this study
-      select(!c(GenderAge, Method)) %>%
-      filter(Database %in% input$survival_database_name_selector)  %>%
-      filter(Age %in% input$survival_age_group_selector)     %>%
-      filter(Gender %in% input$survival_sex_selector)     %>%
-      filter(Cancer %in% input$survival_outcome_cohort_name_selector)  
-    
-    table
-  })
-  output$tbl_survival_rates_table <-  DT::renderDataTable({
-    
-    table<-get_survival_rates_table()
-    
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
-    
-    table <- table %>%
-      select(!c("Stratification",
-                "type",
-                "logse",
-                "conf.int",
-                "conf.type",
-                "n.risk",
-                "n.event",
-                "n.censor"
-                
-                )) %>%
-      mutate(surv = surv * 100) %>% 
-      mutate(lower = lower * 100) %>% 
-      mutate(upper = upper * 100) %>% 
-      mutate(surv=nice.num2(surv)) %>%
-      mutate(std.err=nice.num3(std.err)) %>%
-      mutate(cumhaz=nice.num3(cumhaz)) %>%
-      mutate(std.chaz=nice.num3(std.chaz)) %>%      
-      mutate(lower=nice.num2(lower)) %>%
-      mutate(upper=nice.num2(upper)) %>%
-      relocate(Cancer) %>%
-      relocate(surv, .after = time) %>%
-      relocate(lower, .after = surv) %>%
-      relocate(upper, .after = lower) %>% 
-      rename(Sex = Gender) %>% 
-      rename(`Time (years)` = time) %>% 
-      mutate(surv= ifelse(!is.na(surv),paste0(surv, " (",lower," - ",  upper, ")"))) %>% 
-      rename(`% Survival (95% CI)` = surv,
-             `Calendar Year` = CalendarYearGp) %>% 
-      select(!c("lower", "upper",
-                "std.err",
-                "cumhaz",
-                "std.chaz"))
-                
-                
-    
-    datatable(table,
-              rownames= FALSE,
-              extensions = 'Buttons',
-              options = list(lengthChange = FALSE,
-                             dom = 'tB',
-                             pageLength = 100000000,
-                             buttons = list(list(extend = "csv",
-                                                 text = "Download results as csv",
-                                                 filename = "survival_rates_whole_pop"))
-              ))
-  } )
+# # risk table
+#   get_survival_risktable<-reactive({
+# 
+#     table<-survival_risk_table %>%
+#       # first deselect settings which did not vary for this study
+#       select(!c(GenderAge, Method)) %>%
+#       filter(Database %in% input$survival_database_name_selector)  %>%
+#       filter(Age %in% input$survival_age_group_selector)     %>%
+#       filter(Gender %in% input$survival_sex_selector)     %>%
+#       filter(Cancer %in% input$survival_outcome_cohort_name_selector) %>%
+#       relocate(`20`, .after = `18`)
+#      # filter(CalendarYearGp %in% input$calendar_year_selector)
+# 
+#     table
+#   })
+#   output$tbl_survival_risk_table<-  DT::renderDataTable({
+# 
+#     table<-get_survival_risktable()
+# 
+#     validate(need(ncol(table)>1,
+#                   "No results for selected inputs"))
+# 
+#     table <- table %>%
+#       select(!c("Stratification")) %>%
+#       rename(Sex = Gender, `Calendar Year` = CalendarYearGp)
+# 
+#     datatable(table,
+#               rownames= FALSE,
+#               extensions = 'Buttons',
+#               options = list(lengthChange = FALSE,
+#                              dom = 'tB',
+#                              pageLength = 100000000,
+#                              buttons = list(list(extend = "csv",
+#                                                  text = "Download results as csv",
+#                                                  filename = "survival_risk_table"))
+#               ))
+#   } )
+# 
+# # median/mean survival
+#   get_survival_median_table<-reactive({
+# 
+#     table<-survival_median_table %>%
+#       # first deselect settings which did not vary for this study
+#       select(!c(GenderAge, Method)) %>%
+#       filter(Database %in% input$survival_database_name_selector)  %>%
+#       filter(Age %in% input$survival_age_group_selector)     %>%
+#       filter(Gender %in% input$survival_sex_selector)     %>%
+#       filter(Cancer %in% input$survival_outcome_cohort_name_selector)
+# 
+#     table
+#   })
+#   output$tbl_survival_median_table<-  DT::renderDataTable({
+# 
+#     table<-get_survival_median_table()
+# 
+#     validate(need(ncol(table)>1,
+#                   "No results for selected inputs"))
+# 
+#     table <- table %>%
+#       select(!c("Stratification", "n.max", "n.start")) %>%
+#       relocate(Cancer) %>%
+#       rename(Sex = Gender) %>%
+#       rename(`Records (n)` = records) %>%
+#       mutate(median= ifelse(!is.na(median),paste0(median, " (",`0.95LCL`," - ",  `0.95UCL`, ")"))) %>%
+#       rename(`Median Survival in Years (95% CI)` = median) %>%
+#       mutate(rmean= ifelse(!is.na(rmean),paste0(rmean, " (",`se(rmean)`,")"))) %>%
+#       rename(`rmean in Years (SE)` = rmean,
+#              `Events (n)` = events,
+#              `Calendar Year` = CalendarYearGp) %>%
+#       select(!c("0.95LCL", "0.95UCL", "se(rmean)"))
+# 
+#     #
+#     # table <- table %>%
+#     #   mutate(across(everything(), as.character)) %>%
+#     #   mutate(across(everything(), ~replace_na(.x, " ")))
+#     #
+#     datatable(table,
+#               rownames= FALSE,
+#               extensions = 'Buttons',
+#               options = list(lengthChange = FALSE,
+#                              dom = 'tB',
+#                              pageLength = 100000000,
+#                              buttons = list(list(extend = "csv",
+#                                                  text = "Download results as csv",
+#                                                  filename = "survival_median_survival"))
+#               ))
+#   } )
+# 
+# # survival probabilities
+#   get_survival_rates_table<-reactive({
+# 
+#     table<- survival_rates_table %>%
+#       # first deselect settings which did not vary for this study
+#       select(!c(GenderAge, Method)) %>%
+#       filter(Database %in% input$survival_database_name_selector)  %>%
+#       filter(Age %in% input$survival_age_group_selector)     %>%
+#       filter(Gender %in% input$survival_sex_selector)     %>%
+#       filter(Cancer %in% input$survival_outcome_cohort_name_selector)
+# 
+#     table
+#   })
+#   output$tbl_survival_rates_table <-  DT::renderDataTable({
+# 
+#     table<-get_survival_rates_table()
+# 
+#     validate(need(ncol(table)>1,
+#                   "No results for selected inputs"))
+# 
+#     table <- table %>%
+#       select(!c("Stratification",
+#                 "type",
+#                 "logse",
+#                 "conf.int",
+#                 "conf.type",
+#                 "n.risk",
+#                 "n.event",
+#                 "n.censor"
+# 
+#                 )) %>%
+#       mutate(surv = surv * 100) %>%
+#       mutate(lower = lower * 100) %>%
+#       mutate(upper = upper * 100) %>%
+#       mutate(surv=nice.num2(surv)) %>%
+#       mutate(std.err=nice.num3(std.err)) %>%
+#       mutate(cumhaz=nice.num3(cumhaz)) %>%
+#       mutate(std.chaz=nice.num3(std.chaz)) %>%
+#       mutate(lower=nice.num2(lower)) %>%
+#       mutate(upper=nice.num2(upper)) %>%
+#       relocate(Cancer) %>%
+#       relocate(surv, .after = time) %>%
+#       relocate(lower, .after = surv) %>%
+#       relocate(upper, .after = lower) %>%
+#       rename(Sex = Gender) %>%
+#       rename(`Time (years)` = time) %>%
+#       mutate(surv= ifelse(!is.na(surv),paste0(surv, " (",lower," - ",  upper, ")"))) %>%
+#       rename(`% Survival (95% CI)` = surv,
+#              `Calendar Year` = CalendarYearGp) %>%
+#       select(!c("lower", "upper",
+#                 "std.err",
+#                 "cumhaz",
+#                 "std.chaz"))
+# 
+# 
+# 
+#     datatable(table,
+#               rownames= FALSE,
+#               extensions = 'Buttons',
+#               options = list(lengthChange = FALSE,
+#                              dom = 'tB',
+#                              pageLength = 100000000,
+#                              buttons = list(list(extend = "csv",
+#                                                  text = "Download results as csv",
+#                                                  filename = "survival_rates_whole_pop"))
+#               ))
+#   } )
   
 # table 1
   get_table_one <-reactive({
     
-    table<-table_one_results %>% 
-      filter(Cancer %in% input$table1_outcome_cohort_name_selector) %>% 
-      filter(Sex %in% input$table1_sex_selector) 
+    table <- tableone_summary %>% 
+      filter(group_level %in% input$table1_outcome_cohort_name_selector) %>% 
+      filter(strata_level %in% input$table1_strata_selector) 
     
     table
   }) 
-  output$tbl_table_one<-  DT::renderDataTable({
+  output$tbl_table_one <-  DT::renderDataTable({
     
-    table<-get_table_one()
+    table <- get_table_one()
     
     validate(need(ncol(table)>1,
                   "No results for selected inputs"))
     
-    table <- table %>% 
-      select(!c("analysis" )) %>% 
-      relocate(Cancer, .after = `CPRD GOLD`) %>% 
-      rename(Database = var)
+    # table <- table %>% 
+    #   select(!c("analysis" )) %>% 
+    #   relocate(Cancer, .after = `CPRD GOLD`) %>% 
+    #   rename(Database = var)
     
     datatable(table,
               rownames= FALSE,
@@ -324,8 +326,58 @@ server <-	function(input, output, session) {
 # hazard over time results
   
 # table for cohort attrition
+  get_table_attrition <-reactive({
+    
+    table <- cohort_attrition %>% 
+      filter(cohort_name %in% input$attrition_cohort_name_selector) 
+    
+    table
+  }) 
+  output$tbl_table_attrition <-  DT::renderDataTable({
+    
+    table <- get_table_attrition()
+    
+    validate(need(ncol(table)>1,
+                  "No results for selected inputs"))
+    
+    datatable(table,
+              rownames= FALSE,
+              extensions = 'Buttons',
+              options = list(lengthChange = FALSE,
+                             dom = 'tB',
+                             pageLength = 100000000,
+                             buttons = list(list(extend = "csv", 
+                                                 text = "Download results as csv",
+                                                 filename = "cohortAttrition"))
+              ))
+  } )
+  
 
 # table for cdm snapshot
+  get_database_info <-reactive({
+    
+    table <- cdm_snapshot 
+    
+    table
+  }) 
+  output$tbl_database_info <-  DT::renderDataTable({
+    
+    table <- get_database_info()
+    
+    validate(need(ncol(table)>1,
+                  "No results for selected inputs"))
+    
+    datatable(table,
+              rownames= FALSE,
+              extensions = 'Buttons',
+              options = list(lengthChange = FALSE,
+                             dom = 'tB',
+                             pageLength = 100000000,
+                             buttons = list(list(extend = "csv", 
+                                                 text = "Download results as csv",
+                                                 filename = "CDMsnapshot"))
+              ))
+  } )
   
 
  # keeping this code for reference 
