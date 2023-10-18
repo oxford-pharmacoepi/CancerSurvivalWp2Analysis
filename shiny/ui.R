@@ -41,7 +41,7 @@ ui <-  fluidPage(theme = bs_theme(version = 4, bootswatch = "minty"),
  "This app is a companion to the study focussing on the assessment and prediction of survival for eight different cancers
  (Breast, Colorectal, Lung, Liver, Stomach, Head & Neck, Prostate, and Pancreas) for a variety of different electronic health records and cancer registries across Europe (Spain, Netherlands, Italy, Germany, Norway, Finland, Portugal, Estonia, Switzerland, Hungary, and the United Kingdom)."), 
  tags$h5(
- "In the following pages you can find information on the survival using the KM method, median survival, mean survival and survival as one, five and ten years. Additionally, the results of eight extraolation methods to predict survival with goodness of fit measures and predicted survival at one, five and ten years for stratified and adjusted model types. Finally and a description of the characteristics of the study populations and attrition is also reported.
+ "In the following pages you can find information on the survival using the KM method, median survival, mean survival and survival as one, five and ten years. Additionally, the results of eight extrapolation methods to predict survival with goodness of fit measures and predicted survival at one, five and ten years for stratified and adjusted model types. Finally and a description of the characteristics of the study populations and attrition is also reported.
 for each cancer. All results have been performed for the whole population and for each age group (10 year age bands) and also for each sex (apart from prostate cancer)."),
 
                            # HTML('<br>'),
