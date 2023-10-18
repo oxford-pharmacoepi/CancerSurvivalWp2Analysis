@@ -14,10 +14,13 @@ library(dplyr)
 library(stringr)
 library(tidyr)
 library(ggalt)
+library(bslib)
 
 #### UI -----
 #ui <-  fluidPage(theme = shinytheme("spacelab"),
-ui <-  fluidPage(theme = shinytheme("cerulean"),
+#ui <-  fluidPage(theme = shinytheme("cerulean"),
+ui <-  fluidPage(theme = bs_theme(version = 4, bootswatch = "minty"),
+#ui <-  fluidPage(theme = bs_theme(bootswatch = "pulse"),
                  
                  # title ------ 
                  # shown across tabs
@@ -203,7 +206,7 @@ for each cancer. All results have been performed for the whole population and fo
 
 
                    ## Survival ------
- tabPanel("Population Survivaland extrapolations",
+ tabPanel("Population Survival and extrapolations",
           tags$h3("KM Survival Analysis"),
           tags$h5("For this study we also calculated overall survival using the kaplan meier method. The results contain the estimates (including median survival). risk tables and KM survival plots which are shown below...."),
           tags$hr(),
