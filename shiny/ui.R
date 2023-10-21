@@ -14,10 +14,13 @@ library(dplyr)
 library(stringr)
 library(tidyr)
 library(ggalt)
+library(bslib)
 
 #### UI -----
 #ui <-  fluidPage(theme = shinytheme("spacelab"),
-ui <-  fluidPage(theme = shinytheme("cerulean"),
+#ui <-  fluidPage(theme = shinytheme("cerulean"),
+ui <-  fluidPage(theme = bs_theme(version = 4, bootswatch = "minty"),
+#ui <-  fluidPage(theme = bs_theme(bootswatch = "pulse"),
                  
                  # title ------ 
                  # shown across tabs
@@ -38,7 +41,7 @@ ui <-  fluidPage(theme = shinytheme("cerulean"),
  "This app is a companion to the study focussing on the assessment and prediction of survival for eight different cancers
  (Breast, Colorectal, Lung, Liver, Stomach, Head & Neck, Prostate, and Pancreas) for a variety of different electronic health records and cancer registries across Europe (Spain, Netherlands, Italy, Germany, Norway, Finland, Portugal, Estonia, Switzerland, Hungary, and the United Kingdom)."), 
  tags$h5(
- "In the following pages you can find information on the survival using the KM method, median survival, mean survival and survival as one, five and ten years. Additionally, the results of eight extraolation methods to predict survival with goodness of fit measures and predicted survival at one, five and ten years for stratified and adjusted model types. Finally and a description of the characteristics of the study populations and attrition is also reported.
+ "In the following pages you can find information on the survival using the KM method, median survival, mean survival and survival as one, five and ten years. Additionally, the results of eight extrapolation methods to predict survival with goodness of fit measures and predicted survival at one, five and ten years for stratified and adjusted model types. Finally and a description of the characteristics of the study populations and attrition is also reported.
 for each cancer. All results have been performed for the whole population and for each age group (10 year age bands) and also for each sex (apart from prostate cancer)."),
 
                            # HTML('<br>'),
@@ -203,7 +206,7 @@ for each cancer. All results have been performed for the whole population and fo
 
 
                    ## Survival ------
- tabPanel("Population Survivaland extrapolations",
+ tabPanel("Population Survival and extrapolations",
           tags$h3("KM Survival Analysis"),
           tags$h5("For this study we also calculated overall survival using the kaplan meier method. The results contain the estimates (including median survival). risk tables and KM survival plots which are shown below...."),
           tags$hr(),
