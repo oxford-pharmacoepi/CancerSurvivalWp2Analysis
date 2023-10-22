@@ -25,8 +25,7 @@ data <- Pop %>%
 
 #carry out km estimate ---
 #take every other row from results
-observedkm[[j]] <- 
-  test <- survfit (Surv(time_years, status) ~ 1, data=data) %>%
+observedkm[[j]] <- survfit (Surv(time_years, status) ~ 1, data=data) %>%
   tidy() %>%
   mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") %>% 
   filter(row_number() %% 2 == 1)
