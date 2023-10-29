@@ -27,8 +27,20 @@ data <- Pop %>%
 #take every other row from results
 observedkm[[j]] <- survfit (Surv(time_years, status) ~ 1, data=data) %>%
   tidy() %>%
-  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") %>% 
-  filter(row_number() %% 2 == 1)
+  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both")
+
+# reduce the size of KM for plotting
+if(nrow(observedkm[[j]]) > 6000){
+  observedkm[[j]] <- observedkm[[j]] %>%
+    filter(row_number() %% 4 == 1)
+} else if(nrow(observedkm[[j]]) > 3000 & nrow(observedkm[[j]]) < 6000 ){
+  observedkm[[j]] <- observedkm[[j]] %>%
+    filter(row_number() %% 3 == 1)
+} else if(nrow(observedkm[[j]]) > 2000 & nrow(observedkm[[j]]) < 3000 ){
+  observedkm[[j]] <- observedkm[[j]] %>%
+    filter(row_number() %% 2 == 1)
+}
+
 
 print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
 
@@ -95,8 +107,20 @@ print(paste0("Median survival from KM from observed data ", Sys.time()," for ",o
 # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
 
 observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>%
-  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") %>% 
-  filter(row_number() %% 2 == 1)
+  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") 
+
+
+# reduce the size of haz over time for plotting
+if(nrow(observedhazotKM[[j]]) > 6000){
+  observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
+    filter(row_number() %% 4 == 1)
+}else if(nrow(observedhazotKM[[j]]) > 3000 & nrow(observedhazotKM[[j]]) < 6000 ){
+  observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
+    filter(row_number() %% 3 == 1)
+}else if(nrow(observedhazotKM[[j]]) > 2000 & nrow(observedhazotKM[[j]]) < 3000 ){
+  observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
+    filter(row_number() %% 2 == 1)
+}
 
 print(paste0("Hazard over time results for KM ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
 

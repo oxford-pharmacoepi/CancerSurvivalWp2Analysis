@@ -31,21 +31,10 @@ outcome_cohorts <- CDMConnector::readCohortSet(here(
   "Cohorts" 
 ))
 
-# Other settings ---- for troubleshooting
-# if you have instantiated outcome cohorts already set this to TRUE
-instantiatedCancerCohorts <- FALSE
+# do different things depending on database type
+if(priorhistory == TRUE){
 
-if(instantiatedCancerCohorts == TRUE){
-  
-cdm <- CDMConnector::cdm_from_con(con = db,
-                                    cdm_schema = cdm_database_schema,
-                                    write_schema = results_database_schema,
-                                    cohort_tables = c(outcome))  
-  
-  
-} else {
-#create a cdm reference for your cohorts ----
-  # using generate concept cohort set
+  # if a database has prior history then we want patients with at least 1 year prior history
 cdm <- CDMConnector::generateConceptCohortSet(
   cdm,
   conceptSet = cancerconcepts,
@@ -54,9 +43,6 @@ cdm <- CDMConnector::generateConceptCohortSet(
   requiredObservation = c(365, 0),
   end = "observation_period_end_date",
   overwrite = TRUE )
-
-}
-
 
 info(logger, "SUBSETTING CDM")
 cdm <- cdmSubsetCohort(cdm, "outcome")
@@ -87,7 +73,6 @@ cdm$outcome <- cdm$outcome %>%
     days = FALSE,
     window = list(c(-Inf, -1))
   )
-
 
 
 # get variables for analysis ---
@@ -144,20 +129,22 @@ cdm$analysis <- cdm$outcome %>%
   
   compute_query()
 
-# use this to show the SQL code
-#%>% 
-  #show_query()
-
+# see if there is prostate cancer in database then run this code and put in both if statements
 # remove females from prostate cancer cohort (misdiagnosis)
 # get cohort definition id for prostate cancer
-prostateID <- outcome_cohorts %>% 
-  filter(outcome_cohorts$cohort_name == "IncidentProstateCancer") %>% 
-  select(cohort_definition_id) %>% 
-  as.numeric()
+if( "IncidentProstateCancer" %in% outcome_cohorts$cohort_name == TRUE){
+  
+  prostateID <- outcome_cohorts %>% 
+    filter(outcome_cohorts$cohort_name == "IncidentProstateCancer") %>% 
+    select(cohort_definition_id) %>% 
+    as.numeric()
+  
+  # remove females from prostate cancer cohort (misdiagnosis)
+  cdm$analysis <- cdm$analysis %>% 
+    filter(!(sex == "Female" & cohort_definition_id == prostateID))
+}
 
-# remove females from prostate cancer cohort (misdiagnosis)
-cdm$analysis <- cdm$analysis %>% 
-  filter(!(sex == "Female" & cohort_definition_id == prostateID))
+
 
 # take the first cancer in history to make sure incident cases
 cdm$analysis <- cdm$analysis %>% 
@@ -173,6 +160,139 @@ cdm$analysis <- cdm$analysis %>%
 #update the attrition
 cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
                                       reason="Exclude patients with any prior history of maglinancy (ex skin cancer)" )
+
+} else {
+  
+  cdm <- CDMConnector::generateConceptCohortSet(
+    cdm,
+    conceptSet = cancerconcepts,
+    name = "outcome",
+    limit = "first",
+    requiredObservation = c(0, 0),
+    end = "observation_period_end_date",
+    overwrite = TRUE )
+  
+  info(logger, "SUBSETTING CDM")
+  cdm <- cdmSubsetCohort(cdm, "outcome")
+  info(logger, "SUBSETTED CDM")
+  
+  # instantiate exclusion
+  info(logger, "INSTANTIATE EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CANCER)")
+  
+  codelistExclusion <- codesFromConceptSet(here("1_InstantiateCohorts", "Exclusion"), cdm)
+  
+  cdm <- CDMConnector::generateConceptCohortSet(cdm = cdm, 
+                                                conceptSet = codelistExclusion, 
+                                                name = "exclusion",
+                                                overwrite = TRUE)
+  
+  info(logger, "INSTANTIATED EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CANCER)")
+  
+  # use patient profiles to create a flag of anyone with MALIGNANT NEOPLASTIC DISEASE (excluding skin cancer) prior to cancer diagnoses in our cohorts
+  cdm$outcome <- cdm$outcome %>% 
+    addCohortIntersect(
+      cdm = cdm,
+      targetCohortTable = "exclusion", 
+      targetStartDate = "cohort_start_date",
+      targetEndDate = "cohort_end_date",
+      flag = FALSE,
+      count = FALSE,
+      date = TRUE,
+      days = FALSE,
+      window = list(c(-Inf, 0))
+    )
+  
+  # get variables for analysis ---
+  cdm$analysis <- cdm$outcome %>% 
+    # this section uses patient profiles to add in age and age groups as well as
+    # sex and prior history
+    addDemographics(
+      age = TRUE,
+      ageName = "age",
+      ageGroup =  list(
+        "age_gr" =
+          list(
+            "18 to 29" = c(18, 29),
+            "30 to 39" = c(30, 39),
+            "40 to 49" = c(40, 49),
+            "50 to 59" = c(50, 59),
+            "60 to 69" = c(60, 69),
+            "70 to 79" = c(70, 79),
+            "80 to 89" = c(80, 89),
+            "> 90" = c(90, 150)
+          )
+      )
+    ) %>% 
+    
+    # this section adds in date of death, removes those with a diagnosis outside the study period and
+    # date.
+    # Also code sets the end date 31 dec 19 for those with observation period past this date
+    # and removes death date for people with death past dec 2019 (end of study period)
+    
+    left_join(cdm$death %>% 
+                select("person_id",  "death_date") %>% 
+                distinct(),
+              by = c("subject_id"= "person_id")) %>% 
+    left_join(cdm$observation_period %>% 
+                select("person_id",  "observation_period_end_date") %>% 
+                distinct(),
+              by = c("subject_id"= "person_id")) %>% 
+    compute_query() %>% 
+    filter(cohort_start_date >= startdate) %>% 
+    filter(cohort_start_date <= '2019-12-31') %>% 
+    mutate(observation_period_end_date_2019 = ifelse(observation_period_end_date >= '2019-12-31', '2019-12-31', NA)) %>%
+    mutate(observation_period_end_date_2019 = as.Date(observation_period_end_date_2019) ) %>%
+    mutate(observation_period_end_date_2019 = coalesce(observation_period_end_date_2019, observation_period_end_date)) %>% 
+    mutate(status = death_date) %>% 
+    mutate(status = ifelse(death_date > '2019-12-31', NA, status)) %>% 
+    mutate(status = ifelse(death_date > observation_period_end_date_2019, NA, status)) %>% 
+    mutate(status = ifelse(is.na(status), 1, 2 )) %>% 
+    mutate(time_days = observation_period_end_date_2019 - cohort_start_date ) %>% 
+    mutate(time_years=time_days/365) %>% 
+    filter(age_gr != "None") %>% 
+    mutate(sex_age_gp = str_c(age_gr, sex, sep = "_"),
+           future_observation = time_days) %>%
+    rename(anymalignacy = date_cancerexcludnonmelaskincancer_minf_to_0 ) %>% 
+    compute_query()
+  
+  # see if there is prostate cancer in database then run this code and put in both if statements
+  # remove females from prostate cancer cohort (misdiagnosis)
+  # get cohort definition id for prostate cancer
+  if( "IncidentProstateCancer" %in% outcome_cohorts$cohort_name == TRUE){
+  
+  prostateID <- outcome_cohorts %>% 
+    filter(outcome_cohorts$cohort_name == "IncidentProstateCancer") %>% 
+    select(cohort_definition_id) %>% 
+    as.numeric()
+  
+  # remove females from prostate cancer cohort (misdiagnosis)
+  cdm$analysis <- cdm$analysis %>% 
+    filter(!(sex == "Female" & cohort_definition_id == prostateID))
+  }
+  
+  # take the first cancer in history to make sure incident cases
+  cdm$analysis <- cdm$analysis %>% 
+    group_by(subject_id) %>%
+    slice_min(order_by = c(cohort_start_date)) %>%
+    ungroup() %>% 
+    compute_query()
+  
+  # create a filter that checks the dates on any malignancy (apart from non melanoma skin cancer)
+  # and sees if this date is before cohort entry for cancers of interest. If there are dates of
+  # any malignancy before cohort entry date these patients
+  cdm$analysis <- cdm$analysis %>% 
+    mutate(cancer_dates = (anymalignacy < cohort_start_date) ) %>% 
+    filter(cancer_dates != TRUE)
+  
+  #update the attrition
+  cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
+                                        reason="Exclude patients with any prior history of maglinancy (ex skin cancer)" )
+  
+}
+
+# use this to show the SQL code
+#%>% 
+  #show_query()
 
 
 # remove those with date of death and cancer diagnosis on same date
@@ -306,7 +426,7 @@ medianResults <- bind_rows(
   predmedmeanfinalageS) %>%
   mutate(Database = db.name) %>% 
   mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
-  select(!c(n.max, n.start))
+  select(!c(n.max, n.start, records, events))
 
 # hazard over time results -----
 hazOverTimeResults <- bind_rows( 

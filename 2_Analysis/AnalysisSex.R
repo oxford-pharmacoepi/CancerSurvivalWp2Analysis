@@ -26,18 +26,48 @@ for(j in 1:nrow(outcome_cohorts)) {
   #creates a test that determines if both sexs in the data and runs if only two
   sexlevels <- data %>%
     group_by(sex) %>% summarise(count = n()) %>% tally()
-  
 
   if(sexlevels == 2){
-    
     
     #carry out km estimate
     observedkm_sex[[j]] <- survfit (Surv(time_years, status) ~ sex, data=data) %>%
       tidy() %>%
       rename(Sex = strata) %>%
       mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = str_replace(Sex, "sex=Male", "Male"), 
-             Sex = str_replace(Sex,"sex=Female", "Female")) %>% 
-     filter(row_number() %% 2 == 1)
+             Sex = str_replace(Sex,"sex=Female", "Female")) 
+    
+    # reduce the size of KM for plotting
+    if(nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 6000){
+      observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 3000 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) < 6000){
+      observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 2000 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) < 3000){
+      observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]
+    }
+
+    if(nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 6000){
+      observedkm_male <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 3000 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) < 6000){
+      observedkm_male <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 2000 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) < 3000){
+      observedkm_male <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_male <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]
+    }
+
+    observedkm_sex[[j]] <- bind_rows(observedkm_female, observedkm_male)
     
       print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
         
@@ -128,8 +158,41 @@ for(j in 1:nrow(outcome_cohorts)) {
       do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
       ungroup %>%
       mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All") %>% 
-      rename(Sex = sex) %>% 
-      filter(row_number() %% 2 == 1)
+      rename(Sex = sex) 
+    
+    # reduce the size of haz over time for plotting
+    if(nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 6000){
+      observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 3000 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) < 6000){
+      observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 2000 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) < 3000){
+      observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]
+    }
+    
+    if(nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 6000){
+      observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 3000 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) < 6000){
+      observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 2000 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) < 3000){
+      observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]
+    }
+    
+    observedhazotKM_sex[[j]] <- bind_rows(observedhazotKM_female, observedhazotKM_male)
+    
     
     print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], "sex strat completed"))
     
@@ -142,7 +205,6 @@ for(j in 1:nrow(outcome_cohorts)) {
   
 } # this closes the loop on the analysis containing both sexes 
   
-
 # take the results from a list (one element for each cancer) and put into dataframe for KM survival
 observedkmcombined_sex <- dplyr::bind_rows(observedkm_sex) %>%
   rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%

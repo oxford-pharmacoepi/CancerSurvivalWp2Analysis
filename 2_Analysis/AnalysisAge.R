@@ -40,9 +40,149 @@ for(j in 1:nrow(outcome_cohorts)) {
              Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
              Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
              Age = str_replace(Age, "age_gr=> 90", "> 90") ,
-             Sex = "Both") %>% 
-      filter(row_number() %% 2 == 1)
+             Sex = "Both") 
     
+    # 18 to 29
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) > 6000){
+      observedkm_1829 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) < 6000){
+      observedkm_1829 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) < 3000){
+      observedkm_1829 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_1829 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]
+    }
+    
+    # 30 to 39
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) > 6000){
+      observedkm_3039 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) < 6000){
+      observedkm_3039 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) < 3000){
+      observedkm_3039 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_3039 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]
+    }
+
+    
+    # 40 to 49
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 6000){
+      observedkm_4049 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) < 6000){
+      observedkm_4049 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) < 3000){
+      observedkm_4049 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_4049 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]
+    }   
+    
+    
+    # 50 to 59
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 6000){
+      observedkm_5059 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) < 6000){
+      observedkm_5059 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) < 3000){
+      observedkm_5059 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_5059 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]
+    }   
+    
+    # 60 to 69
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 6000){
+      observedkm_6069 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) < 6000){
+      observedkm_6069 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) < 3000){
+      observedkm_6069 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_6069 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]
+    }    
+    
+    # 70 to 79
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 6000){
+      observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) < 6000){
+      observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) < 3000){
+      observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]
+    }       
+    
+    # 80 to 89
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) > 6000){
+      observedkm_8089 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) < 6000){
+      observedkm_8089 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) < 3000){
+      observedkm_8089 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_8089 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]
+    }     
+    
+    
+    # 90+
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) > 6000){
+      observedkm_90 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) < 6000){
+      observedkm_90 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) < 3000){
+      observedkm_90 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_90 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]
+    }   
+
+    observedkm_age[[j]] <- bind_rows(
+      observedkm_1829,
+      observedkm_3039,
+      observedkm_4049,
+      observedkm_5059,
+      observedkm_6069,
+      observedkm_7079,
+      observedkm_8089,
+      observedkm_90)    
+        
     print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed")) 
     
     # get risk table for specific times for each age group then combine again ---
@@ -243,21 +383,17 @@ for(j in 1:nrow(outcome_cohorts)) {
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
           mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
-          rename(Age = age_gr) 
-
-      },
+          rename(Age = age_gr) },
       error = function(e) {
-        cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0(" First model not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], "start removing age groups and repeat", e))
-      }
+        info(logger, paste0(" First model not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], "start removing age groups and repeat", e))},
+      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     )
     
     # if model is successful with no removal of age groups if not remove 18-29 age group
     if (exists("modelhot") == TRUE) {
       
-      observedhazotKM_age[[j]] <- modelhot %>% 
-        filter(row_number() %% 2 == 1)
+      observedhazotKM_age[[j]] <- modelhot
       
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
@@ -282,8 +418,8 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0(" after removal of 18-29 age group:  Second attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
-      }
+        info(logger, paste0(" after removal of 18-29 age group:  Second attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))} ,
+      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     )
       
     }
@@ -291,8 +427,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # if model successful after removal of 18-29 age group if not remove 30-39 age group
     if (exists("modelhot") == TRUE) {
       
-      observedhazotKM_age[[j]] <- modelhot %>% 
-        filter(row_number() %% 2 == 1)
+      observedhazotKM_age[[j]] <- modelhot 
 
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
@@ -319,14 +454,14 @@ for(j in 1:nrow(outcome_cohorts)) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
         info(logger, paste0(" after removal of 30-39 age group: 3rd attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
-      }
+      } ,
+      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     ) }
     
  
     if (exists("modelhot") == TRUE) {
       
-      observedhazotKM_age[[j]] <- modelhot %>% 
-        filter(row_number() %% 2 == 1)
+      observedhazotKM_age[[j]] <- modelhot 
       
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
@@ -352,15 +487,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0(" after removal of 40-49 age group: 4th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
+        info(logger, paste0(" after removal of 40-49 age group: 4th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))},
+      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
+    ) 
       }
-    ) }
     
     
     if (exists("modelhot") == TRUE) {
       
-      observedhazotKM_age[[j]] <- modelhot %>% 
-        filter(row_number() %% 2 == 1)
+      observedhazotKM_age[[j]] <- modelhot
       
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
@@ -387,15 +522,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0("after removal of 50-59 age group: 5th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
-      }
+        info(logger, paste0("after removal of 50-59 age group: 5th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))} ,
+      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     ) }
     
     
     if (exists("modelhot") == TRUE) {
       
-      observedhazotKM_age[[j]] <- modelhot %>% 
-        filter(row_number() %% 2 == 1)
+      observedhazotKM_age[[j]] <- modelhot
       
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
@@ -423,15 +557,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0("after removal of 60-69 age group:  6th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
-      }
+        info(logger, paste0("after removal of 60-69 age group:  6th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e)) },
+      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     )
     }    
     
     if (exists("modelhot") == TRUE) {
       
-      observedhazotKM_age[[j]] <- modelhot %>% 
-        filter(row_number() %% 2 == 1)
+      observedhazotKM_age[[j]] <- modelhot 
       
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
@@ -448,7 +581,6 @@ for(j in 1:nrow(outcome_cohorts)) {
         filter(age_gr != "60 to 69") %>% 
         filter(age_gr != "70 to 79")
     
-    
     tryCatch(
       {
         modelhot <- group_by(data,age_gr) %>% 
@@ -460,15 +592,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0("after removal of 70-79 age group: 7th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
-      }
+        info(logger, paste0("after removal of 70-79 age group: 7th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))},
+      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     ) 
       }
     
     if (exists("modelhot") == TRUE) {
       
-      observedhazotKM_age[[j]] <- modelhot %>% 
-        filter(row_number() %% 2 == 1)
+      observedhazotKM_age[[j]] <- modelhot
       
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
@@ -486,7 +617,6 @@ for(j in 1:nrow(outcome_cohorts)) {
         filter(age_gr != "70 to 79") %>% 
         filter(age_gr != "80 to 89")
     
-    
     tryCatch(
       {
         modelhot <- group_by(data,age_gr) %>% 
@@ -498,15 +628,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0(" after removal of 80-89 age group: 8th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
-      }
+        info(logger, paste0(" after removal of 80-89 age group: 8th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))},
+      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     )
     }
     
     if (exists("modelhot") == TRUE) {
       
-      observedhazotKM_age[[j]] <- modelhot %>% 
-        filter(row_number() %% 2 == 1)
+      observedhazotKM_age[[j]] <- modelhot
       
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
@@ -517,9 +646,155 @@ for(j in 1:nrow(outcome_cohorts)) {
       info(logger, paste0("hazard over time age stratification not carried due to low sample numbers in all age groups ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
     }
+    
     if (exists("modelhot") == TRUE) {
-      rm(modelhot)
+
+    # 18 to 29
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) > 6000){
+      observedhazotkm_1829 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) < 6000){
+      observedhazotkm_1829 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) < 3000){
+      observedhazotkm_1829 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotkm_1829 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]
     }
+    
+    # 30 to 39
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) > 6000){
+      observedhazotkm_3039 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) < 6000){
+      observedhazotkm_3039 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) < 3000){
+      observedhazotkm_3039 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotkm_3039 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]
+    }
+    
+    
+    # 40 to 49
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 6000){
+      observedhazotkm_4049 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) < 6000){
+      observedhazotkm_4049 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) < 3000){
+      observedhazotkm_4049 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotkm_4049 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]
+    }   
+    
+    
+    # 50 to 59
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 6000){
+      observedhazotkm_5059 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) < 6000){
+      observedhazotkm_5059 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) < 3000){
+      observedhazotkm_5059 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotkm_5059 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]
+    }   
+    
+    # 60 to 69
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 6000){
+      observedhazotkm_6069 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) < 6000){
+      observedhazotkm_6069 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) < 3000){
+      observedhazotkm_6069 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotkm_6069 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]
+    }    
+    
+    # 70 to 79
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 6000){
+      observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) < 6000){
+      observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) < 3000){
+      observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]
+    }       
+    
+    # 80 to 89
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) > 6000){
+      observedhazotkm_8089 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) < 6000){
+      observedhazotkm_8089 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) < 3000){
+      observedhazotkm_8089 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotkm_8089 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]
+    }     
+    
+    
+    # 90+
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) > 6000){
+      observedhazotkm_90 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) < 6000){
+      observedhazotkm_90 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) < 3000){
+      observedhazotkm_90 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedhazotkm_90 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]
+    }   
+    
+    observedhazotKM_age[[j]] <- bind_rows(
+      observedhazotkm_1829,
+      observedhazotkm_3039,
+      observedhazotkm_4049,
+      observedhazotkm_5059,
+      observedhazotkm_6069,
+      observedhazotkm_7079,
+      observedhazotkm_8089,
+      observedhazotkm_90)  
+    
+    rm(modelhot)
+    }
+    
+
+    
 }
 
 # take the results from a list (one element for each cancer) and put into dataframe for KM survival
