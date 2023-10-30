@@ -1,4 +1,6 @@
 #### PACKAGES -----
+# the following will prompt you to install the various packages used in the study 
+renv::restore()
 options(encoding = "UTF-8")
 
 library(shiny)
@@ -18,8 +20,8 @@ library(ggalt)
 
 # install.packages("remotes")
 # remotes::install_github("paleolimbot/libproj")
+# install.packages("devtools")
 # devtools::install_github("hrbrmstr/ggalt", ref = "noproj")
-
 
 #### UI -----
 # ui <-  fluidPage(theme = shinytheme("spacelab"),
