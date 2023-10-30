@@ -118,7 +118,8 @@ tableone_all_cancers <- cdm$analysis %>%
 
 info(logger, "CREATED TABLE ONE SUMMARY")
 
-tableone <- bind_rows(tableone, tableone_all_cancers)
+tableone <- bind_rows(tableone, tableone_all_cancers) %>% 
+  filter(variable != "Prior observation")
 
 }
 
