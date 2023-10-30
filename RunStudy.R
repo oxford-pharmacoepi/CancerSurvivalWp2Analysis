@@ -381,8 +381,7 @@ reformat_table_one <- function(table_one_summary){
     reformatted_table1 <- rbind(reformatted_table1, data.frame(x = paste0("Age Group: ", age_var[[i]], " n (%)"),
                                                                y = paste0(table_one_summary %>% dplyr::filter(variable_level == age_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
                                                                           " (",
-                                                                          #round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == age_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
-                                                                          as.numeric(table_one_summary %>% dplyr::filter(variable_level == age_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)),
+                                                                          round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == age_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
                                                                           ")")) )
   }
   
@@ -399,7 +398,7 @@ reformat_table_one <- function(table_one_summary){
     reformatted_table1 <- rbind(reformatted_table1, data.frame(x = paste0(condition_var[[i]], " n (%)"),
                                                                y = paste0(table_one_summary %>% dplyr::filter(variable_level == condition_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
                                                                           " (",
-                                                                          as.numeric(table_one_summary %>% dplyr::filter(variable_level == condition_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)),
+                                                                          round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == condition_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
                                                                           ")")))
   }
   
@@ -415,7 +414,7 @@ reformat_table_one <- function(table_one_summary){
     reformatted_table1 <- rbind(reformatted_table1, data.frame(x = paste0(medication_var[[i]], " n (%)"),
                                                                y = paste0(table_one_summary %>% dplyr::filter(variable_level == medication_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
                                                                           " (",
-                                                                          as.numeric(table_one_summary %>% dplyr::filter(variable_level == medication_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)),
+                                                                          round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == medication_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
                                                                           ")")))
   }
   reformatted_table1 <- reformatted_table1 %>% dplyr::distinct()
@@ -681,7 +680,7 @@ write_csv(GOFResults, paste0(here(output.folder),"/", cdm_name(cdm), "_goodness_
 write_csv(ExtrpolationParameters, paste0(here(output.folder),"/", cdm_name(cdm), "_extrapolation_parameters.csv"))
 write_csv(survivalProbabilities, paste0(here(output.folder),"/", cdm_name(cdm), "_survival_probabilities.csv"))
 write_csv(AnalysisRunSummary, paste0(here(output.folder),"/", cdm_name(cdm), "_analyses_run_summary.csv"))
-write_csv(tableone, paste0(here(output.folder),"/", cdm_name(cdm), "_tableone_summary.csv"))
+write_csv(tableone_final, paste0(here(output.folder),"/", cdm_name(cdm), "_tableone_summary.csv"))
 write_csv(snapshotcdm, paste0(here(output.folder),"/", cdm_name(cdm), "_cdm_snapshot.csv"))
 write_csv(attritioncdm, paste0(here(output.folder),"/", cdm_name(cdm), "_cohort_attrition.csv"))
 info(logger, "SAVED RESULTS")
@@ -711,7 +710,7 @@ survival_study_results <- list(survivalResults ,
                                ExtrpolationParameters,
                                survivalProbabilities,
                                AnalysisRunSummary,
-                               tableone,
+                               tableone_final,
                                snapshotcdm,
                                attritioncdm)
 

@@ -112,105 +112,150 @@ tableone_all_cancers <- cdm$analysis %>%
     minCellCount = 5,
     ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150))
   )  %>% 
-  mutate(group_level = "All 8 Cancers")
+  mutate(group_level = "All Cancers")
 
 )
 
-tableone <- bind_rows(tableone, tableone_all_cancers) 
-  
-  
+info(logger, "CREATED TABLE ONE SUMMARY")
+
+tableone <- bind_rows(tableone, tableone_all_cancers)
+
 }
+
+info(logger, "CREATING TABLE ONE")
+
+# rename cancers with better formats
+tableone <- tableone %>% 
+  mutate(group_level = replace(group_level, group_level == "Breastcancer", "Breast")) %>%
+  mutate(group_level = replace(group_level, group_level == "Crc", "Colorectal")) %>%
+  mutate(group_level = replace(group_level, group_level == "Hncancer", "Head and Neck")) %>%
+  mutate(group_level = replace(group_level, group_level == "Livercancer", "Liver")) %>%
+  mutate(group_level = replace(group_level, group_level == "Lungcancer", "Lung")) %>%
+  mutate(group_level = replace(group_level, group_level == "Pancreaticcancer", "Pancreatic")) %>%
+  mutate(group_level = replace(group_level, group_level == "Prostatecancer", "Prostate")) %>%
+  mutate(group_level = replace(group_level, group_level == "Stomachcancer", "Stomach")) 
 
 # tidy up the table ones for papers and shiny
 
-
-tableone_summary_breast <- tableone %>%
-  filter(group_level == "Breastcancer" & strata_name == "Overall")
-
-reformat_table_one <- function(table_one_summary){
-
-  reformatted_table1 <- data.frame(x = character(),  y = character())
+# overall
+tableone_clean_temp <- list()
+for(tableonecancer in 1:length(unique(tableone$group_level))) {
   
-  n1 <- table_one_summary %>% dplyr::filter(variable == "Number subjects") %>% dplyr::pull(estimate)
+  tabledata <- tableone %>%
+    filter(group_level == unique(tableone$group_level)[tableonecancer]) %>% 
+    filter(strata_name == "Overall")
   
-  reformatted_table1 <- rbind(reformatted_table1,
-                              data.frame(x = paste0("n"),
-                                         y = paste0(n1)))
-
-  # variables assembled by min/max etc
-  cat_var <- table_one_summary %>% dplyr::filter(estimate_type == "min") %>% dplyr::select(variable) %>% dplyr::distinct() %>% dplyr::pull(variable)
+   tb1_temp <- reformat_table_one(tabledata) %>% 
+     mutate(Cancer = unique(tabledata$group_level),
+            Stratification = "none",
+            Sex = "Both" ,
+            Age = "All" ,
+            Database = db.name)
   
-  for (i in (1:length(cat_var))){
-    reformatted_table1 <- rbind(reformatted_table1,
-                                data.frame(x = paste0(cat_var[[i]], ": median (IQR)"),
-                                           y = paste0(table_one_summary %>% dplyr::filter(variable == cat_var[[i]]) %>% dplyr::filter(estimate_type == "median") %>% dplyr::pull(estimate),
-                                                      " (",
-                                                      table_one_summary %>% dplyr::filter(variable == cat_var[[i]]) %>% dplyr::filter(estimate_type == "q25") %>% dplyr::pull(estimate),
-                                                      " - ",
-                                                      table_one_summary %>% dplyr::filter(variable == cat_var[[i]]) %>% dplyr::filter(estimate_type == "q75") %>% dplyr::pull(estimate),
-                                                      ")"))
-    )
-  }
-
-  # age group variables
-  age_var <- table_one_summary %>%
-    dplyr::filter(variable == "Age group") %>%
-    dplyr::select(variable_level) %>%
-    dplyr::distinct() %>%
-    dplyr::pull()
-
-  for (i in (1:length(age_var))){
-    reformatted_table1 <- rbind(reformatted_table1, data.frame(x = paste0("Age Group: ", age_var[[i]], " n (%)"),
-                                                               y = paste0(table_one_summary %>% dplyr::filter(variable_level == age_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
-                                                                          " (",
-                                                                          #round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == age_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
-                                                                          as.numeric(table_one_summary %>% dplyr::filter(variable_level == age_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)),
-                                                                          ")")) )
-  }
-
-
-  #condition variables
-  condition_var <- table_one_summary %>%
-    dplyr::filter(stringr::str_detect(variable, 'Conditions flag -inf')) %>%
-    dplyr::filter(!variable_level == "Malignant neoplastic disease") %>%
-    dplyr::select(variable_level) %>%
-    dplyr::distinct() %>%
-    dplyr::pull(variable_level)
-
-  for (i in (1:length(condition_var))){
-    reformatted_table1 <- rbind(reformatted_table1, data.frame(x = paste0(condition_var[[i]], " n (%)"),
-                                                               y = paste0(table_one_summary %>% dplyr::filter(variable_level == condition_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
-                                                                          " (",
-                                                                          as.numeric(table_one_summary %>% dplyr::filter(variable_level == condition_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)),
-                                                                          ")")))
-  }
-
-  #medication variables
-  medication_var <- table_one_summary %>%
-    dplyr::filter(stringr::str_detect(variable, 'Medications flag -365')) %>%
-    dplyr::filter(!variable == "Ref medications antineoplastic agents") %>%
-    dplyr::select(variable_level) %>%
-    dplyr::distinct() %>%
-    dplyr::pull(variable_level)
-
-  for (i in (1:length(medication_var))){
-    reformatted_table1 <- rbind(reformatted_table1, data.frame(x = paste0(medication_var[[i]], " n (%)"),
-                                                               y = paste0(table_one_summary %>% dplyr::filter(variable_level == medication_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
-                                                                          " (",
-                                                                          as.numeric(table_one_summary %>% dplyr::filter(variable_level == medication_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)),
-                                                                          ")")))
-  }
-  reformatted_table1 <- reformatted_table1 %>% dplyr::distinct()
-
-  ###rename columns
-  colnames(reformatted_table1) <- c("Description", "Value") 
   
-  return(reformatted_table1)
+   tableone_clean_temp[[tableonecancer]] <- tb1_temp
+   rm(tb1_temp)
   
 }
+tableone_overall <- dplyr::bind_rows(tableone_clean_temp) 
 
-testy <- reformat_table_one(tableone_summary_breast)
+# by sex
+tableone_clean_temp <- list()
+for(tableonecancer in 1:length(unique(tableone$group_level))) {
+  
+  
+  tabledata <- tableone %>%
+    filter(group_level == unique(tableone$group_level)[tableonecancer]) %>% 
+    filter(strata_name == "sex") 
+  
+  if(unique(tableone$group_level)[tableonecancer] != "Prostate") {
+  
+  tb1_tempF <- tabledata %>% 
+    filter(strata_level == "Female") %>% 
+    reformat_table_one() %>% 
+    mutate(Cancer = unique(tabledata$group_level),
+           Stratification = "Sex",
+           Sex = "Female" ,
+           Age = "All" ,
+           Database = db.name)
+  
+  tb1_tempM <- tabledata %>% 
+    filter(strata_level == "Male") %>% 
+    reformat_table_one() %>% 
+    mutate(Cancer = unique(tabledata$group_level),
+           Stratification = "Sex",
+           Sex = "Male" ,
+           Age = "All" ,
+           Database = db.name)
+  
+  #combine sexes together
+  tb1_temp <- bind_rows(tb1_tempF, tb1_tempM)
+  
+  rm(tb1_tempF, tb1_tempM)
+  
+  } else {
+    
+    tb1_tempM <- tabledata %>% 
+      filter(strata_level == "Male") %>% 
+      reformat_table_one() %>% 
+      mutate(Cancer = unique(tabledata$group_level),
+             Stratification = "Sex",
+             Sex = "Male" ,
+             Age = "All" ,
+             Database = db.name)
+    
+    tb1_temp <- tb1_tempM
+  }
+  
+  tableone_clean_temp[[tableonecancer]] <- tb1_temp
+  
+  rm(tb1_temp )
+  
+}
+tableone_sex <- dplyr::bind_rows(tableone_clean_temp) 
+
+# by age
+tableone_clean_temp <- list()
+for(tableonecancer in 1:length(unique(tableone$group_level))) {
+  
+  tabledata <- tableone %>%
+    filter(group_level == unique(tableone$group_level)[tableonecancer]) %>% 
+    filter(strata_name == "age_gr") 
+  
+tb1_temp_age <- list()
+for(z in 1:length(unique(tabledata$strata_level))) {
+  
+
+  
+# because some age groups do not have data need to have try catches to make sure loop still continues even if data not available
+  tryCatch(
+    {
+      tb1_temp_age[[z]] <- tabledata %>% 
+        filter(strata_level == unique(tabledata$strata_level)[z]) %>% 
+        reformat_table_one() %>% 
+        mutate(Cancer = unique(tabledata$group_level),
+               Stratification = "Age",
+               Sex = "Both",
+               Age =  unique(tabledata$strata_level)[z] ,
+               Database = db.name) %>% 
+        dplyr::filter(!stringr::str_detect(Description, 'Age Group:'))
+      
+      },
+    error = function(e) {info(logger, paste0(" Table one for 18 to 29 year olds not carried out for  ",unique(tableone$group_level)[tableonecancer], "see log for more information", e))},
+    warning = function(w){info(logger, paste0(unique(tableone$group_level)[tableonecancer], ": ", w))}
+  )  
+}
+  
+tableone_clean_temp[[tableonecancer]] <- bind_rows(tb1_temp_age)
+  
+  rm(tb1_temp_age)
+}
+
+tableone_age <- dplyr::bind_rows(tableone_clean_temp) 
 
 
+# combine all tableone outputs
+tableone_final <- dplyr::bind_rows(tableone_overall, tableone_sex, tableone_age)
 
 
+info(logger, "CREATED TABLE ONE")
