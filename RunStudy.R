@@ -663,7 +663,8 @@ AnalysisRunSummary <-
   mutate(Database = cdm_name(cdm))
 
 # snapshot the cdm
-snapshotcdm <- snapshot(cdm)
+snapshotcdm <- snapshot(cdm) %>% 
+  mutate(Database = cdm_name(cdm))
 
 #get attrition for the cohorts and add cohort identification
 attritioncdm <- cohort_attrition(cdm$analysis) %>% 
@@ -673,7 +674,8 @@ attritioncdm <- cohort_attrition(cdm$analysis) %>%
             keep = FALSE
             ) %>% 
   select(!c(cohort, json)) %>% 
-  relocate(cohort_name)
+  relocate(cohort_name) %>% 
+  mutate(Database = cdm_name(cdm))
 
 # save results as csv for data partner can review
 info(logger, "SAVING RESULTS")
