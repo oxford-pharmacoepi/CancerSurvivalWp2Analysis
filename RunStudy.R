@@ -394,12 +394,14 @@ reformat_table_one <- function(table_one_summary){
     dplyr::distinct() %>%
     dplyr::pull(variable_level)
   
+  if(length(condition_var) != 0) {
   for (i in (1:length(condition_var))){
     reformatted_table1 <- rbind(reformatted_table1, data.frame(x = paste0(condition_var[[i]], " n (%)"),
                                                                y = paste0(table_one_summary %>% dplyr::filter(variable_level == condition_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
                                                                           " (",
                                                                           round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == condition_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
                                                                           ")")))
+  }
   }
   
   #medication variables
@@ -410,12 +412,15 @@ reformat_table_one <- function(table_one_summary){
     dplyr::distinct() %>%
     dplyr::pull(variable_level)
   
+  
+  if(length(medication_var) != 0) {
   for (i in (1:length(medication_var))){
     reformatted_table1 <- rbind(reformatted_table1, data.frame(x = paste0(medication_var[[i]], " n (%)"),
                                                                y = paste0(table_one_summary %>% dplyr::filter(variable_level == medication_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
                                                                           " (",
                                                                           round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == medication_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
                                                                           ")")))
+  }
   }
   reformatted_table1 <- reformatted_table1 %>% dplyr::distinct()
   

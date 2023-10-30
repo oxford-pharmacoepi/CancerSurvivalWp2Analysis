@@ -135,8 +135,7 @@ tableone <- tableone %>%
   mutate(group_level = replace(group_level, group_level == "Prostatecancer", "Prostate")) %>%
   mutate(group_level = replace(group_level, group_level == "Stomachcancer", "Stomach")) 
 
-# tidy up the table ones for papers and shiny
-
+# tidy up the table ones
 # overall
 tableone_clean_temp <- list()
 for(tableonecancer in 1:length(unique(tableone$group_level))) {
@@ -250,7 +249,6 @@ tableone_clean_temp[[tableonecancer]] <- bind_rows(tb1_temp_age)
   
   rm(tb1_temp_age)
 }
-
 tableone_age <- dplyr::bind_rows(tableone_clean_temp) 
 
 
