@@ -42,10 +42,104 @@ server <-	function(input, output, session) {
               ))
   } )
   
-  # KM plots no extrapolations
+  # KM survival plots no extrapolations
   output$plot_km <- renderPlotly({
     
     table <- get_km()
+    validate(need(ncol(table)>1,
+                  "No results for selected inputs"))
+    
+    if(is.null(input$km_plot_group)){
+      if(!is.null(input$km_plot_facet)){
+        p<-table %>%
+          unite("facet_var",
+                c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+          ggplot(aes_string(x= "time", y="est",
+                            ymin = "lcl",
+                            ymax = "ucl")) +
+          geom_line() +
+          #geom_point(position=position_dodge(width=1))+
+          #geom_errorbar(width=0) +
+          facet_wrap(vars(facet_var),ncol = 2)+
+          scale_y_continuous(
+            limits = c(0, NA)
+          ) +
+          theme_bw()
+      } else{
+        p<-table %>%
+          ggplot(aes_string(x="time", y="est",
+                            ymin = "lcl",
+                            ymax = "ucl")) +
+          #geom_point(position=position_dodge(width=1))+
+          #geom_errorbar(width=0) +
+          scale_y_continuous(
+            limits = c(0, NA)
+          ) +
+          theme_bw()
+      }
+    }
+    
+    
+    if(!is.null(input$km_plot_group) ){
+      
+      if(is.null(input$km_plot_facet) ){
+        p<-table %>%
+          unite("Group",
+                c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+          ggplot(aes_string(x="time", y="est",
+                            ymin = "lcl",
+                            ymax = "ucl",
+                            group="Group",
+                            colour="Group")) +
+          geom_line() +
+          #geom_point(position=position_dodge(width=1))+
+          #geom_errorbar(width=0, position=position_dodge(width=1)) +
+          theme_bw()
+      }
+      
+      if(!is.null(input$km_plot_facet) ){
+        if(!is.null(input$km_plot_group) ){
+          p<-table %>%
+            unite("Group",
+                  c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+            unite("facet_var",
+                  c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+            ggplot(aes_string(x="time", y="est",
+                              ymin = "lcl",
+                              ymax = "ucl",
+                              group="Group",
+                              colour="Group")) +
+            #geom_point(position=position_dodge(width=1))+
+            #geom_errorbar(width=0, position=position_dodge(width=1)) +
+            geom_line() +
+            facet_wrap(vars(facet_var),ncol = 2)+
+            scale_y_continuous(
+              limits = c(0, NA)
+            )  +
+            theme_bw()
+        }
+      }
+      
+    }
+    
+    p
+    
+  })
+  
+  # km haz over time plot no extrapolations
+  get_hot_km <- reactive({
+    
+    table <- hot_km %>%
+      filter(Database %in% input$km_database_name_selector)  %>%
+      filter(Cancer %in% input$km_outcome_cohort_name_selector) %>%
+      filter(Age %in% input$km_age_group_selector)     %>%
+      filter(Sex %in% input$km_sex_selector)      
+    
+    table
+  })
+  output$plot_hot_km <- renderPlotly({
+    
+    table <- get_hot_km()
     validate(need(ncol(table)>1,
                   "No results for selected inputs"))
     
@@ -260,6 +354,7 @@ server <-	function(input, output, session) {
 
     table<-risk_table_results %>%
       # first deselect settings which did not vary for this study
+      select(!c(Method, Adjustment)) %>% 
       filter(Database %in% input$km_database_name_selector)  %>%
       filter(Cancer %in% input$km_outcome_cohort_name_selector) %>%
       filter(Age %in% input$km_age_group_selector)     %>%
@@ -274,7 +369,8 @@ server <-	function(input, output, session) {
     validate(need(ncol(table)>1,
                   "No results for selected inputs"))
 
-    table <- table 
+    table <- table %>% 
+      relocate(Cancer)
 
     datatable(table,
               rownames= FALSE,
@@ -293,6 +389,7 @@ server <-	function(input, output, session) {
     
     table <- med_surv_km %>%
       # first deselect settings which did not vary for this study
+      select(!c(Method)) %>% 
       filter(Database %in% input$km_database_name_selector)  %>%
       filter(Cancer %in% input$km_outcome_cohort_name_selector) %>%
       filter(Age %in% input$km_age_group_selector)     %>%
@@ -307,7 +404,13 @@ server <-	function(input, output, session) {
     validate(need(ncol(table)>1,
                   "No results for selected inputs"))
     
-    table <- table 
+    table <- table %>% 
+    mutate(rmean=nice.num2(rmean)) %>%
+    mutate(`se(rmean)`=nice.num2(`se(rmean)`)) %>%
+    mutate(median=nice.num2(median)) %>%
+    mutate(`0.95LCL`=nice.num2(`0.95LCL`)) %>%
+    mutate(`0.95UCL`=nice.num2(`0.95UCL`)) %>%
+    relocate(Cancer)
     
     datatable(table,
               rownames= FALSE,
@@ -446,5 +549,9 @@ server <-	function(input, output, session) {
                                                  filename = "CDMsnapshot"))
               ))
   } )
+
+  
+  
+  
    
 }

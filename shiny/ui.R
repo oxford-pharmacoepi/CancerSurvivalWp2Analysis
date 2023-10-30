@@ -68,11 +68,152 @@ for each cancer. All results have been performed for the whole population and fo
  
  
                    ), 
+
+
+
+## KM ------                 
+tabPanel("Population Survival",	  
+         tags$h3("Study Population Survival"),
+         tags$h5("This section contains the overall survival for each cancer for each database. Kaplan-Meier plots, median and mean survival are also presented as well as survival at one, five and ten years for the whole population and stratified by sex and age group."),
+         tags$hr(),
+         tags$h5("Attributes") ,
+         div(style="display: inline-block;vertical-align:top; width: 150px;",
+             pickerInput(inputId = "km_database_name_selector",
+                         label = "Database",
+                         choices = unique(survival_km$Database),
+                         selected = unique(survival_km$Database),
+                         options = list(
+                           `actions-box` = TRUE,
+                           size = 10,
+                           `selected-text-format` = "count > 3"),
+                         multiple = TRUE)
+         ),
+         
+         div(style="display: inline-block;vertical-align:top; width: 150px;",
+             pickerInput(inputId = "km_outcome_cohort_name_selector",
+                         label = "Cancer",
+                         choices = unique(survival_km$Cancer),
+                         selected = c("IncidentBreastCancer"),
+                         options = list(
+                           `actions-box` = TRUE,
+                           size = 10,
+                           `selected-text-format` = "count > 3"),
+                         multiple = TRUE)
+         ),      
+         
+         div(style="display: inline-block;vertical-align:top; width: 150px;",
+             pickerInput(inputId = "km_sex_selector",
+                         label = "Sex",
+                         choices = unique(survival_km$Sex),
+                         selected = c("Both"),
+                         options = list(
+                           `actions-box` = TRUE,
+                           size = 10,
+                           `selected-text-format` = "count > 3"),
+                         multiple = TRUE)
+         ),    
+         
+         div(style="display: inline-block;vertical-align:top; width: 150px;",
+             pickerInput(inputId = "km_age_group_selector",
+                         label = "Age",
+                         choices = unique(survival_km$Age),
+                         selected = c("All"),
+                         options = list(
+                           `actions-box` = TRUE,
+                           size = 10,
+                           `selected-text-format` = "count > 3"),
+                         multiple = TRUE)
+         ),    
+         
+         tags$hr(),
+         tabsetPanel(type = "tabs",
+                     tabPanel("Plot of KM survival curve",
+                              tags$hr(),
+                              tags$h5("Plotting Options"),
+                              div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                  pickerInput(inputId = "km_plot_facet",
+                                              label = "Facet by",
+                                              choices = c("Cancer",
+                                                          "Database",
+                                                          "Sex",
+                                                          "Age"
+                                              ),
+                                              selected = c("Cancer"),
+                                              options = list(
+                                                `actions-box` = TRUE,
+                                                size = 10,
+                                                `selected-text-format` = "count > 3"),
+                                              multiple = TRUE,)
+                              ),
+                              div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                  pickerInput(inputId = "km_plot_group",
+                                              label = "Colour by",
+                                              choices = c("Sex",
+                                                          "Age",
+                                                          "Cancer",
+                                                          "Database"),
+                                              selected = c("Database"),
+                                              options = list(
+                                                `actions-box` = TRUE,
+                                                size = 10,
+                                                `selected-text-format` = "count > 3"),
+                                              multiple = TRUE,)
+                              ),
+                              plotlyOutput('plot_km', height = "800px") %>% withSpinner() ),
+                     
+                     tabPanel("Plot of hazard over time curve",
+                              tags$hr(),
+                              tags$h5("Plotting Options"),
+                              div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                  pickerInput(inputId = "km_plot_facet",
+                                              label = "Facet by",
+                                              choices = c("Cancer",
+                                                          "Database",
+                                                          "Sex",
+                                                          "Age"
+                                              ),
+                                              selected = c("Cancer"),
+                                              options = list(
+                                                `actions-box` = TRUE,
+                                                size = 10,
+                                                `selected-text-format` = "count > 3"),
+                                              multiple = TRUE,)
+                              ),
+                              div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                  pickerInput(inputId = "km_plot_group",
+                                              label = "Colour by",
+                                              choices = c("Sex",
+                                                          "Age",
+                                                          "Cancer",
+                                                          "Database"),
+                                              selected = c("Database"),
+                                              options = list(
+                                                `actions-box` = TRUE,
+                                                size = 10,
+                                                `selected-text-format` = "count > 3"),
+                                              multiple = TRUE,)
+                              ),
+                              plotlyOutput('plot_hot_km', height = "800px") %>% withSpinner() ),                    
+                     
+                     tabPanel("KM risk table",
+                              DTOutput('tbl_survival_risk_table') %>% withSpinner()),
+                     
+                     tabPanel("Median survival estimates",
+                              tags$hr(),
+                              DTOutput('tbl_survival_median_table') %>% withSpinner()),
+                     
+                     tabPanel("Survival Probabilities",
+                              DTOutput('tbl_survival_probs_table') %>% withSpinner())
+                     
+                     
+         )
+         
+) ,
  
 ## Survival extrapolation ------
- tabPanel("Population Survival and extrapolations",
-          tags$h3("KM Survival Analysis"),
-          tags$h5("For this study we also calculated overall survival using the kaplan meier method. The results contain the estimates (including median survival). risk tables and KM survival plots which are shown below...."),
+ tabPanel("Population Survival Extrapolations",
+          tags$h3("Survival Extrapolation Analysis"),
+          tags$h5("For this analysis we used nine extrapolation methods to model the observed survival. Below are the predicted survival curves, hazard over time, median and mean survival and survival at one, five and ten years. Two sets of analyses were performed 1) stratified by sex and age 2) adjusted by sex and age."),
           tags$hr(),
           tags$h5("Strata"),
           div(style="display: inline-block;vertical-align:top; width: 150px;",
@@ -193,7 +334,7 @@ for each cancer. All results have been performed for the whole population and fo
                                                choices = c("Sex",
                                                            "Age",
                                                            "Cancer",
-                                                           "Database",
+                                                         #  "Database",
                                                            "Method"),
                                                selected = c("Database", "Method"),
                                                options = list(
@@ -211,122 +352,10 @@ for each cancer. All results have been performed for the whole population and fo
 
  ) ,
 
-
-
-## KM ------                 
-tabPanel("KM plots",	  
-         tags$h3("Study Population Survival"),
-         tags$h5("TBC"),
-         tags$hr(),
-         tags$h5("Attributes") ,
-         div(style="display: inline-block;vertical-align:top; width: 150px;",
-             pickerInput(inputId = "km_database_name_selector",
-                         label = "Database",
-                         choices = unique(survival_km$Database),
-                         selected = unique(survival_km$Database),
-                         options = list(
-                           `actions-box` = TRUE,
-                           size = 10,
-                           `selected-text-format` = "count > 3"),
-                         multiple = TRUE)
-             ),
-         
-         div(style="display: inline-block;vertical-align:top; width: 150px;",
-             pickerInput(inputId = "km_outcome_cohort_name_selector",
-                         label = "Cancer",
-                         choices = unique(survival_km$Cancer),
-                         selected = c("IncidentBreastCancer"),
-                         options = list(
-                           `actions-box` = TRUE,
-                           size = 10,
-                           `selected-text-format` = "count > 3"),
-                         multiple = TRUE)
-         ),      
-         
-         div(style="display: inline-block;vertical-align:top; width: 150px;",
-             pickerInput(inputId = "km_sex_selector",
-                         label = "Sex",
-                         choices = unique(survival_km$Sex),
-                         selected = c("Both"),
-                         options = list(
-                           `actions-box` = TRUE,
-                           size = 10,
-                           `selected-text-format` = "count > 3"),
-                         multiple = TRUE)
-         ),    
-         
-         div(style="display: inline-block;vertical-align:top; width: 150px;",
-             pickerInput(inputId = "km_age_group_selector",
-                         label = "Age",
-                         choices = unique(survival_km$Age),
-                         selected = c("All"),
-                         options = list(
-                           `actions-box` = TRUE,
-                           size = 10,
-                           `selected-text-format` = "count > 3"),
-                         multiple = TRUE)
-         ),    
-         
-tags$hr(),
-tabsetPanel(type = "tabs",
-            tabPanel("Plot of KM survival curve",
-                     tags$hr(),
-                     tags$h5("Plotting Options"),
-                     div(style="display: inline-block;vertical-align:top; width: 150px;",
-                         pickerInput(inputId = "km_plot_facet",
-                                     label = "Facet by",
-                                     choices = c("Cancer",
-                                                 "Database",
-                                                 "Sex",
-                                                 "Age"
-                                     ),
-                                     selected = c("Cancer"),
-                                     options = list(
-                                       `actions-box` = TRUE,
-                                       size = 10,
-                                       `selected-text-format` = "count > 3"),
-                                     multiple = TRUE,)
-                     ),
-                     div(style="display: inline-block;vertical-align:top; width: 150px;",
-                         pickerInput(inputId = "km_plot_group",
-                                     label = "Colour by",
-                                     choices = c("Sex",
-                                                 "Age",
-                                                 "Cancer",
-                                                 "Database"),
-                                     selected = c("Database"),
-                                     options = list(
-                                       `actions-box` = TRUE,
-                                       size = 10,
-                                       `selected-text-format` = "count > 3"),
-                                     multiple = TRUE,)
-                     ),
-                     plotlyOutput('plot_km', height = "800px") %>% withSpinner() ),
-            
-            
-            
-            tabPanel("KM risk table",
-                     DTOutput('tbl_survival_risk_table') %>% withSpinner()),
-            
-            tabPanel("Median survival estimates",
-                     tags$hr(),
-                     DTOutput('tbl_survival_median_table') %>% withSpinner()),
-            
-            tabPanel("Survival Probabilities",
-                     DTOutput('tbl_survival_probs_table') %>% withSpinner())
-            
-            
-)
-
-) ,
-
-            
-
-
 ## Population characteristics ------ 
                    tabPanel("Population Characteristics",	  
                             tags$h3("Study Population Characteristics"),
-                            tags$h5("The population characteristics are shown for the different cancers with sex and age strata is below. For conditions any time prior from cancer diagnosis was used to capture conditions and for medications up to one year prior was used to capture medication utilisation."),
+                            tags$h5("The population characteristics are shown for the different cancers with sex and age strata is below. For databases with information on prior history for conditions and medication, for conditions any time prior from cancer diagnosis was used to capture conditions and for medications up to one year prior was used to capture medication utilisation."),
                             tags$hr(),
                             tags$h5("Study outcome") ,
                             div(style="display: inline-block;vertical-align:top; width: 150px;",
@@ -370,7 +399,7 @@ tabsetPanel(type = "tabs",
                    ) ,
                    
 ## Population attrition ------                 
- tabPanel("Population attrition",	  
+ tabPanel("Population Attrition",	  
           tags$h3("Study Population Attrition"),
           tags$h5("Below is the attrition for each cancer showing how the final study numbers were obtained for the study."),
           tags$hr(),
