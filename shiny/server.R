@@ -1,7 +1,7 @@
 #### SERVER ------
 server <-	function(input, output, session) {
   
-  # survival estimates: km only
+# survival estimates: km only
   get_km <- reactive({
     
     #table <- surv_prob_km %>%
@@ -42,7 +42,7 @@ server <-	function(input, output, session) {
               ))
   } )
   
-  # KM survival plots no extrapolations
+# KM survival plots no extrapolations
   output$plot_km <- renderPlotly({
     
     table <- get_km()
@@ -126,7 +126,7 @@ server <-	function(input, output, session) {
     
   })
   
-  # km haz over time plot no extrapolations
+# km haz over time plot no extrapolations
   get_hot_km <- reactive({
     
     table <- hot_km %>%
@@ -220,7 +220,7 @@ server <-	function(input, output, session) {
     
   })
   
-  # survival estimates: whole population with extrapolations
+# survival estimates: whole population with extrapolations
   get_survival_estimates<-reactive({
 
     table <- survival_estimates %>%
@@ -265,7 +265,7 @@ server <-	function(input, output, session) {
               ))
   } )
 
-  # KM plots with extrapolations
+# KM plots with extrapolations
   output$plot_survival_estimates<- renderPlotly({
 
     table<-get_survival_estimates()
@@ -389,7 +389,7 @@ server <-	function(input, output, session) {
     
     table <- med_surv_km %>%
       # first deselect settings which did not vary for this study
-      select(!c(Method)) %>% 
+      select(!c(Method, Stratification)) %>% 
       filter(Database %in% input$km_database_name_selector)  %>%
       filter(Cancer %in% input$km_outcome_cohort_name_selector) %>%
       filter(Age %in% input$km_age_group_selector)     %>%
@@ -443,7 +443,10 @@ server <-	function(input, output, session) {
     validate(need(ncol(table)>1,
                   "No results for selected inputs"))
     
-    table <- table 
+    table <- table %>% 
+    mutate(surv=nice.num(surv)) %>%
+      mutate(lower=nice.num(lower)) %>%
+      mutate(upper=nice.num(upper))
     
     datatable(table,
               rownames= FALSE,
@@ -456,8 +459,7 @@ server <-	function(input, output, session) {
                                                  filename = "survprobs_table"))
               ))
   } )
-  
-  
+
 # table 1
   get_table_one <-reactive({
     

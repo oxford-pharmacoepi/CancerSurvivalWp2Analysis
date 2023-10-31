@@ -372,18 +372,6 @@ tabPanel("Population Survival",
 
                             ),
                             
-                            # div(style="display: inline-block;vertical-align:top; width: 150px;",
-                            #     pickerInput(inputId = "table1_strata_selector",
-                            #                 label = "Stratfication",
-                            #                 choices = sort(unique(tableone_summary$Stratification)),
-                            #                 selected = c("none"),
-                            #                 options = list(
-                            #                   `actions-box` = TRUE,
-                            #                   size = 10,
-                            #                   `selected-text-format` = "count > 3"),
-                            #                 multiple = TRUE)
-                            # ),
-                            
                             div(style="display: inline-block;vertical-align:top; width: 150px;",
                                 pickerInput(inputId = "table1_sex_selector",
                                             label = "Sex",
