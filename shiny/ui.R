@@ -197,13 +197,26 @@ tabPanel("Population Survival",
                               plotlyOutput('plot_hot_km', height = "800px") %>% withSpinner() ),                    
                      
                      tabPanel("KM risk table",
+                 
+                              
                               DTOutput('tbl_survival_risk_table') %>% withSpinner()),
                      
                      tabPanel("Median survival estimates",
-                              tags$hr(),
                               DTOutput('tbl_survival_median_table') %>% withSpinner()),
                      
                      tabPanel("Survival Probabilities",
+                              tags$hr(),
+                              div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                  pickerInput(inputId = "km_time_selector",
+                                              label = "Filter time",
+                                              choices = unique(survival_probabilities$time),
+                                              selected = unique(survival_probabilities$time),
+                                              options = list(
+                                                `actions-box` = TRUE,
+                                                size = 10,
+                                                `selected-text-format` = "count > 3"),
+                                              multiple = TRUE,)
+                              ),
                               DTOutput('tbl_survival_probs_table') %>% withSpinner())
                      
                      

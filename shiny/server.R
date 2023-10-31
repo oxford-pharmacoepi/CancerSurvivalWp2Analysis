@@ -41,7 +41,6 @@ server <-	function(input, output, session) {
                                                  filename = "km_survival_estimates"))
               ))
   } )
-  
   output$plot_km <- renderPlotly({
     table <- get_km()
     validate(need(ncol(table) > 1, "No results for selected inputs"))
@@ -53,15 +52,19 @@ server <-	function(input, output, session) {
         p <- table %>%
           unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
           ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = facet_var)) +
-          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = facet_var), alpha = 0.5) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = facet_var), alpha = 0.3) +
           geom_line() +
+          xlab("Time (Years)") +
+          ylab("Survival Probability") +
           facet_wrap(vars(facet_var), ncol = 2) +
           scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
       } else {
         p <- table %>%
           ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl)) +
-          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = "blue"), alpha = 0.5) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = "blue"), alpha = 0.3) +
+          xlab("Time (Years)") +
+          ylab("Survival Probability") +
           scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
       }
@@ -73,8 +76,10 @@ server <-	function(input, output, session) {
           unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
           unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
           ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group, fill = Group)) +
-          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.5) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.3) +
           geom_line() +
+          xlab("Time (Years)") +
+          ylab("Survival Probability") +
           facet_wrap(vars(facet_var), ncol = 2) +
           scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
@@ -83,8 +88,10 @@ server <-	function(input, output, session) {
           unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
           mutate(Group = factor(Group)) +
           ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group, fill = Group)) +
-          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.5) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.3) +
           geom_line() +
+          xlab("Time (Years)") +
+          ylab("Survival Probability") +
           scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
       }
@@ -105,91 +112,6 @@ server <-	function(input, output, session) {
     
     table
   })
-  
-  # output$plot_hot_km <- renderPlotly({
-  #   
-  #   table <- get_hot_km()
-  #   validate(need(ncol(table)>1,
-  #                 "No results for selected inputs"))
-  #   
-  #   if(is.null(input$km_plot_group)){
-  #     if(!is.null(input$km_plot_facet)){
-  #       p<-table %>%
-  #         unite("facet_var",
-  #               c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
-  #         ggplot(aes_string(x= "time", y="est",
-  #                           ymin = "lcl",
-  #                           ymax = "ucl")) +
-  #         geom_line() +
-  #         #geom_point(position=position_dodge(width=1))+
-  #         #geom_errorbar(width=0) +
-  #         facet_wrap(vars(facet_var),ncol = 2)+
-  #         scale_y_continuous(
-  #           limits = c(0, NA)
-  #         ) +
-  #         theme_bw()
-  #     } else{
-  #       p<-table %>%
-  #         ggplot(aes_string(x="time", y="est",
-  #                           ymin = "lcl",
-  #                           ymax = "ucl")) +
-  #         #geom_point(position=position_dodge(width=1))+
-  #         #geom_errorbar(width=0) +
-  #         scale_y_continuous(
-  #           limits = c(0, NA)
-  #         ) +
-  #         theme_bw()
-  #     }
-  #   }
-  #   
-  #   
-  #   if(!is.null(input$km_plot_group) ){
-  #     
-  #     if(is.null(input$km_plot_facet) ){
-  #       p<-table %>%
-  #         unite("Group",
-  #               c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
-  #         ggplot(aes_string(x="time", y="est",
-  #                           ymin = "lcl",
-  #                           ymax = "ucl",
-  #                           group="Group",
-  #                           colour="Group")) +
-  #         geom_line() +
-  #         #geom_point(position=position_dodge(width=1))+
-  #         #geom_errorbar(width=0, position=position_dodge(width=1)) +
-  #         theme_bw()
-  #     }
-  #     
-  #     if(!is.null(input$km_plot_facet) ){
-  #       if(!is.null(input$km_plot_group) ){
-  #         p<-table %>%
-  #           unite("Group",
-  #                 c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
-  #           unite("facet_var",
-  #                 c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
-  #           ggplot(aes_string(x="time", y="est",
-  #                             ymin = "lcl",
-  #                             ymax = "ucl",
-  #                             group="Group",
-  #                             colour="Group")) +
-  #           #geom_point(position=position_dodge(width=1))+
-  #           #geom_errorbar(width=0, position=position_dodge(width=1)) +
-  #           geom_line() +
-  #           facet_wrap(vars(facet_var),ncol = 2)+
-  #           scale_y_continuous(
-  #             limits = c(0, NA)
-  #           )  +
-  #           theme_bw()
-  #       }
-  #     }
-  #     
-  #   }
-  #   
-  #   p
-  #   
-  # })
-  # 
-  # 
   output$plot_hot_km <- renderPlotly({
     table <- get_hot_km()
     validate(need(ncol(table) > 1, "No results for selected inputs"))
@@ -370,7 +292,7 @@ server <-	function(input, output, session) {
 
     table<-risk_table_results %>%
       # first deselect settings which did not vary for this study
-      select(!c(Method, Adjustment)) %>% 
+      select(!c(Method, Adjustment, Stratification)) %>% 
       filter(Database %in% input$km_database_name_selector)  %>%
       filter(Cancer %in% input$km_outcome_cohort_name_selector) %>%
       filter(Age %in% input$km_age_group_selector)     %>%
@@ -448,7 +370,8 @@ server <-	function(input, output, session) {
       filter(Database %in% input$km_database_name_selector)  %>%
       filter(Cancer %in% input$km_outcome_cohort_name_selector) %>%
       filter(Age %in% input$km_age_group_selector)     %>%
-      filter(Sex %in% input$km_sex_selector)    
+      filter(Sex %in% input$km_sex_selector)    %>% 
+      filter(time %in% input$km_time_selector )
     
     table
   })
@@ -463,10 +386,8 @@ server <-	function(input, output, session) {
     mutate(surv=nice.num(surv)) %>%
       mutate(lower=nice.num(lower)) %>%
       mutate(upper=nice.num(upper)) %>% 
-      select(!c(surv, lower, upper, Method, Stratification))
-    # %>% 
-    #   relocate(c(time, `Survival Rate % (95% CI)` )) %>% 
-    #   rename(`Time (years)` = time)
+      select(!c(surv, lower, upper, Method, Stratification)) %>% 
+     rename(`Time (years)` = time)
       
     
     datatable(table,
@@ -518,8 +439,6 @@ server <-	function(input, output, session) {
 # table for extrapolation parameters 
   
 # gof fit results
-  
-# hazard over time results
   
 # table for cohort attrition
   get_table_attrition <-reactive({
