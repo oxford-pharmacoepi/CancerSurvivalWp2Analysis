@@ -361,30 +361,53 @@ tabPanel("Population Survival",
                             div(style="display: inline-block;vertical-align:top; width: 150px;",
                                 pickerInput(inputId = "table1_outcome_cohort_name_selector",
                                             label = "Cancer",
-                                            choices = sort(unique(tableone_summary$group_level)),
-                                            selected = c("Breastcancer"),
+                                            choices = sort(unique(tableone_summary$Cancer)),
+                                            selected = c("Breast"),
                                             options = list(
                                               `actions-box` = TRUE,
                                               size = 10,
                                               `selected-text-format` = "count > 3"),
-                                            multiple = TRUE)
-
+                                            multiple = FALSE)
 
 
                             ),
+                            
+                            # div(style="display: inline-block;vertical-align:top; width: 150px;",
+                            #     pickerInput(inputId = "table1_strata_selector",
+                            #                 label = "Stratfication",
+                            #                 choices = sort(unique(tableone_summary$Stratification)),
+                            #                 selected = c("none"),
+                            #                 options = list(
+                            #                   `actions-box` = TRUE,
+                            #                   size = 10,
+                            #                   `selected-text-format` = "count > 3"),
+                            #                 multiple = TRUE)
+                            # ),
                             
                             div(style="display: inline-block;vertical-align:top; width: 150px;",
-                                pickerInput(inputId = "table1_strata_selector",
-                                            label = "Strata",
-                                            choices = sort(unique(tableone_summary$strata_level)),
-                                            selected = c("Overall"),
+                                pickerInput(inputId = "table1_sex_selector",
+                                            label = "Sex",
+                                            choices = sort(unique(tableone_summary$Sex)),
+                                            selected = c("Both"),
                                             options = list(
                                               `actions-box` = TRUE,
                                               size = 10,
                                               `selected-text-format` = "count > 3"),
                                             multiple = TRUE)
                             ),
-                            
+
+                            div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                pickerInput(inputId = "table1_age_selector",
+                                            label = "Age",
+                                            choices = sort(unique(tableone_summary$Age)),
+                                            selected = c("All"),
+                                            options = list(
+                                              `actions-box` = TRUE,
+                                              size = 10,
+                                              `selected-text-format` = "count > 3"),
+                                            multiple = TRUE)
+                            ),
+
                             
                             tabsetPanel(type = "tabs",
                                         tabPanel("Study Population Characteristics", 

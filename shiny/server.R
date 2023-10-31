@@ -462,8 +462,10 @@ server <-	function(input, output, session) {
   get_table_one <-reactive({
     
     table <- tableone_summary %>% 
-      filter(group_level %in% input$table1_outcome_cohort_name_selector) %>% 
-      filter(strata_level %in% input$table1_strata_selector) 
+      filter(Cancer %in% input$table1_outcome_cohort_name_selector) %>% 
+      #filter(Stratification %in% input$table1_strata_selector) %>% 
+      filter(Sex %in% input$table1_sex_selector) %>% 
+      filter(Age %in% input$table1_age_selector)
     
     table
   }) 
