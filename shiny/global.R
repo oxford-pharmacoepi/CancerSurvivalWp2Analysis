@@ -42,3 +42,6 @@ med_surv_km <- median_survival_results %>%
 hot_km <- hazard_overtime_results %>% 
   filter(Method == "Kaplan-Meier")
 
+#filter results for stratified results
+survival_est_strat <- survival_estimates %>% 
+  filter(Adjustment == "None" )

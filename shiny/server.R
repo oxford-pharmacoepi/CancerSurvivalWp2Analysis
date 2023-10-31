@@ -220,19 +220,14 @@ server <-	function(input, output, session) {
     
   })
   
-# survival estimates: whole population with extrapolations
+# survival estimates: whole population with extrapolations STRATIFICATION
   get_survival_estimates<-reactive({
 
-    table <- survival_estimates %>%
-      # first deselect settings which did not vary for this study
+    table <- survival_est_strat %>%
       filter(Database %in% input$survival_database_name_selector)  %>%
       filter(Cancer %in% input$survival_outcome_cohort_name_selector) %>%
-      filter(Stratification %in% input$survival_strat_selector) %>%
-      filter(Adjustment %in% input$survival_adjust_selector) %>% 
-      filter(Method %in% input$survival_method_selector) %>% 
       filter(Age %in% input$survival_age_group_selector)     %>%
       filter(Sex %in% input$survival_sex_selector)    
-
 
     table
   })
@@ -265,7 +260,7 @@ server <-	function(input, output, session) {
               ))
   } )
 
-# KM plots with extrapolations
+# KM plots with extrapolations STRATIFICATION
   output$plot_survival_estimates<- renderPlotly({
 
     table<-get_survival_estimates()
@@ -277,7 +272,7 @@ server <-	function(input, output, session) {
         p<-table %>%
           unite("facet_var",
                 c(all_of(input$survival_plot_facet)), remove = FALSE, sep = "; ") %>%
-          ggplot(aes_string(x=input$time, y="est",
+          ggplot(aes_string(x="time", y="est",
                             ymin = "lcl",
                             ymax = "ucl")) +
           geom_line() +
@@ -290,7 +285,7 @@ server <-	function(input, output, session) {
           theme_bw()
       } else{
         p<-table %>%
-          ggplot(aes_string(x=input$time, y="est",
+          ggplot(aes_string(x="time", y="est",
                             ymin = "lcl",
                             ymax = "ucl")) +
           #geom_point(position=position_dodge(width=1))+
@@ -309,7 +304,7 @@ server <-	function(input, output, session) {
         p<-table %>%
           unite("Group",
                 c(all_of(input$survival_plot_group)), remove = FALSE, sep = "; ") %>%
-          ggplot(aes_string(x=input$time, y="est",
+          ggplot(aes_string(x="time", y="est",
                             ymin = "lcl",
                             ymax = "ucl",
                             group="Group",
@@ -327,7 +322,7 @@ server <-	function(input, output, session) {
                   c(all_of(input$survival_plot_group)), remove = FALSE, sep = "; ") %>%
             unite("facet_var",
                   c(all_of(input$survival_plot_facet)), remove = FALSE, sep = "; ") %>%
-            ggplot(aes_string(x=input$time, y="est",
+            ggplot(aes_string(x="time", y="est",
                               ymin = "lcl",
                               ymax = "ucl",
                               group="Group",
@@ -349,7 +344,7 @@ server <-	function(input, output, session) {
 
   })
 
-# risk table
+# risk table KM
   get_survival_risktable<-reactive({
 
     table<-risk_table_results %>%
@@ -384,7 +379,7 @@ server <-	function(input, output, session) {
               ))
   } )
  
-# median/mean survival
+# median/mean survival KM
   get_survival_median_table <- reactive({
     
     table <- med_surv_km %>%
@@ -424,7 +419,7 @@ server <-	function(input, output, session) {
               ))
   } )
 
-# survival probabilities for 1, 5 and 10 years
+# survival probabilities for 1, 5 and 10 years KM
   get_surv_prob_table <-reactive({
     
     table <- surv_prob_km %>%
@@ -446,7 +441,12 @@ server <-	function(input, output, session) {
     table <- table %>% 
     mutate(surv=nice.num(surv)) %>%
       mutate(lower=nice.num(lower)) %>%
-      mutate(upper=nice.num(upper))
+      mutate(upper=nice.num(upper)) %>% 
+      select(!c(surv, lower, upper, Method, Stratification))
+    # %>% 
+    #   relocate(c(time, `Survival Rate % (95% CI)` )) %>% 
+    #   rename(`Time (years)` = time)
+      
     
     datatable(table,
               rownames= FALSE,
@@ -465,7 +465,6 @@ server <-	function(input, output, session) {
     
     table <- tableone_summary %>% 
       filter(Cancer %in% input$table1_outcome_cohort_name_selector) %>% 
-      #filter(Stratification %in% input$table1_strata_selector) %>% 
       filter(Sex %in% input$table1_sex_selector) %>% 
       filter(Age %in% input$table1_age_selector)
     
@@ -478,10 +477,8 @@ server <-	function(input, output, session) {
     validate(need(ncol(table)>1,
                   "No results for selected inputs"))
     
-    # table <- table %>% 
-    #   select(!c("analysis" )) %>% 
-    #   relocate(Cancer, .after = `CPRD GOLD`) %>% 
-    #   rename(Database = var)
+    table <- table %>%
+      select(!c(Stratification )) 
     
     datatable(table,
               rownames= FALSE,
@@ -515,6 +512,9 @@ server <-	function(input, output, session) {
     
     validate(need(ncol(table)>1,
                   "No results for selected inputs"))
+    
+    table <- table %>%
+      select(!c("cohort_definition_id" )) 
     
     datatable(table,
               rownames= FALSE,
