@@ -43,88 +43,193 @@ server <-	function(input, output, session) {
   } )
   
 # KM survival plots no extrapolations
+  # output$plot_km <- renderPlotly({
+  # 
+  #   table <- get_km()
+  #   validate(need(ncol(table)>1,
+  #                 "No results for selected inputs"))
+  # 
+  #   if(is.null(input$km_plot_group)){
+  #     if(!is.null(input$km_plot_facet)){
+  #       p <- table %>%
+  #         unite("facet_var",
+  #               c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+  #         ggplot(aes_string(x= "time", y="est",
+  #                           ymin = "lcl",
+  #                           ymax = "ucl")) +
+  #         geom_line() +
+  #         facet_wrap(vars(facet_var),ncol = 2)+
+  #         scale_y_continuous(
+  #           limits = c(0, NA)
+  #         ) +
+  #         theme_bw()
+  #     } else{
+  #       p<-table %>%
+  #         ggplot(aes_string(x="time", y="est",
+  #                           ymin = "lcl",
+  #                           ymax = "ucl")) +
+  #         geom_line() +
+  #         scale_y_continuous(
+  #           limits = c(0, NA)
+  #         ) +
+  #         theme_bw()
+  #     }
+  #   }
+  # 
+  # 
+  # 
+  #   if(!is.null(input$km_plot_group) ){
+  # 
+  #     if(is.null(input$km_plot_facet) ){
+  #       p<-table %>%
+  #         unite("Group",
+  #               c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+  #         ggplot(aes_string(x="time", y="est",
+  #                           ymin = "lcl",
+  #                           ymax = "ucl",
+  #                           group="Group",
+  #                           colour="Group")) +
+  #         geom_line() +
+  #         #geom_point(position=position_dodge(width=1))+
+  #         #geom_errorbar(width=0, position=position_dodge(width=1)) +
+  #         theme_bw()
+  #     }
+  # 
+  #     if(!is.null(input$km_plot_facet) ){
+  #       if(!is.null(input$km_plot_group) ){
+  #         p<-table %>%
+  #           unite("Group",
+  #                 c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+  #           unite("facet_var",
+  #                 c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+  #           ggplot(aes_string(x="time", y="est",
+  #                             ymin = "lcl",
+  #                             ymax = "ucl",
+  #                             group="Group",
+  #                             colour="Group")) +
+  #           # geom_ribbon(aes(ymin = "lcl",
+  #           #                 ymax = "ucl",
+  #           #                 fill = "Group",
+  #           #                 colour = "Group"), alpha = .15, show.legend = FALSE) +
+  #           geom_line() +
+  #           facet_wrap(vars(facet_var),ncol = 2)+
+  #           scale_y_continuous(
+  #             limits = c(0, NA)
+  #           )  +
+  #           theme_bw()
+  #       }
+  #     }
+  # 
+  #   }
+  # 
+  #   p
+  # 
+  # })
+  # 
+
   output$plot_km <- renderPlotly({
-    
     table <- get_km()
-    validate(need(ncol(table)>1,
-                  "No results for selected inputs"))
+    validate(need(ncol(table) > 1, "No results for selected inputs"))
     
-    if(is.null(input$km_plot_group)){
-      if(!is.null(input$km_plot_facet)){
-        p<-table %>%
-          unite("facet_var",
-                c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
-          ggplot(aes_string(x= "time", y="est",
-                            ymin = "lcl",
-                            ymax = "ucl")) +
+    if (is.null(input$km_plot_group)) {
+      if (!is.null(input$km_plot_facet)) {
+        p <- table %>%
+          unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = facet_var)) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = facet_var), alpha = 0.5) +
           geom_line() +
-          #geom_point(position=position_dodge(width=1))+
-          #geom_errorbar(width=0) +
-          facet_wrap(vars(facet_var),ncol = 2)+
-          scale_y_continuous(
-            limits = c(0, NA)
-          ) +
+          facet_wrap(vars(facet_var), ncol = 2) +
+          scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
-      } else{
-        p<-table %>%
-          ggplot(aes_string(x="time", y="est",
-                            ymin = "lcl",
-                            ymax = "ucl")) +
-          #geom_point(position=position_dodge(width=1))+
-          #geom_errorbar(width=0) +
-          scale_y_continuous(
-            limits = c(0, NA)
-          ) +
+      } else {
+        p <- table %>%
+          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl)) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = "blue"), alpha = 0.5) +
+          scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
       }
     }
     
-    
-    if(!is.null(input$km_plot_group) ){
-      
-      if(is.null(input$km_plot_facet) ){
-        p<-table %>%
-          unite("Group",
-                c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
-          ggplot(aes_string(x="time", y="est",
-                            ymin = "lcl",
-                            ymax = "ucl",
-                            group="Group",
-                            colour="Group")) +
+    if (!is.null(input$km_plot_group)) {
+      if (!is.null(input$km_plot_facet)) {
+        p <- table %>%
+          unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+          unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group, fill = Group)) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.5) +
           geom_line() +
-          #geom_point(position=position_dodge(width=1))+
-          #geom_errorbar(width=0, position=position_dodge(width=1)) +
+          facet_wrap(vars(facet_var), ncol = 2) +
+          scale_y_continuous(limits = c(0, NA)) +
+          theme_bw()
+      } else {
+        p <- table %>%
+          unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+          mutate(Group = factor(Group)) +
+          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group, fill = Group)) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.5) +
+          geom_line() +
+          scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
       }
-      
-      if(!is.null(input$km_plot_facet) ){
-        if(!is.null(input$km_plot_group) ){
-          p<-table %>%
-            unite("Group",
-                  c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
-            unite("facet_var",
-                  c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
-            ggplot(aes_string(x="time", y="est",
-                              ymin = "lcl",
-                              ymax = "ucl",
-                              group="Group",
-                              colour="Group")) +
-            #geom_point(position=position_dodge(width=1))+
-            #geom_errorbar(width=0, position=position_dodge(width=1)) +
-            geom_line() +
-            facet_wrap(vars(facet_var),ncol = 2)+
-            scale_y_continuous(
-              limits = c(0, NA)
-            )  +
-            theme_bw()
-        }
-      }
-      
     }
     
     p
-    
   })
+  
+  
+  
+  
+  output$plot_km <- renderPlotly({
+    table <- get_km()
+    validate(need(ncol(table) > 1, "No results for selected inputs"))
+    
+    if (is.null(input$km_plot_group)) {
+      if (!is.null(input$km_plot_facet)) {
+        p <- table %>%
+          unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = facet_var)) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.3) +
+          geom_line() +
+          scale_y_continuous(limits = c(0, NA)) +
+          facet_wrap(vars(facet_var), ncol = 2) +
+          theme_bw()
+      } else {
+        p <- table %>%
+          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl)) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.3) +
+          geom_line() +
+          scale_y_continuous(limits = c(0, NA)) +
+          theme_bw()
+      }
+    } else {
+      if (is.null(input$km_plot_facet)) {
+        p <- table %>%
+          unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+          mutate(Group = factor(Group)) +
+          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group)) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.3) +
+          geom_line() +
+          scale_y_continuous(limits = c(0, NA)) +
+          theme_bw()
+      } else {
+        p <- table %>%
+          unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+          unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+          mutate(Group = factor(Group)) +
+          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group)) +
+          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.3) +
+          geom_line() +
+          facet_wrap(vars(facet_var), ncol = 2) +
+          scale_y_continuous(limits = c(0, NA)) +
+          theme_bw()
+      }
+    }
+    
+    ggplotly(p)
+  })
+  
+  
+  
   
 # km haz over time plot no extrapolations
   get_hot_km <- reactive({
@@ -466,7 +571,8 @@ server <-	function(input, output, session) {
     table <- tableone_summary %>% 
       filter(Cancer %in% input$table1_outcome_cohort_name_selector) %>% 
       filter(Sex %in% input$table1_sex_selector) %>% 
-      filter(Age %in% input$table1_age_selector)
+      filter(Age %in% input$table1_age_selector) %>% 
+      filter(Database %in% input$table1_database_selector)
     
     table
   }) 
@@ -478,7 +584,8 @@ server <-	function(input, output, session) {
                   "No results for selected inputs"))
     
     table <- table %>%
-      select(!c(Stratification )) 
+      select(!c(Stratification )) %>% 
+      filter(Description != "Antineoplastic agents n (%)")
     
     datatable(table,
               rownames= FALSE,
@@ -502,7 +609,8 @@ server <-	function(input, output, session) {
   get_table_attrition <-reactive({
     
     table <- cohort_attrition %>% 
-      filter(cohort_name %in% input$attrition_cohort_name_selector) 
+      filter(cohort_name %in% input$attrition_cohort_name_selector) %>% 
+    filter(Database %in% input$attrition_database_name_selector) 
     
     table
   }) 

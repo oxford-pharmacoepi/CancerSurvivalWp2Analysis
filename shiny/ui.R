@@ -24,7 +24,7 @@ ui <-  fluidPage(theme = bs_theme(version = 4, bootswatch = "minty"),
                  
                  # title ------ 
                  # shown across tabs
-                 titlePanel("Overall Survival and extrapolation for common cancers: a multinational cohort study"),
+                 titlePanel("Overall survival and extrapolation for common cancers: a multinational cohort study"),
                  
                  # set up: pages along the side -----  
                  navlistPanel(
@@ -46,11 +46,12 @@ for each cancer. All results have been performed for the whole population and fo
 
                            # HTML('<br>'),
 
-                        tags$h5("The results of this study are published in the following journal:"
+                        tags$h5("The results of this study are published in the following journals:"
                                 ),
  tags$ol(
-   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" )),
- 
+   tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" ),
+    tags$li(strong("TBC"),"(",tags$a(href="https://www.ndorms.ox.ac.uk/research/research-groups/Musculoskeletal-Pharmacoepidemiology","Paper Link"),")" )),
+
  tags$h5("The analysis code used to generate these results can be found",
          tags$a(href="https://github.com/oxford-pharmacoepi", "here"),
          ".The cohort diagnostics including the clinical codelists for each of the 8 cancers can be found",
@@ -58,7 +59,7 @@ for each cancer. All results have been performed for the whole population and fo
          
          ),
  
- tags$h5("Any questions regarding these results or problems with the app please contact",
+ tags$h5("Any questions regarding these results or problems with this shiny app please contact",
          tags$a(href="mailto:danielle.newby@ndorms.ox.ac.uk", "Danielle Newby")
          
  ),
@@ -148,10 +149,10 @@ tabPanel("Population Survival",
                               div(style="display: inline-block;vertical-align:top; width: 150px;",
                                   pickerInput(inputId = "km_plot_group",
                                               label = "Colour by",
-                                              choices = c("Sex",
+                                              choices = c("Cancer",
+                                                          "Database",
                                                           "Age",
-                                                          "Cancer",
-                                                          "Database"),
+                                                          "Sex"),
                                               selected = c("Database"),
                                               options = list(
                                                 `actions-box` = TRUE,
@@ -238,54 +239,8 @@ tabPanel("Population Survival",
                             `selected-text-format` = "count > 3"),
                           multiple = TRUE)
           ),
-          # div(style="display: inline-block;vertical-align:top; width: 150px;",
-          #     pickerInput(inputId = "survival_strat_selector",
-          #                 label = "Stratification",
-          #                 choices = sort(unique(survival_est_strat$Stratification)),
-          #                 selected = c("None"),
-          #                 options = list(
-          #                   `actions-box` = TRUE,
-          #                   size = 10,
-          #                   `selected-text-format` = "count > 3"),
-          #                 multiple = TRUE)
-          # ),
-          # div(style="display: inline-block;vertical-align:top; width: 150px;",
-          #     pickerInput(inputId = "survival_adjust_selector",
-          #                 label = "Adjustment",
-          #                 choices = sort(unique(survival_est_strat$Adjustment)),
-          #                 selected = c("None"),
-          #                 options = list(
-          #                   `actions-box` = TRUE,
-          #                   size = 10,
-          #                   `selected-text-format` = "count > 3"),
-          #                 multiple = TRUE)
-          # ),
-          # div(style="display: inline-block;vertical-align:top; width: 150px;",
-          #     pickerInput(inputId = "survival_method_selector",
-          #                 label = "Method",
-          #                 choices = sort(unique(survival_est_strat$Method)),
-          #                 selected = unique(survival_est_strat$Method),
-          #                 options = list(
-          #                   `actions-box` = TRUE,
-          #                   size = 10,
-          #                   `selected-text-format` = "count > 3"),
-          #                 multiple = TRUE)
-          # ),
 
 
-          # tags$hr(),
-          # tags$h5("Population Settings"),
-          div(style="display: inline-block;vertical-align:top; width: 150px;",
-              pickerInput(inputId = "survival_age_group_selector",
-                          label = "Age group",
-                          choices = unique(survival_est_strat$Age),
-                          selected = "All",
-                          options = list(
-                            `actions-box` = TRUE,
-                            size = 10,
-                            `selected-text-format` = "count > 3"),
-                          multiple = TRUE)
-          ),
           div(style="display: inline-block;vertical-align:top; width: 150px;",
               pickerInput(inputId = "survival_sex_selector",
                           label = "Sex",
@@ -297,22 +252,23 @@ tabPanel("Population Survival",
                             `selected-text-format` = "count > 3"),
                           multiple = TRUE)
           ),
+          
+          div(style="display: inline-block;vertical-align:top; width: 150px;",
+              pickerInput(inputId = "survival_age_group_selector",
+                          label = "Age",
+                          choices = unique(survival_est_strat$Age),
+                          selected = "All",
+                          options = list(
+                            `actions-box` = TRUE,
+                            size = 10,
+                            `selected-text-format` = "count > 3"),
+                          multiple = TRUE)
+          ),
           tags$hr(),
           tabsetPanel(type = "tabs",
                       tabPanel("Plot of KM survival curve and extrapolations",
                                tags$hr(),
                                tags$h5("Plotting Options"),
-                               # div(style="display: inline-block;vertical-align:top; width: 150px;",
-                               #     pickerInput(inputId = "time",
-                               #                 label = "X axis",
-                               #                 choices = c("time"),
-                               #                 selected = "time",
-                               #                 options = list(
-                               #                   `actions-box` = TRUE,
-                               #                   size = 10,
-                               #                   `selected-text-format` = "count > 3"),
-                               #                 multiple = FALSE,)
-                               # ),
                                div(style="display: inline-block;vertical-align:top; width: 150px;",
                                    pickerInput(inputId = "survival_plot_facet",
                                                label = "Facet by",
@@ -352,154 +308,13 @@ tabPanel("Population Survival",
 
  ) ,
 
-## Survival extrapolation ADJUSTMENT ------
-# tabPanel("Population Survival Extrapolations: Adjustment",
-#          tags$h3("Adjustment Extrapolation Analysis"),
-#          tags$h5("For this analysis we used nine extrapolation methods to model the observed survival. Below are the predicted survival curves, clog-log plots showing proportionality, hazard over time, median and mean survival and survival at one, five and ten years. The analysis was performed on the whole database and adjusted by sex and age "),
-#          tags$hr(),
-#          tags$h5("Strata"),
-#          div(style="display: inline-block;vertical-align:top; width: 150px;",
-#              pickerInput(inputId = "survival_database_name_selector",
-#                          label = "Database",
-#                          choices = unique(survival_estimates$Database),
-#                          selected = unique(survival_estimates$Database),
-#                          options = list(
-#                            `actions-box` = TRUE,
-#                            size = 10,
-#                            `selected-text-format` = "count > 3"),
-#                          multiple = TRUE)
-#          ),
-#          div(style="display: inline-block;vertical-align:top; width: 150px;",
-#              pickerInput(inputId = "survival_outcome_cohort_name_selector",
-#                          label = "Outcome",
-#                          choices = sort(unique(survival_estimates$Cancer)),
-#                          selected = c("IncidentBreastCancer"),
-#                          options = list(
-#                            `actions-box` = TRUE,
-#                            size = 10,
-#                            `selected-text-format` = "count > 3"),
-#                          multiple = TRUE)
-#          ),
-#          div(style="display: inline-block;vertical-align:top; width: 150px;",
-#              pickerInput(inputId = "survival_strat_selector",
-#                          label = "Stratification",
-#                          choices = sort(unique(survival_estimates$Stratification)),
-#                          selected = c("None"),
-#                          options = list(
-#                            `actions-box` = TRUE,
-#                            size = 10,
-#                            `selected-text-format` = "count > 3"),
-#                          multiple = TRUE)
-#          ),
-#          div(style="display: inline-block;vertical-align:top; width: 150px;",
-#              pickerInput(inputId = "survival_adjust_selector",
-#                          label = "Adjustment",
-#                          choices = sort(unique(survival_estimates$Adjustment)),
-#                          selected = c("None"),
-#                          options = list(
-#                            `actions-box` = TRUE,
-#                            size = 10,
-#                            `selected-text-format` = "count > 3"),
-#                          multiple = TRUE)
-#          ),
-#          div(style="display: inline-block;vertical-align:top; width: 150px;",
-#              pickerInput(inputId = "survival_method_selector",
-#                          label = "Method",
-#                          choices = sort(unique(survival_estimates$Method)),
-#                          selected = unique(survival_estimates$Method),
-#                          options = list(
-#                            `actions-box` = TRUE,
-#                            size = 10,
-#                            `selected-text-format` = "count > 3"),
-#                          multiple = TRUE)
-#          ),
-#          
-#          
-#          tags$hr(),
-#          tags$h5("Population Settings"),
-#          div(style="display: inline-block;vertical-align:top; width: 150px;",
-#              pickerInput(inputId = "survival_age_group_selector",
-#                          label = "Age group",
-#                          choices = unique(survival_estimates$Age),
-#                          selected = "All",
-#                          options = list(
-#                            `actions-box` = TRUE,
-#                            size = 10,
-#                            `selected-text-format` = "count > 3"),
-#                          multiple = TRUE)
-#          ),
-#          div(style="display: inline-block;vertical-align:top; width: 150px;",
-#              pickerInput(inputId = "survival_sex_selector",
-#                          label = "Sex",
-#                          choices = unique(survival_estimates$Sex),
-#                          selected = "Both",
-#                          options = list(
-#                            `actions-box` = TRUE,
-#                            size = 10,
-#                            `selected-text-format` = "count > 3"),
-#                          multiple = TRUE)
-#          ),
-#          tags$hr(),
-#          tabsetPanel(type = "tabs",
-#                      tabPanel("Plot of KM survival curve and extrapolations",
-#                               tags$hr(),
-#                               tags$h5("Plotting Options"),
-#                               div(style="display: inline-block;vertical-align:top; width: 150px;",
-#                                   pickerInput(inputId = "time",
-#                                               label = "X axis",
-#                                               choices = c("time"),
-#                                               selected = "time",
-#                                               options = list(
-#                                                 `actions-box` = TRUE,
-#                                                 size = 10,
-#                                                 `selected-text-format` = "count > 3"),
-#                                               multiple = FALSE,)
-#                               ),
-#                               div(style="display: inline-block;vertical-align:top; width: 150px;",
-#                                   pickerInput(inputId = "survival_plot_facet",
-#                                               label = "Facet by",
-#                                               choices = c("Cancer",
-#                                                           "Database",
-#                                                           "Sex",
-#                                                           "Age"
-#                                               ),
-#                                               selected = c("Cancer"),
-#                                               options = list(
-#                                                 `actions-box` = TRUE,
-#                                                 size = 10,
-#                                                 `selected-text-format` = "count > 3"),
-#                                               multiple = TRUE,)
-#                               ),
-#                               div(style="display: inline-block;vertical-align:top; width: 150px;",
-#                                   pickerInput(inputId = "survival_plot_group",
-#                                               label = "Colour by",
-#                                               choices = c("Sex",
-#                                                           "Age",
-#                                                           "Cancer",
-#                                                           #  "Database",
-#                                                           "Method"),
-#                                               selected = c("Database", "Method"),
-#                                               options = list(
-#                                                 `actions-box` = TRUE,
-#                                                 size = 10,
-#                                                 `selected-text-format` = "count > 3"),
-#                                               multiple = TRUE,)
-#                               ),
-#                               plotlyOutput('plot_survival_estimates', height = "800px") %>% withSpinner() )
-#                      
-#                      
-#                      
-#                      
-#          )
-#          
-# ) ,
 
 ## Population characteristics ------ 
                    tabPanel("Population Characteristics",	  
                             tags$h3("Study Population Characteristics"),
                             tags$h5("The population characteristics are shown for the different cancers with sex and age strata is below. For databases with information on prior history for conditions and medication, for conditions any time prior from cancer diagnosis was used to capture conditions and for medications up to one year prior was used to capture medication utilisation."),
                             tags$hr(),
-                            tags$h5("Study outcome") ,
+                            tags$h5("Attributes") ,
                             div(style="display: inline-block;vertical-align:top; width: 150px;",
                                 pickerInput(inputId = "table1_outcome_cohort_name_selector",
                                             label = "Cancer",
@@ -512,6 +327,18 @@ tabPanel("Population Survival",
                                             multiple = FALSE)
 
 
+                            ),
+                            
+                            div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                pickerInput(inputId = "table1_database_selector",
+                                            label = "Database",
+                                            choices = unique(tableone_summary$Database),
+                                            selected = unique(tableone_summary$Database),
+                                            options = list(
+                                              `actions-box` = TRUE,
+                                              size = 10,
+                                              `selected-text-format` = "count > 3"),
+                                            multiple = TRUE)
                             ),
                             
                             div(style="display: inline-block;vertical-align:top; width: 150px;",
@@ -537,6 +364,7 @@ tabPanel("Population Survival",
                                               `selected-text-format` = "count > 3"),
                                             multiple = TRUE)
                             ),
+ 
 
                             
                             tabsetPanel(type = "tabs",
@@ -556,12 +384,27 @@ tabPanel("Population Survival",
           tags$h3("Study Population Attrition"),
           tags$h5("Below is the attrition for each cancer showing how the final study numbers were obtained for the study."),
           tags$hr(),
-          tags$h5("Cancer") ,
+          tags$h5("Attributes") ,
           div(style="display: inline-block;vertical-align:top; width: 150px;",
               pickerInput(inputId = "attrition_cohort_name_selector",
                           label = "Cancer",
                           choices = sort(unique(cohort_attrition$cohort_name)),
                           selected = c("IncidentBreastCancer"),
+                          options = list(
+                            `actions-box` = TRUE,
+                            size = 10,
+                            `selected-text-format` = "count > 3"),
+                          multiple = TRUE)
+              
+              
+              
+          ),
+          
+          div(style="display: inline-block;vertical-align:top; width: 150px;",
+              pickerInput(inputId = "attrition_database_name_selector",
+                          label = "Database",
+                          choices = unique(cohort_attrition$Database),
+                          selected = unique(cohort_attrition$Database),
                           options = list(
                             `actions-box` = TRUE,
                             size = 10,
