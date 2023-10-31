@@ -127,9 +127,113 @@ server <-	function(input, output, session) {
   # })
   # 
 
+  # output$plot_km <- renderPlotly({
+  #   table <- get_km()
+  #   validate(need(ncol(table) > 1, "No results for selected inputs"))
+  #   
+  #   if (is.null(input$km_plot_group)) {
+  #     if (!is.null(input$km_plot_facet)) {
+  #       p <- table %>%
+  #         unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+  #         ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = facet_var)) +
+  #         geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = facet_var), alpha = 0.5) +
+  #         geom_line() +
+  #         facet_wrap(vars(facet_var), ncol = 2) +
+  #         scale_y_continuous(limits = c(0, NA)) +
+  #         theme_bw()
+  #     } else {
+  #       p <- table %>%
+  #         ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl)) +
+  #         geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = "blue"), alpha = 0.5) +
+  #         scale_y_continuous(limits = c(0, NA)) +
+  #         theme_bw()
+  #     }
+  #   }
+  #   
+  #   if (!is.null(input$km_plot_group)) {
+  #     if (!is.null(input$km_plot_facet)) {
+  #       p <- table %>%
+  #         unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+  #         unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+  #         ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group, fill = Group)) +
+  #         geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.5) +
+  #         geom_line() +
+  #         facet_wrap(vars(facet_var), ncol = 2) +
+  #         scale_y_continuous(limits = c(0, NA)) +
+  #         theme_bw()
+  #     } else {
+  #       p <- table %>%
+  #         unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+  #         mutate(Group = factor(Group)) +
+  #         ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group, fill = Group)) +
+  #         geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.5) +
+  #         geom_line() +
+  #         scale_y_continuous(limits = c(0, NA)) +
+  #         theme_bw()
+  #     }
+  #   }
+  #   
+  #   p
+  # })
+  
+  
+  
+  
+  # output$plot_km <- renderPlotly({
+  #   table <- get_km()
+  #   validate(need(ncol(table) > 1, "No results for selected inputs"))
+  #   
+  #   if (is.null(input$km_plot_group)) {
+  #     if (!is.null(input$km_plot_facet)) {
+  #       p <- table %>%
+  #         unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+  #         ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = facet_var)) +
+  #         geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.3) +
+  #         geom_line() +
+  #         scale_y_continuous(limits = c(0, NA)) +
+  #         facet_wrap(vars(facet_var), ncol = 2) +
+  #         theme_bw()
+  #     } else {
+  #       p <- table %>%
+  #         ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl)) +
+  #         geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.3) +
+  #         geom_line() +
+  #         scale_y_continuous(limits = c(0, NA)) +
+  #         theme_bw()
+  #     }
+  #   } else {
+  #     if (is.null(input$km_plot_facet)) {
+  #       p <- table %>%
+  #         unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+  #         mutate(Group = factor(Group)) +
+  #         ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group)) +
+  #         geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.3) +
+  #         geom_line() +
+  #         scale_y_continuous(limits = c(0, NA)) +
+  #         theme_bw()
+  #     } else {
+  #       p <- table %>%
+  #         unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
+  #         unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
+  #         mutate(Group = factor(Group)) +
+  #         ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group)) +
+  #         geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.3) +
+  #         geom_line() +
+  #         facet_wrap(vars(facet_var), ncol = 2) +
+  #         scale_y_continuous(limits = c(0, NA)) +
+  #         theme_bw()
+  #     }
+  #   }
+  #   
+  #   ggplotly(p)
+  # })
+  # 
+  # 
   output$plot_km <- renderPlotly({
     table <- get_km()
     validate(need(ncol(table) > 1, "No results for selected inputs"))
+    
+    p <- NULL  # Initialize an empty ggplot object
     
     if (is.null(input$km_plot_group)) {
       if (!is.null(input$km_plot_facet)) {
@@ -175,60 +279,6 @@ server <-	function(input, output, session) {
     
     p
   })
-  
-  
-  
-  
-  output$plot_km <- renderPlotly({
-    table <- get_km()
-    validate(need(ncol(table) > 1, "No results for selected inputs"))
-    
-    if (is.null(input$km_plot_group)) {
-      if (!is.null(input$km_plot_facet)) {
-        p <- table %>%
-          unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
-          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = facet_var)) +
-          geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.3) +
-          geom_line() +
-          scale_y_continuous(limits = c(0, NA)) +
-          facet_wrap(vars(facet_var), ncol = 2) +
-          theme_bw()
-      } else {
-        p <- table %>%
-          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl)) +
-          geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.3) +
-          geom_line() +
-          scale_y_continuous(limits = c(0, NA)) +
-          theme_bw()
-      }
-    } else {
-      if (is.null(input$km_plot_facet)) {
-        p <- table %>%
-          unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
-          mutate(Group = factor(Group)) +
-          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group)) +
-          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.3) +
-          geom_line() +
-          scale_y_continuous(limits = c(0, NA)) +
-          theme_bw()
-      } else {
-        p <- table %>%
-          unite("Group", c(all_of(input$km_plot_group)), remove = FALSE, sep = "; ") %>%
-          unite("facet_var", c(all_of(input$km_plot_facet)), remove = FALSE, sep = "; ") %>%
-          mutate(Group = factor(Group)) +
-          ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group)) +
-          geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.3) +
-          geom_line() +
-          facet_wrap(vars(facet_var), ncol = 2) +
-          scale_y_continuous(limits = c(0, NA)) +
-          theme_bw()
-      }
-    }
-    
-    ggplotly(p)
-  })
-  
-  
   
   
 # km haz over time plot no extrapolations
