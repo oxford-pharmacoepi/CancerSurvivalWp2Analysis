@@ -18,7 +18,7 @@
     },
     "DT": {
       "Package": "DT",
-      "Version": "0.30",
+      "Version": "0.26",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
