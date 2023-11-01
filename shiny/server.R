@@ -219,8 +219,8 @@ server <-	function(input, output, session) {
                             ymin = "lcl",
                             ymax = "ucl")) +
           geom_line() +
-          #geom_point(position=position_dodge(width=1))+
-          #geom_errorbar(width=0) +
+          xlab("Time (Years)") +
+          ylab("Survival Probability") +
           facet_wrap(vars(facet_var),ncol = 2)+
           scale_y_continuous(
             limits = c(0, NA)
@@ -231,8 +231,8 @@ server <-	function(input, output, session) {
           ggplot(aes_string(x="time", y="est",
                             ymin = "lcl",
                             ymax = "ucl")) +
-          #geom_point(position=position_dodge(width=1))+
-          #geom_errorbar(width=0) +
+          xlab("Time (Years)") +
+          ylab("Survival Probability") +
           scale_y_continuous(
             limits = c(0, NA)
           ) +
@@ -253,8 +253,8 @@ server <-	function(input, output, session) {
                             group="Group",
                             colour="Group")) +
           geom_line() +
-          #geom_point(position=position_dodge(width=1))+
-          #geom_errorbar(width=0, position=position_dodge(width=1)) +
+          xlab("Time (Years)") +
+          ylab("Survival Probability") +
           theme_bw()
       }
 
@@ -270,8 +270,8 @@ server <-	function(input, output, session) {
                               ymax = "ucl",
                               group="Group",
                               colour="Group")) +
-            #geom_point(position=position_dodge(width=1))+
-            #geom_errorbar(width=0, position=position_dodge(width=1)) +
+            xlab("Time (Years)") +
+            ylab("Survival Probability") +
             geom_line() +
             facet_wrap(vars(facet_var),ncol = 2)+
             scale_y_continuous(
