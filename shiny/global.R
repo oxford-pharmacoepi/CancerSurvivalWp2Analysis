@@ -15,12 +15,14 @@ nice.num2<-function(x) {
 nice.num3<-function(x) {
   trimws(format(round(x,3),
                 big.mark=",", nsmall = 3, digits=3, scientific=FALSE))}
+# printing numbers with 4 decimal place and commas 
+nice.num4<-function(x) {
+  trimws(format(round(x,4),
+                big.mark=",", nsmall = 4, digits=4, scientific=FALSE))}
 # for counts- without decimal place
 nice.num.count<-function(x) {
   trimws(format(x,
                 big.mark=",", nsmall = 0, digits=1, scientific=FALSE))}
-
-
 
 #### Load and extract data -----
 #data
@@ -46,5 +48,21 @@ hot_km <- hazard_overtime_results %>%
   filter(Method == "Kaplan-Meier")
 
 #filter results for stratified results
+# survival_est_strat <- survival_estimates %>% 
+#   filter(Adjustment == "None" )
+
 survival_est_strat <- survival_estimates %>% 
+  filter(Adjustment == "None") %>% 
+  mutate(Method = as.factor(Method) %>% relevel(ref = "Kaplan-Meier"))
+
+
+# filter for stratified gof
+goodness_of_fit_results_strat <- goodness_of_fit_results %>% 
   filter(Adjustment == "None" )
+  
+# filter for stratified extroplation parameters
+extrapolation_parameters_strat <- extrapolation_parameters %>% 
+  filter(Adjustment == "None" )
+
+
+

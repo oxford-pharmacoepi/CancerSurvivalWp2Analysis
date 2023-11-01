@@ -310,16 +310,16 @@ tabPanel("Population Survival",
                                ),
                                plotlyOutput('plot_survival_estimates', height = "800px") %>% withSpinner() ),
                       
-                      
-                      
-                      
                       tabPanel("Goodness of Fit" , 
                       DTOutput('tbl_gof') %>% withSpinner()),
-                      
-                      
-                      
+
                       tabPanel("Extrapolation Parameters", 
-                               DTOutput('tbl_parameters') %>% withSpinner()),
+                      DTOutput('tbl_parameters') %>% withSpinner()
+                      
+                      ),
+                      
+                      
+                      
 
 
 
