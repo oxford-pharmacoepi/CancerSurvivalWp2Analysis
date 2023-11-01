@@ -486,7 +486,16 @@ survivalResults <- bind_rows(
   mutate(Database = db.name) %>% 
   mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
   select(!c(n.risk, n.event, n.censor, std.error)) %>% 
-  filter(time != 0)
+  filter(time != 0) %>% 
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLiverCancer", "Liver")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLungCancer", "Lung")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
+
 
 #risk table ----
 riskTableResults <- bind_rows(
@@ -497,7 +506,16 @@ riskTableResults <- bind_rows(
   risktableskm_ageA 
   ) %>%
   mutate(Database = db.name) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLiverCancer", "Liver")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLungCancer", "Lung")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
+
 
 
 # median results KM and predicted median and mean extrapolations ----
@@ -512,7 +530,16 @@ medianResults <- bind_rows(
   predmedmeanfinalageS) %>%
   mutate(Database = db.name) %>% 
   mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
-  select(!c(n.max, n.start, records, events))
+  select(!c(n.max, n.start, records, events)) %>% 
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLiverCancer", "Liver")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLungCancer", "Lung")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
+
 
 # hazard over time results -----
 hazOverTimeResults <- bind_rows( 
@@ -528,7 +555,16 @@ hazOverTimeResults <- bind_rows(
   hazardotfinalageS
 ) %>%
   mutate(Database = db.name) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex,  "Male"))
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex,  "Male")) %>% 
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLiverCancer", "Liver")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLungCancer", "Lung")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
+
 
 # GOF results for extrapolated results (adjusted and stratified)
 GOFResults <- bind_rows( 
@@ -540,7 +576,16 @@ GOFResults <- bind_rows(
 ) %>%
   mutate(Database = db.name) %>% 
   mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
-  select(!c(N, events, censored))
+  select(!c(N, events, censored)) %>% 
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLiverCancer", "Liver")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLungCancer", "Lung")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
+
 
 
 # parameters of the extrapolated models
@@ -553,7 +598,16 @@ ExtrpolationParameters <-bind_rows(
 ) %>%
   mutate(Database = db.name) %>%
   relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male"))
+  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLiverCancer", "Liver")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLungCancer", "Lung")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
+
 
 # survival probabilities km and predicted probabilities
 survivalProbabilities <- bind_rows(
@@ -571,14 +625,23 @@ survivalProbabilities <- bind_rows(
   mutate(Database = db.name) %>%
   relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
   mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
-  filter(time == 1.0 | time == 5.0 | time == 10.0)
+  filter(time == 1.0 | time == 5.0 | time == 10.0) %>% 
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLiverCancer", "Liver")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLungCancer", "Lung")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
+
 
 
 # add a render file for the shiny app for filtering ----
-CancerStudied <- c("IncidentBreastCancer" , "IncidentColorectalCancer"  , 
-                   "IncidentHeadNeckCancer"  , "IncidentLiverCancer" ,
-                   "IncidentLungCancer", "IncidentPancreaticCancer"  ,
-                   "IncidentProstateCancer", "IncidentStomachCancer" )
+CancerStudied <- c("Breast" , "Colorectal"  , 
+                   "Head and Neck"  , "Liver" ,
+                   "Lung", "Pancreatic"  ,
+                   "Prostate", "Stomach" )
 Method <- c("Kaplan-Meier", extrapolations_formatted)
 SexStudied <- (rep(rep(c("Male", "Female"), each = length(Method)), length(CancerStudied)))
 AgeStudied <- (rep(rep(c("> 90" , "18 to 29", "30 to 39", "40 to 49", "50 to 59", "60 to 69", "70 to 79", "80 to 89"), each = length(Method)), length(CancerStudied)))
@@ -605,7 +668,7 @@ AnalysisRunAll <- tibble(
   Sex = rep("Both", by = (length(CancerStudied)*length(Method))),
   Adjustment = rep("None", by = (length(CancerStudied)*length(Method))),
   Stratification = rep("None", by = (length(CancerStudied)*length(Method))) ) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)),Sex, "Male"))
+  mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)),Sex, "Male"))
 
 # SEX STRATIFICATION
 AnalysisRunSexS <- tibble(
@@ -615,7 +678,7 @@ AnalysisRunSexS <- tibble(
   Sex = SexStudied,
   Adjustment = rep("None", by = ((length(CancerStudied))*(length(Method))*2)),
   Stratification = rep("Sex", by = ((length(CancerStudied))*(length(Method))*2))) %>% 
-  filter(Cancer != "IncidentProstateCancer")
+  filter(Cancer != "Prostate")
 
 # SEX ADJUSTED
 AnalysisRunSexA <- tibble(
@@ -625,7 +688,7 @@ AnalysisRunSexA <- tibble(
   Sex = SexStudied,
   Stratification = rep("None", by = ((length(CancerStudied))*(length(Method))*2)),
   Adjustment = rep("Sex", by = ((length(CancerStudied))*(length(Method))*2))) %>% 
-  filter(Cancer != "IncidentProstateCancer")
+  filter(Cancer != "Prostate")
 
 # AGE STRATIFICATION
 AnalysisRunAgeS <- tibble(
@@ -635,7 +698,7 @@ AnalysisRunAgeS <- tibble(
   Age = AgeStudied,
   Adjustment = rep("None", by = ((length(CancerStudied))*(length(Method))*8)),
   Stratification = rep("Age", by = ((length(CancerStudied))*(length(Method))*8))) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)),Sex, "Male"))
+  mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)),Sex, "Male"))
 
 # AGE ADJUSTED
 AnalysisRunAgeA <- tibble(
@@ -645,7 +708,7 @@ AnalysisRunAgeA <- tibble(
   Age = AgeStudied,
   Stratification = rep("None", by = ((length(CancerStudied))*(length(Method))*8)),
   Adjustment = rep("Age", by = ((length(CancerStudied))*(length(Method))*8))) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)),Sex, "Male"))
+  mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)),Sex, "Male"))
 
 # combine results
 AnalysisRunSummary <- bind_rows(AnalysisRunAll,
@@ -675,7 +738,18 @@ attritioncdm <- cohort_attrition(cdm$analysis) %>%
             ) %>% 
   select(!c(cohort, json)) %>% 
   relocate(cohort_name) %>% 
-  mutate(Database = cdm_name(cdm))
+  mutate(Database = cdm_name(cdm)) %>% 
+  rename(Cancer = cohort_name)
+
+attritioncdm <- attritioncdm %>% 
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLiverCancer", "Liver")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentLungCancer", "Lung")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
+  mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
 
 # save results as csv for data partner can review
 info(logger, "SAVING RESULTS")
