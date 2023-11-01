@@ -80,7 +80,7 @@ tableone_all_cancers <- cdm$analysis %>%
       )
     )
   )  %>% 
-  mutate(group_level = "All 8 Cancers")
+  mutate(group_level = "All Cancers")
 
 )
 
