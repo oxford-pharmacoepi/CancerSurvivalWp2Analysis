@@ -31,14 +31,17 @@ list2env(study_results,globalenv())
 # filter results for just km results
 survival_km <- survival_estimates %>% 
   filter(Method == "Kaplan-Meier")
+  
 surv_prob_km <- survival_probabilities %>% 
   filter(Method == "Kaplan-Meier",
          Adjustment == "None") %>% 
   select(!c(Adjustment))
+
 med_surv_km <- median_survival_results %>% 
   filter(Method == "Kaplan-Meier",
          Adjustment == "None") %>% 
   select(!c(Adjustment, `RMST time`))
+
 hot_km <- hazard_overtime_results %>% 
   filter(Method == "Kaplan-Meier")
 

@@ -348,7 +348,21 @@ server <-	function(input, output, session) {
     mutate(median=nice.num2(median)) %>%
     mutate(`0.95LCL`=nice.num2(`0.95LCL`)) %>%
     mutate(`0.95UCL`=nice.num2(`0.95UCL`)) %>%
-    relocate(Cancer)
+    relocate(Cancer) %>% 
+    mutate(median= ifelse(!is.na(median),
+                              paste0(median, " (",
+                                     `0.95LCL`," to ", 
+                                     `0.95UCL`, ")")),
+           rmean = ifelse(!is.na(rmean),
+                          paste0(rmean, " (",
+                                 `se(rmean)`, ")"))
+           
+           
+           ) %>% 
+      rename(`Median Survival in Years (95%CI)` = median) %>% 
+      rename(`RMean Survival in Years (SE)` = rmean) %>% 
+      select(-c(`0.95LCL`, `0.95UCL`, `se(rmean)` ))
+    
     
     datatable(table,
               rownames= FALSE,
@@ -432,19 +446,78 @@ server <-	function(input, output, session) {
                              pageLength = 100000000,
                              buttons = list(list(extend = "csv", 
                                                  text = "Download results as csv",
-                                                 filename = "tableOne"))
+                                                 filename = "table_one"))
               ))
   } )
   
-# table for extrapolation parameters 
+# table for extrapolation parameters
+  get_parameters <-reactive({
+    
+    table <- extrapolation_parameters %>% 
+      filter(Database %in% input$survival_database_name_selector)  %>%
+      filter(Cancer %in% input$survival_outcome_cohort_name_selector) %>%
+      filter(Age %in% input$survival_age_group_selector)  %>%
+      filter(Sex %in% input$survival_sex_selector) 
+    
+    table
+  }) 
+  output$tbl_parameters <-  DT::renderDataTable({
+    
+    table <- get_parameters()
+    
+    validate(need(ncol(table)>1,
+                  "No results for selected inputs"))
+    
+    datatable(table,
+              rownames= FALSE,
+              extensions = 'Buttons',
+              options = list(lengthChange = FALSE,
+                             dom = 'tB',
+                             pageLength = 100000000,
+                             buttons = list(list(extend = "csv", 
+                                                 text = "Download results as csv",
+                                                 filename = "extrapolation_paramters"))
+              ))
+  } ) 
+  
   
 # gof fit results
+  get_gof <-reactive({
+    
+    table <- goodness_of_fit_results %>% 
+      filter(Database %in% input$survival_database_name_selector)  %>%
+      filter(Cancer %in% input$survival_outcome_cohort_name_selector) %>%
+      filter(Age %in% input$survival_age_group_selector)  %>%
+      filter(Sex %in% input$survival_sex_selector) 
+    
+    table
+  }) 
+  output$tbl_gof <-  DT::renderDataTable({
+    
+    table <- get_gof()
+    
+    validate(need(ncol(table)>1,
+                  "No results for selected inputs"))
+    
+    datatable(table,
+              rownames= FALSE,
+              extensions = 'Buttons',
+              options = list(lengthChange = FALSE,
+                             dom = 'tB',
+                             pageLength = 100000000,
+                             buttons = list(list(extend = "csv", 
+                                                 text = "Download results as csv",
+                                                 filename = "GOF_results"))
+              ))
+  } ) 
+  
+  
   
 # table for cohort attrition
   get_table_attrition <-reactive({
     
     table <- cohort_attrition %>% 
-      filter(cohort_name %in% input$attrition_cohort_name_selector) %>% 
+      filter(Cancer %in% input$attrition_cohort_name_selector) %>% 
     filter(Database %in% input$attrition_database_name_selector) 
     
     table

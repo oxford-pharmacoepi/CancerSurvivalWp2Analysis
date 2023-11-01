@@ -94,7 +94,7 @@ tabPanel("Population Survival",
              pickerInput(inputId = "km_outcome_cohort_name_selector",
                          label = "Cancer",
                          choices = unique(survival_km$Cancer),
-                         selected = c("IncidentBreastCancer"),
+                         selected = c("Breast"),
                          options = list(
                            `actions-box` = TRUE,
                            size = 10,
@@ -197,8 +197,6 @@ tabPanel("Population Survival",
                               plotlyOutput('plot_hot_km', height = "800px") %>% withSpinner() ),                    
                      
                      tabPanel("KM risk table",
-                 
-                              
                               DTOutput('tbl_survival_risk_table') %>% withSpinner()),
                      
                      tabPanel("Median survival estimates",
@@ -245,14 +243,13 @@ tabPanel("Population Survival",
               pickerInput(inputId = "survival_outcome_cohort_name_selector",
                           label = "Cancer",
                           choices = sort(unique(survival_est_strat$Cancer)),
-                          selected = c("IncidentBreastCancer"),
+                          selected = c("Breast"),
                           options = list(
                             `actions-box` = TRUE,
                             size = 10,
                             `selected-text-format` = "count > 3"),
                           multiple = TRUE)
           ),
-
 
           div(style="display: inline-block;vertical-align:top; width: 150px;",
               pickerInput(inputId = "survival_sex_selector",
@@ -303,7 +300,6 @@ tabPanel("Population Survival",
                                                choices = c("Sex",
                                                            "Age",
                                                            "Cancer",
-                                                         #  "Database",
                                                            "Method"),
                                                selected = c("Database", "Method"),
                                                options = list(
@@ -312,8 +308,18 @@ tabPanel("Population Survival",
                                                  `selected-text-format` = "count > 3"),
                                                multiple = TRUE,)
                                ),
-                               plotlyOutput('plot_survival_estimates', height = "800px") %>% withSpinner() )
-
+                               plotlyOutput('plot_survival_estimates', height = "800px") %>% withSpinner() ),
+                      
+                      
+                      
+                      
+                      tabPanel("Goodness of Fit" , 
+                      DTOutput('tbl_gof') %>% withSpinner()),
+                      
+                      
+                      
+                      tabPanel("Extrapolation Parameters", 
+                               DTOutput('tbl_parameters') %>% withSpinner()),
 
 
 
@@ -401,8 +407,8 @@ tabPanel("Population Survival",
           div(style="display: inline-block;vertical-align:top; width: 150px;",
               pickerInput(inputId = "attrition_cohort_name_selector",
                           label = "Cancer",
-                          choices = sort(unique(cohort_attrition$cohort_name)),
-                          selected = c("IncidentBreastCancer"),
+                          choices = sort(unique(cohort_attrition$Cancer)),
+                          selected = c("Breast"),
                           options = list(
                             `actions-box` = TRUE,
                             size = 10,
