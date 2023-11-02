@@ -60,28 +60,28 @@ tableone <- cdm$analysis %>%
 
 suppressWarnings(
   
-tableone_all_cancers <- cdm$analysis %>% 
-  mutate(cohort_definition_id = 10) %>% 
-  summariseCharacteristics(
-    strata = list(c("sex"),c("age_gr")),
-    minCellCount = 5,
-    ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
-    tableIntersect = list(
-      "Visits" = list(
-        tableName = "visit_occurrence", value = "count", window = c(-365, 0)
+  tableone_all_cancers <- cdm$analysis %>% 
+    mutate(cohort_definition_id = 10) %>% 
+    summariseCharacteristics(
+      strata = list(c("sex"),c("age_gr")),
+      minCellCount = 5,
+      ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+      tableIntersect = list(
+        "Visits" = list(
+          tableName = "visit_occurrence", value = "count", window = c(-365, 0))),
+      cohortIntersect = list(
+        "Medications" = list(
+          targetCohortTable = "medications", value = "flag", window = c(-365, 0)),
+        "Conditions" = list(
+          targetCohortTable = "conditions", value = "flag", window = c(-Inf, 0)),
+        "outcome" = list(
+          targetCohortTable = "outcome", value = "flag", window = c(0, 0)  
+        )
       )
-    ),
-    cohortIntersect = list(
-      "Medications" = list(
-        targetCohortTable = "medications", value = "flag", window = c(-365, 0)
-      ),
-      "Conditions" = list(
-        targetCohortTable = "conditions", value = "flag", window = c(-Inf, 0)
-      )
-    )
-  )  %>% 
-  mutate(group_level = "All Cancers")
-
+      
+    ) %>% 
+    mutate(group_level = "All Cancers")
+  
 )
 
 
@@ -99,8 +99,14 @@ tableone <- cdm$analysis %>%
   summariseCharacteristics(
     strata = list(c("sex"),c("age_gr")),
     minCellCount = 5,
-    ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150))
-  )
+    ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+tableIntersect = list(
+  "outcome" = list(
+    targetCohortTable = "outcome", value = "flag", window = c(0, 0) )
+)
+
+)
+
 )
 
 suppressWarnings(
@@ -110,8 +116,15 @@ tableone_all_cancers <- cdm$analysis %>%
   summariseCharacteristics(
     strata = list(c("sex"),c("age_gr")),
     minCellCount = 5,
-    ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150))
-  )  %>% 
+    ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+    tableIntersect = list(
+      "outcome" = list(
+        targetCohortTable = "outcome", value = "flag", window = c(0, 0) )
+    
+    
+    
+  )
+  ) %>% 
   mutate(group_level = "All Cancers")
 
 )
@@ -134,7 +147,15 @@ tableone <- tableone %>%
   mutate(group_level = replace(group_level, group_level == "Lungcancer", "Lung")) %>%
   mutate(group_level = replace(group_level, group_level == "Pancreaticcancer", "Pancreatic")) %>%
   mutate(group_level = replace(group_level, group_level == "Prostatecancer", "Prostate")) %>%
-  mutate(group_level = replace(group_level, group_level == "Stomachcancer", "Stomach")) 
+  mutate(group_level = replace(group_level, group_level == "Stomachcancer", "Stomach")) %>% 
+  mutate(variable_level = replace(variable_level, variable_level == "Breastcancer", "Breast Cancer")) %>%
+  mutate(variable_level = replace(variable_level, variable_level == "Crc", "Colorectal Cancer")) %>%
+  mutate(variable_level = replace(variable_level, variable_level == "Hncancer", "Head and Neck Cancer")) %>%
+  mutate(variable_level = replace(variable_level, variable_level == "Livercancer", "Liver Cancer")) %>%
+  mutate(variable_level = replace(variable_level, variable_level == "Lungcancer", "Lung Cancer")) %>%
+  mutate(variable_level = replace(variable_level, variable_level == "Pancreaticcancer", "Pancreatic Cancer")) %>%
+  mutate(variable_level = replace(variable_level, variable_level == "Prostatecancer", "Prostate Cancer")) %>%
+  mutate(variable_level = replace(variable_level, variable_level == "Stomachcancer", "Stomach Cancer"))
 
 # tidy up the table ones
 # overall

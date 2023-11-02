@@ -389,7 +389,6 @@ reformat_table_one <- function(table_one_summary){
   #condition variables
   condition_var <- table_one_summary %>%
     dplyr::filter(stringr::str_detect(variable, 'Conditions flag -inf')) %>%
-    dplyr::filter(!variable_level == "Malignant neoplastic disease") %>%
     dplyr::select(variable_level) %>%
     dplyr::distinct() %>%
     dplyr::pull(variable_level)
@@ -407,7 +406,6 @@ reformat_table_one <- function(table_one_summary){
   #medication variables
   medication_var <- table_one_summary %>%
     dplyr::filter(stringr::str_detect(variable, 'Medications flag -365')) %>%
-    dplyr::filter(!variable == "Ref medications antineoplastic agents") %>%
     dplyr::select(variable_level) %>%
     dplyr::distinct() %>%
     dplyr::pull(variable_level)
@@ -420,8 +418,30 @@ reformat_table_one <- function(table_one_summary){
                                                                           " (",
                                                                           round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == medication_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
                                                                           ")")))
-  }
-  }
+  } 
+    }
+    
+  #cancer outcomes  
+    outcome_var <- table_one_summary %>%
+      dplyr::filter(stringr::str_detect(variable, 'Outcome flag 0 to 0')) %>%
+      dplyr::select(variable_level) %>%
+      dplyr::distinct() %>%
+      dplyr::pull(variable_level)
+    
+    
+    if(length(outcome_var) != 0) {
+      for (i in (1:length(outcome_var))){
+        reformatted_table1 <- rbind(reformatted_table1, data.frame(x = paste0(outcome_var[[i]], " n (%)"),
+                                                                   y = paste0(table_one_summary %>% dplyr::filter(variable_level == outcome_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
+                                                                              " (",
+                                                                              round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == outcome_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
+                                                                              ")"))) 
+    
+    
+      } 
+    }
+      
+      
   reformatted_table1 <- reformatted_table1 %>% dplyr::distinct()
   
   ###rename columns
