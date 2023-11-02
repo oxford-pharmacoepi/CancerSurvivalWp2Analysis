@@ -86,6 +86,12 @@ cdm$person %>%
 # must be in format YYYY-MM-DD
 startdate <- "2000-01-01" 
 
+# Prior history -----
+# if you have a database where the observation period start date for each patient is the date of cancer diagnosis (ie. cancer registry)
+# set this value to FALSE. If your database has linkage or data where you can look in prior history before cancer diagnosis (e.g. primary care)
+# set as TRUE.
+priorhistory <- TRUE
+
 # Run the study ------
 source(here("RunStudy.R"))
 # after the study is run you should have a zip folder in your output folder to share
