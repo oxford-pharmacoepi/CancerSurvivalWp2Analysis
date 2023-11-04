@@ -143,7 +143,7 @@ risktableskm <- dplyr::bind_rows(observedrisktableKM) %>%
   filter(details != "n.censor") %>% 
   mutate(Stratification = "None", Adjustment = "None") %>% 
   mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
-  mutate(across(everything(), ~replace(., .<=  5 , "<5"))) %>% 
+  mutate(across(everything(), ~replace(., .<=  10 , "<10"))) %>% 
   mutate(across(everything(), as.character)) %>%
   replace(is.na(.), "0") 
 
