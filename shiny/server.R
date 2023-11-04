@@ -124,6 +124,8 @@ server <-	function(input, output, session) {
           ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = facet_var)) +
           geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = facet_var), alpha = 0.5) +
           geom_line() +
+          xlab("Time (Years)") +
+          ylab("Hazard") +
           facet_wrap(vars(facet_var), ncol = 2) +
           scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
@@ -132,6 +134,8 @@ server <-	function(input, output, session) {
           ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl)) +
           geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = "blue"), alpha = 0.5) +
           scale_y_continuous(limits = c(0, NA)) +
+          xlab("Time (Years)") +
+          ylab("Hazard") +
           theme_bw()
       }
     }
@@ -144,6 +148,8 @@ server <-	function(input, output, session) {
           ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group, fill = Group)) +
           geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.5) +
           geom_line() +
+          xlab("Time (Years)") +
+          ylab("Hazard") +
           facet_wrap(vars(facet_var), ncol = 2) +
           scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
@@ -154,6 +160,8 @@ server <-	function(input, output, session) {
           ggplot(aes(x = time, y = est, ymin = lcl, ymax = ucl, group = Group, colour = Group, fill = Group)) +
           geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = Group, colour = Group), alpha = 0.5) +
           geom_line() +
+          xlab("Time (Years)") +
+          ylab("Hazard") +
           scale_y_continuous(limits = c(0, NA)) +
           theme_bw()
       }
