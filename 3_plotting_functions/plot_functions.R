@@ -7,7 +7,6 @@ library(here)
 library(quarto)
 library(ggplot2)
 library(scales)
-library(ggh4x)
 
 # SURVIVAL
 #survival figure1 whole population and stratified by database
@@ -15,14 +14,14 @@ survivalFigure1 <- function(survivalData) {
   
   survivalFigureData <- survivalData %>%
     filter(Stratification == "None") %>%
-    filter(CalendarYearGp == "2000 to 2019") %>%
+    filter(Adjustment == "None") %>% 
     ggplot(aes(x = time,
                y = est,
                group = Database,
                col = Database )) +
     scale_y_continuous( labels = scales::percent, limits = c(0, NA)) +
-    scale_colour_manual(values = c("#00468BFF", "#ED0000FF", "#0099B4FF", "#42B540FF", "#925E9FFF", "#FDAF91FF", "#AD002AFF", "grey")) + #blue, #red, #lightblue, #green, purple, peach, dark read, gry
-    scale_fill_manual(values = c("#00468BFF", "#ED0000FF", "#0099B4FF", "#42B540FF", "#925E9FFF", "#FDAF91FF", "#AD002AFF", "grey")) +
+    #scale_colour_manual(values = c("#00468BFF", "#ED0000FF", "#0099B4FF", "#42B540FF", "#925E9FFF", "#FDAF91FF", "#AD002AFF", "grey")) + #blue, #red, #lightblue, #green, purple, peach, dark read, gry
+    #scale_fill_manual(values = c("#00468BFF", "#ED0000FF", "#0099B4FF", "#42B540FF", "#925E9FFF", "#FDAF91FF", "#AD002AFF", "grey")) +
     geom_ribbon(aes(ymin = lcl, 
                     ymax = ucl, 
                     fill = Database), alpha = .15, color = NA, show.legend = FALSE) +
@@ -38,7 +37,9 @@ survivalFigure1 <- function(survivalData) {
           axis.line = element_line(colour = "black", size = 0.6) ,
           panel.grid.major = element_line(color = "grey", size = 0.2, linetype = "dashed"),
           legend.key = element_rect(fill = "transparent", colour = "transparent")) +
-    scale_x_continuous(breaks=seq(0, 20, 2))
+  scale_x_continuous(breaks=seq(0, 20, 2)) +
+    facet_wrap(~ Cancer, ncol = 2, scales = "free_x") +
+    coord_cartesian(xlim = c(0, 20))
   
   return(survivalFigureData)
   
@@ -340,3 +341,34 @@ survivalFigure8 <- function(survivalData) {
   return(survivalFigureData)
   
 }
+
+
+###############################################################
+study_results <- readRDS(here("shiny", "data", "Results.rds"))
+# extract each element from the list to put results into r environment
+list2env(study_results,globalenv())
+rm(study_results)
+
+survival_km <- survival_estimates %>% 
+  filter(Method == "Kaplan-Meier")
+# plots survival per cancer
+asd <- survivalFigure1(survival_km)
+
+
+
+
+
+surv_prob_km <- survival_probabilities %>% 
+  filter(Method == "Kaplan-Meier",
+         Adjustment == "None") %>% 
+  select(!c(Adjustment))
+
+med_surv_km <- median_survival_results %>% 
+  filter(Method == "Kaplan-Meier",
+         Adjustment == "None") %>% 
+  select(!c(Adjustment, `RMST time`))
+
+hot_km <- hazard_overtime_results %>% 
+  filter(Method == "Kaplan-Meier")
+
+
