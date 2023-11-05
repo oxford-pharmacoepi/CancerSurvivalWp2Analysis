@@ -814,7 +814,7 @@ risktableskm_age <- dplyr::bind_rows(observedrisktableKM_age) %>%
   filter(details != "n.censor") %>% 
   mutate(Stratification = "Age", Adjustment = "None") %>% 
   mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
-  mutate(across(where(is.numeric), ~replace(., .<  5 , "<5"))) %>% 
+  mutate(across(where(is.numeric), ~replace(., .<  10 , "<10"))) %>% 
   mutate(across(everything(), as.character)) %>%
   replace(is.na(.), "0")
 
@@ -841,7 +841,7 @@ risktableskm_ageA <- dplyr::bind_rows(observedrisktableKM_age) %>%
   filter(details != "n.censor") %>% 
   mutate(Stratification = "None", Adjustment = "Age") %>% 
   mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
-  mutate(across(where(is.numeric), ~replace(., .<  5 , "<5"))) %>% 
+  mutate(across(where(is.numeric), ~replace(., .<  10 , "<10"))) %>% 
   mutate(across(everything(), as.character)) %>%
   replace(is.na(.), "0")
 

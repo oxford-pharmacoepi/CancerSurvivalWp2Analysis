@@ -222,7 +222,7 @@ risktableskm_sex <- dplyr::bind_rows(observedrisktableKM_sex) %>%
   filter(details != "n.censor") %>% 
   mutate(Stratification = "Sex", Adjustment = "None") %>% 
   mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
-  mutate(across(everything(), ~replace(., .<=  5 , "<5"))) %>% 
+  mutate(across(everything(), ~replace(., .<=  10 , "<10"))) %>% 
   mutate(across(everything(), as.character)) %>%
   replace(is.na(.), "0")
 
@@ -249,7 +249,7 @@ risktableskm_sexA <- dplyr::bind_rows(observedrisktableKM_sex) %>%
   filter(details != "n.censor") %>% 
   mutate(Stratification = "None", Adjustment = "Sex") %>% 
   mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
-  mutate(across(everything(), ~replace(., .<=  5 , "<5"))) %>% 
+  mutate(across(everything(), ~replace(., .<=  10 , "<10"))) %>% 
   mutate(across(everything(), as.character)) %>%
   replace(is.na(.), "0")
 
