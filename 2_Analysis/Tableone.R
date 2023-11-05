@@ -100,7 +100,7 @@ tableone <- cdm$analysis %>%
     strata = list(c("sex"),c("age_gr")),
     minCellCount = 5,
     ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
-tableIntersect = list(
+cohortIntersect = list(
   "outcome" = list(
     targetCohortTable = "outcome", value = "flag", window = c(0, 0) )
 )
@@ -112,22 +112,23 @@ tableIntersect = list(
 suppressWarnings(
   
 tableone_all_cancers <- cdm$analysis %>% 
-  mutate(cohort_definition_id = 10) %>% 
-  summariseCharacteristics(
-    strata = list(c("sex"),c("age_gr")),
-    minCellCount = 5,
-    ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
-    tableIntersect = list(
-      "outcome" = list(
-        targetCohortTable = "outcome", value = "flag", window = c(0, 0) )
-    
-    
-    
-  )
-  ) %>% 
-  mutate(group_level = "All Cancers")
+          mutate(cohort_definition_id = 10) %>% 
+          summariseCharacteristics(
+            strata = list(c("sex"),c("age_gr")),
+            minCellCount = 5,
+            ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+            cohortIntersect = list(
+              "outcome" = list(
+                targetCohortTable = "outcome", value = "flag", window = c(0, 0)  
+              )
+            )
+            
+          ) %>% 
+          mutate(group_level = "All Cancers")
+        
+      )
+      
 
-)
 
 info(logger, "CREATED TABLE ONE SUMMARY")
 
