@@ -250,7 +250,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
   
      # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE ) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         mutate(Method = extrapolations_formatted[i], 
@@ -333,7 +333,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
       
       # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE ) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         filter(.time != 0.0) %>% 
@@ -415,7 +415,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
       
       # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE ) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         mutate(Method = extrapolations_formatted[i], 
@@ -494,7 +494,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
       
       # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE ) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         mutate(Method = extrapolations_formatted[i], 
@@ -568,7 +568,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
       
       # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         mutate(Method = extrapolations_formatted[i], 
