@@ -349,11 +349,19 @@ study_results <- readRDS(here("shiny", "data", "Results.rds"))
 list2env(study_results,globalenv())
 rm(study_results)
 
+pathResults <- "C:/Users/dnewby/OneDrive - Nexus365/Desktop/Plots/"
+
 survival_km <- survival_estimates %>% 
   filter(Method == "Kaplan-Meier")
-# plots survival per cancer
-asd <- survivalFigure1(survival_km)
 
+# plots survival per cancer
+plot1 <- survivalFigure1(survival_km)
+
+plotname <- paste0("FIGURE1_Survival_all_cancers.png")
+
+png(paste0(pathResults, plotname), width = 7, height = 10, units = "in", res = 1200)
+print(plot1, newpage = FALSE)
+dev.off()
 
 
 
