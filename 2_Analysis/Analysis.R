@@ -230,7 +230,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
         distinct()
       
       pr_mean <- predict(model, type = "rmst") %>% 
@@ -250,7 +250,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
   
      # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         mutate(Method = extrapolations_formatted[i], 
@@ -313,7 +313,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
         distinct() 
       
       pr_mean <- predict(model, type = "rmst") %>% 
@@ -333,7 +333,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
       
       # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         filter(.time != 0.0) %>% 
@@ -395,7 +395,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
         distinct() 
       
       pr_mean <- predict(model, type = "rmst") %>% 
@@ -415,7 +415,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
       
       # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         mutate(Method = extrapolations_formatted[i], 
@@ -474,7 +474,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
+      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
         distinct() 
       
       pr_mean <- predict(model, type = "rmst") %>% 
@@ -494,7 +494,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
       
       # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         mutate(Method = extrapolations_formatted[i], 
@@ -507,7 +507,6 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                   NA)) %>% 
         rename(time = .time,
                "surv" = .pred_survival )
-      
       
       rm(model)
       #print out progress               
@@ -547,11 +546,13 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5) %>% 
-        distinct()  
+      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
+        distinct() 
       
-      pr_mean <- predict(model, type = "rmst") %>% 
-        distinct()  
+      pr_mean <- predict(model, type = "rmst", 
+                         #times = 10, 
+                         se.fit = FALSE) %>% 
+        distinct() 
       
       pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
@@ -567,7 +568,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
       
       # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         mutate(Method = extrapolations_formatted[i], 

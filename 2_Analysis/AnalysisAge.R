@@ -969,7 +969,7 @@ for(j in 1:nrow(outcome_cohorts)) {
             select(!c(.quantile))
           
           # survival predicted probabilities from extrapolations
-          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
             mutate(Age = data$age_gr) %>% 
             distinct()
           pred_survival_prob_results_temp[[i]] <-  pred_survival_prob_results_temp[[i]] %>% 
@@ -1068,7 +1068,7 @@ for(j in 1:nrow(outcome_cohorts)) {
             select(!c(.quantile))
           
           # survival predicted probabilities from extrapolations
-          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
             mutate(Age = data$age_gr) %>% 
             distinct()
           
@@ -1167,7 +1167,7 @@ for(j in 1:nrow(outcome_cohorts)) {
             select(!c(.quantile))
           
           # survival predicted probabilities from extrapolations
-          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
             mutate(Age = data$age_gr) %>% 
             distinct()
           
@@ -1264,7 +1264,7 @@ for(j in 1:nrow(outcome_cohorts)) {
             select(!c(.quantile))
           
           # survival predicted probabilities from extrapolations
-          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
             mutate(Age = data$age_gr) %>% 
             distinct()
           
@@ -1355,7 +1355,7 @@ for(j in 1:nrow(outcome_cohorts)) {
             select(!c(.quantile))
           
           # survival predicted probabilities from extrapolations
-          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+          pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
             mutate(Age = data$age_gr) %>% 
             distinct()
           
@@ -1550,7 +1550,7 @@ for(j in 1:nrow(outcome_cohorts)) {
               select(!c(.quantile))
             
             # survival predicted probabilities from extrapolations
-            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
               distinct() %>% 
               tidyr::unnest(.pred) %>% 
               filter(.time != 0.0) %>% 
@@ -1645,7 +1645,7 @@ for(j in 1:nrow(outcome_cohorts)) {
               select(!c(.quantile))
             
             # survival predicted probabilities from extrapolations
-            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
               distinct() %>% 
               tidyr::unnest(.pred) %>% 
               filter(.time != 0.0) %>% 
@@ -1738,7 +1738,7 @@ for(j in 1:nrow(outcome_cohorts)) {
               select(!c(.quantile))
             
             # survival predicted probabilities from extrapolations
-            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
               distinct() %>% 
               tidyr::unnest(.pred) %>% 
               filter(.time != 0.0) %>% 
@@ -1829,7 +1829,7 @@ for(j in 1:nrow(outcome_cohorts)) {
               select(!c(.quantile))
             
             # survival predicted probabilities from extrapolations
-            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
               distinct() %>% 
               tidyr::unnest(.pred) %>% 
               filter(.time != 0.0) %>% 
@@ -1914,7 +1914,7 @@ for(j in 1:nrow(outcome_cohorts)) {
               select(!c(.quantile))
             
             # survival predicted probabilities from extrapolations
-            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = grid, conf.int = FALSE ) %>% 
+            pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = TRUE ) %>% 
               distinct() %>% 
               tidyr::unnest(.pred) %>% 
               filter(.time != 0.0) %>% 

@@ -112,7 +112,6 @@ cohortIntersect = list(
 suppressWarnings(
   
 tableone_all_cancers <- cdm$analysis %>% 
-<<<<<<< HEAD
           mutate(cohort_definition_id = 10) %>% 
           summariseCharacteristics(
             strata = list(c("sex"),c("age_gr")),
@@ -129,7 +128,6 @@ tableone_all_cancers <- cdm$analysis %>%
         
       )
       
-=======
   mutate(cohort_definition_id = 10) %>% 
   summariseCharacteristics(
     strata = list(c("sex"),c("age_gr")),
@@ -144,7 +142,7 @@ tableone_all_cancers <- cdm$analysis %>%
   )
   ) %>% 
   mutate(group_level = "All Cancers")
->>>>>>> f0c2e547b13364fa22d2864bc7c08d158118e170
+
 
 
 info(logger, "CREATED TABLE ONE SUMMARY")

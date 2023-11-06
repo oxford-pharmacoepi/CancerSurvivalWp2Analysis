@@ -452,39 +452,39 @@ reformat_table_one <- function(table_one_summary){
 }
 
 # Setting up information for extrapolation methods to be used ---
-# extrapolations <- c("gompertz", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3", "spline5") 
-# extrapolations_formatted <- c("Gompertz", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (3 knots)", "Spline (5 knots)")
-extrapolations <- c("gompertz",
-                    "weibullph" ,
-                    "exp", 
-                    "llogis", 
-                    "lnorm",
-                    "gengamma",
-                    "spline1", 
-                    "spline3",
-                    "spline5", 
-                    "spline1o", 
-                    "spline3o", 
-                    "spline5o",
-                    "spline1n",
-                    "spline3n", 
-                    "spline5n") 
-
-extrapolations_formatted <- c("Gompertz", 
-                              "WeibullPH" ,
-                              "Exponential",
-                              "Log-logistic", 
-                              "Log-normal", 
-                              "Generalised Gamma", 
-                              "Spline hazard (1 knot)",
-                              "Spline hazard (3 knots)", 
-                              "Spline hazard (5 knots)",
-                              "Spline odds (1 knot)", 
-                              "Spline odds (3 knots)",
-                              "Spline odds (5 knots)",
-                              "Spline normal (1 knot)",
-                              "Spline normal (3 knots)",
-                              "Spline normal (5 knots)")
+extrapolations <- c("gompertz", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3", "spline5")
+extrapolations_formatted <- c("Gompertz", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (3 knots)", "Spline (5 knots)")
+# extrapolations <- c("gompertz",
+#                     "weibullph" ,
+#                     "exp", 
+#                     "llogis", 
+#                     "lnorm",
+#                     "gengamma",
+#                     "spline1", 
+#                     "spline3",
+#                     "spline5", 
+#                     "spline1o", 
+#                     "spline3o", 
+#                     "spline5o",
+#                     "spline1n",
+#                     "spline3n", 
+#                     "spline5n") 
+# 
+# extrapolations_formatted <- c("Gompertz", 
+#                               "WeibullPH" ,
+#                               "Exponential",
+#                               "Log-logistic", 
+#                               "Log-normal", 
+#                               "Generalised Gamma", 
+#                               "Spline hazard (1 knot)",
+#                               "Spline hazard (3 knots)", 
+#                               "Spline hazard (5 knots)",
+#                               "Spline odds (1 knot)", 
+#                               "Spline odds (3 knots)",
+#                               "Spline odds (5 knots)",
+#                               "Spline normal (1 knot)",
+#                               "Spline normal (3 knots)",
+#                               "Spline normal (5 knots)")
 
 # setting up time for extrapolation ----
 t <- seq(0, timeinyrs*365.25, by=60) # can make smaller can plot to see if it affects results
