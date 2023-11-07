@@ -546,13 +546,23 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
+      # fixing memory issues with getting confidence intervals/SE
+      # extract first entry and calculate CI/SE from this
+      model2 <- model
+      model2$data <- list(
+        m = model$data$m[1,], 
+        Y = model$data$Y[1,], 
+        mml = model$data$mml[1]
+      )
+      
+      pr_median <- predict(model2, type = "quantile", p = 0.5, conf.int = TRUE) %>% 
         distinct() 
       
-      pr_mean <- predict(model, type = "rmst", 
-                         #times = 10, 
-                         se.fit = FALSE) %>% 
-        distinct() 
+      pr_mean <- predict(model2, type = "rmst", 
+                         times = (as.numeric(as.Date((max(data$observation_period_end_date_2019)))
+                        - as.Date((min(data$cohort_start_date)))) / 365), 
+                         se.fit = TRUE) %>% 
+        distinct()
       
       pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
@@ -568,7 +578,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         select(!c(.quantile))
       
       # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE) %>% 
+      pred_survival_prob_results_temp[[i]] <- predict(model2, type = "survival", times = c(1,5,10), conf.int = TRUE) %>% 
         distinct() %>% 
         tidyr::unnest(.pred) %>% 
         mutate(Method = extrapolations_formatted[i], 
@@ -582,7 +592,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         rename(time = .time,
                "surv" = .pred_survival )
       
-      rm(model)
+      rm(model, model2)
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
       
