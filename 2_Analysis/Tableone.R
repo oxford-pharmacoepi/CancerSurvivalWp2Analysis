@@ -39,7 +39,7 @@ info(logger, "CREATE TABLE ONE SUMMARY")
 suppressWarnings(
 tableone <- cdm$analysis %>%
   summariseCharacteristics(
-    strata = list(c("sex"),c("age_gr")),
+    strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
     ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
     tableIntersect = list(
@@ -63,7 +63,7 @@ suppressWarnings(
   tableone_all_cancers <- cdm$analysis %>% 
     mutate(cohort_definition_id = 10) %>% 
     summariseCharacteristics(
-      strata = list(c("sex"),c("age_gr")),
+      strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
       minCellCount = 10,
       ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
       tableIntersect = list(
@@ -97,7 +97,7 @@ info(logger, "CREATE TABLE ONE SUMMARY")
 suppressWarnings(
 tableone <- cdm$analysis %>%
   summariseCharacteristics(
-    strata = list(c("sex"),c("age_gr")),
+    strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
     ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
 cohortIntersect = list(
@@ -114,7 +114,7 @@ suppressWarnings(
 tableone_all_cancers <- cdm$analysis %>% 
           mutate(cohort_definition_id = 10) %>% 
           summariseCharacteristics(
-            strata = list(c("sex"),c("age_gr")),
+            strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
             minCellCount = 5,
             ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
             cohortIntersect = list(
@@ -130,7 +130,7 @@ tableone_all_cancers <- cdm$analysis %>%
       
   mutate(cohort_definition_id = 10) %>% 
   summariseCharacteristics(
-    strata = list(c("sex"),c("age_gr")),
+    strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
     ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
     tableIntersect = list(
@@ -147,8 +147,7 @@ tableone_all_cancers <- cdm$analysis %>%
 
 info(logger, "CREATED TABLE ONE SUMMARY")
 
-tableone <- bind_rows(tableone, tableone_all_cancers) %>% 
-  filter(variable != "Prior observation")
+tableone <- bind_rows(tableone, tableone_all_cancers)
 
 }
 
@@ -262,8 +261,6 @@ for(tableonecancer in 1:length(unique(tableone$group_level))) {
 tb1_temp_age <- list()
 for(z in 1:length(unique(tabledata$strata_level))) {
   
-
-  
 # because some age groups do not have data need to have try catches to make sure loop still continues even if data not available
   tryCatch(
     {
@@ -292,6 +289,5 @@ tableone_age <- dplyr::bind_rows(tableone_clean_temp)
 
 # combine all tableone outputs
 tableone_final <- dplyr::bind_rows(tableone_overall, tableone_sex, tableone_age)
-
 
 info(logger, "CREATED TABLE ONE")

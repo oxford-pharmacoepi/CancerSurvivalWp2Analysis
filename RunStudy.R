@@ -436,8 +436,7 @@ reformat_table_one <- function(table_one_summary){
                                                                               " (",
                                                                               round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == outcome_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
                                                                               ")"))) 
-    
-    
+
       } 
     }
       
@@ -452,42 +451,11 @@ reformat_table_one <- function(table_one_summary){
 }
 
 # Setting up information for extrapolation methods to be used ---
-extrapolations <- c("gompertz", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3", "spline5")
-extrapolations_formatted <- c("Gompertz", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (3 knots)", "Spline (5 knots)")
-# extrapolations <- c("gompertz",
-#                     "weibullph" ,
-#                     "exp", 
-#                     "llogis", 
-#                     "lnorm",
-#                     "gengamma",
-#                     "spline1", 
-#                     "spline3",
-#                     "spline5", 
-#                     "spline1o", 
-#                     "spline3o", 
-#                     "spline5o",
-#                     "spline1n",
-#                     "spline3n", 
-#                     "spline5n") 
-# 
-# extrapolations_formatted <- c("Gompertz", 
-#                               "WeibullPH" ,
-#                               "Exponential",
-#                               "Log-logistic", 
-#                               "Log-normal", 
-#                               "Generalised Gamma", 
-#                               "Spline hazard (1 knot)",
-#                               "Spline hazard (3 knots)", 
-#                               "Spline hazard (5 knots)",
-#                               "Spline odds (1 knot)", 
-#                               "Spline odds (3 knots)",
-#                               "Spline odds (5 knots)",
-#                               "Spline normal (1 knot)",
-#                               "Spline normal (3 knots)",
-#                               "Spline normal (5 knots)")
+extrapolations <- c("gompertz", "weibullph" , "exp", "llogis", "lnorm", "gengamma", "spline1", "spline3")
+extrapolations_formatted <- c("Gompertz", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (3 knots)")
 
 # setting up time for extrapolation ----
-t <- seq(0, timeinyrs*365.25, by=60) # can make smaller can plot to see if it affects results
+t <- seq(0, timeinyrs*365.25, by=60) # can make smaller
 
 #Run analysis ----
 # set up so notation doesnt include scientific
@@ -508,6 +476,11 @@ info(logger, 'RUNNING ANALYSIS FOR AGE')
 source(here("2_Analysis","AnalysisAge.R"))
 info(logger, 'ANALYSIS RAN FOR AGE')
 
+# age*sex analysis KM only
+# info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
+# source(here("2_Analysis","AnalysisAgeSex.R"))
+# info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
+
 #set option back to zero
 options(scipen = 0)
 
@@ -517,7 +490,6 @@ source(here("2_Analysis","Tableone.R"))
 info(logger, 'TABLE ONE ANALYSIS RAN')
   
 ##################################################################
-
 # Tidy up results and save ----
 
 # survival KM and extrapolated data -----
@@ -546,7 +518,6 @@ survivalResults <- bind_rows(
   mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
 
-
 #risk table ----
 riskTableResults <- bind_rows(
   risktableskm , 
@@ -566,9 +537,7 @@ riskTableResults <- bind_rows(
   mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
 
-
-
-# median results KM and predicted median and mean extrapolations ----
+# KM median results, survival probabilites and predicted from extrapolations ----
 medianResults <- bind_rows( 
   medkmcombined ,
   medkmcombined_sex , 
@@ -589,7 +558,6 @@ medianResults <- bind_rows(
   mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
-
 
 # hazard over time results -----
 hazOverTimeResults <- bind_rows( 
@@ -657,34 +625,6 @@ ExtrpolationParameters <-bind_rows(
   mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
-
-
-# survival probabilities km and predicted probabilities
-survivalProbabilities <- bind_rows(
-  survprobtablekm ,
-  survprobtablekm_sex ,
-  survprobtablekm_sexA ,
-  survprobtablekm_age,
-  survprobtablekm_ageA,
-  predsurvivalprobfinal,
-  predsurvivalprobfinalsex,
-  predsurvivalprobfinalage,
-  predsurvivalprobfinalsexS,
-  predsurvivalprobfinalageS
-) %>%
-  mutate(Database = db.name) %>%
-  relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
-  mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
-  filter(time == 1.0 | time == 5.0 | time == 10.0) %>% 
-  mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
-  mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
-  mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
-  mutate(Cancer = replace(Cancer, Cancer == "IncidentLiverCancer", "Liver")) %>%
-  mutate(Cancer = replace(Cancer, Cancer == "IncidentLungCancer", "Lung")) %>%
-  mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
-  mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
-  mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
-
 
 
 # add a render file for the shiny app for filtering ----
@@ -809,7 +749,6 @@ write_csv(medianResults, paste0(here(output.folder),"/", cdm_name(cdm), "_median
 write_csv(hazOverTimeResults, paste0(here(output.folder),"/", cdm_name(cdm), "_hazard_overtime.csv"))
 write_csv(GOFResults, paste0(here(output.folder),"/", cdm_name(cdm), "_goodness_of_fit.csv"))
 write_csv(ExtrpolationParameters, paste0(here(output.folder),"/", cdm_name(cdm), "_extrapolation_parameters.csv"))
-write_csv(survivalProbabilities, paste0(here(output.folder),"/", cdm_name(cdm), "_survival_probabilities.csv"))
 write_csv(AnalysisRunSummary, paste0(here(output.folder),"/", cdm_name(cdm), "_analyses_run_summary.csv"))
 write_csv(tableone_final, paste0(here(output.folder),"/", cdm_name(cdm), "_tableone_summary.csv"))
 write_csv(snapshotcdm, paste0(here(output.folder),"/", cdm_name(cdm), "_cdm_snapshot.csv"))
@@ -839,7 +778,6 @@ survival_study_results <- list(survivalResults ,
                                hazOverTimeResults,
                                GOFResults,
                                ExtrpolationParameters,
-                               survivalProbabilities,
                                AnalysisRunSummary,
                                tableone_final,
                                snapshotcdm,
@@ -851,7 +789,6 @@ names(survival_study_results) <- c(paste0("survival_estimates"),
                                    paste0("hazard_overtime_results"),
                                    paste0("goodness_of_fit_results"),
                                    paste0("extrapolation_parameters"),
-                                   paste0("survival_probabilities"),
                                    paste0("analyses_run_summary"),
                                    paste0("tableone_summary"),
                                    paste0("cdm_snapshot"),

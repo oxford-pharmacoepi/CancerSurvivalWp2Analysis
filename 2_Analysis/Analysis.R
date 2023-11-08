@@ -12,7 +12,6 @@ observedkm <- list()
 observedmedianKM <- list()
 observedhazotKM <- list()
 observedrisktableKM <- list()
-observedsurprobsKM <- list()
 
 # loop to carry out for each cancer
 for(j in 1:nrow(outcome_cohorts)) {
@@ -69,13 +68,10 @@ print(paste0("Extract risk table ", Sys.time()," for ",outcome_cohorts$cohort_na
 
 
 # get surv probs for specific times ---
-observedsurprobsKM[[j]] <- do.call(data.frame, cols) %>%
+surprobsKM <- do.call(data.frame, cols) %>%
   select(c(time, surv, lower, upper)) %>% 
-  mutate(Method = "Kaplan-Meier", 
-         Cancer = outcome_cohorts$cohort_name[j],
-         Sex = "Both" ,
-         Age = "All",
-         surv = round((surv*100),4),
+  filter(time == 1 | time == 5 | time == 10 ) %>% 
+  mutate(surv = round((surv*100),4),
          lower = round((lower*100),4),
          upper = round((upper*100),4),
          "Survival Rate % (95% CI)"= ifelse(!is.na(surv),
@@ -83,24 +79,53 @@ observedsurprobsKM[[j]] <- do.call(data.frame, cols) %>%
                                             paste0(nice.num1(lower)),"-",
                                             paste0(nice.num1(upper)), ")"),
                                                                 NA)) %>% 
-  relocate("Survival Rate % (95% CI)", .before = Method)
+  select(-c(lower, upper)) %>% 
+  pivot_wider(names_from = time, 
+              values_from = c(`Survival Rate % (95% CI)`, surv),
+              names_prefix = " year ",
+              names_sep = "")
 
 # KM median survival---
 modelKM <- survfit(Surv(time_years, status) ~ 1, data=data) %>%
   summary()
 
-observedmedianKM[[j]] <- modelKM$table %>%
+medianKM <- modelKM$table %>%
   as.data.frame() %>%
   tibble::rownames_to_column() %>%  
   pivot_longer(-rowname) %>% 
-  pivot_wider(names_from=rowname, values_from=value) %>%
-  mutate(Method = "Kaplan-Meier", 
-         Cancer = outcome_cohorts$cohort_name[j],
-         Sex = "Both" ,
-         Age = "All" ) %>%
-          select(-name)
-  
+  pivot_wider(names_from=rowname, values_from=value) %>% 
+  rename(n = records, se =`se(rmean)`) %>% 
+  mutate(rmean = round(rmean, 4),
+         median = round(median, 4),
+         `0.95LCL` = round(`0.95LCL`, 4),
+         `0.95UCL` = round(`0.95UCL`, 4),
+         "rmean in years (SE)"= ifelse(!is.na(rmean),
+                                       paste0(paste0(nice.num2(rmean)), " (",
+                                              paste0(nice.num2(se)), ")"),
+                                       NA),
+         "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
+                                                     paste0(paste0(nice.num2(median)), " (",
+                                                            paste0(nice.num2(`0.95LCL`)),"-",
+                                                            paste0(nice.num2(`0.95UCL`)), ")"),
+                                                     NA)) %>% 
+  select(-c(`0.95LCL`,`0.95UCL`, name, n.max, n.start, se)) %>% 
+  mutate(n  = replace(n, n ==  0 , NA),
+         events = replace(events, events ==  0 , NA)) %>%
+  mutate(n  = replace(n, n <=  10 , "<10"),
+         events  = replace(events, events <=  10 , "<10"))  %>%
+  mutate(n  = replace_na(n, "0"),
+         events  = replace_na(events, "0")) %>% 
+  mutate(n = as.character(n),
+         events = as.character(events))
 
+observedmedianKM[[j]] <- bind_cols(medianKM, surprobsKM)
+observedmedianKM[[j]] <- observedmedianKM[[j]] %>% 
+  mutate(Method = "Kaplan-Meier", 
+         Cancer = outcome_cohorts$cohort_name[j] ,
+         Age = "All", 
+         Sex = "Both" )
+  
+rm(surprobsKM,medianKM )
 print(paste0("Median survival from KM from observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
 
 # hazard function over time ----
@@ -108,7 +133,6 @@ print(paste0("Median survival from KM from observed data ", Sys.time()," for ",o
 
 observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>%
   mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") 
-
 
 # reduce the size of haz over time for plotting
 if(nrow(observedhazotKM[[j]]) > 6000){
@@ -146,11 +170,6 @@ risktableskm <- dplyr::bind_rows(observedrisktableKM) %>%
   mutate(across(everything(), ~replace(., .<=  10 , "<10"))) %>% 
   mutate(across(everything(), as.character)) %>%
   replace(is.na(.), "0") 
-
-# generate results for survival probabilities
-survprobtablekm <- dplyr::bind_rows(observedsurprobsKM) %>% 
-  mutate(Stratification = "None", Adjustment = "None") %>% 
-  filter(time != 0.0)
   
 toc(func.toc=toc_min)
 info(logger, 'KM analysis for whole population COMPLETE')
@@ -167,8 +186,7 @@ extrapolations_all <- list() # extrapolation over time
 gof_haz_all <- list() # goodness of fit
 hazot_all <- list() # hazard over time 
 parameters_all <- list() # parameters from each model
-pred_median_mean_all <- list() # extract the predicted median and RMST from extrapolation methods
-pred_survival_prob_all <- list() # extract the predicted survival times from extrapolation methods
+pred_median_mean_all <- list() # extract the predicted median and RMST, surv prob 1,5,10 from extrapolation methods
 
 # Running analysis for each cancer
 for(j in 1:nrow(outcome_cohorts)) {
@@ -181,7 +199,6 @@ for(j in 1:nrow(outcome_cohorts)) {
   hazot_results_temp <- list()
   parameters_results_temp <- list() 
   pred_median_mean_results_temp <- list() 
-  pred_survival_prob_results_temp <- list()
 
   #subset the data by cancer type
   data <- Pop %>%
@@ -230,45 +247,57 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
-        distinct()
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        rename(median = est) %>% 
+        mutate(median = round(median, 4),
+               lcl = round(lcl, 4),
+               ucl = round(ucl, 4),
+               "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
+                                                           paste0(paste0(nice.num2(median)), " (",
+                                                                  paste0(nice.num2(lcl)),"-",
+                                                                  paste0(nice.num2(ucl)), ")"),
+                                                           NA)) %>% 
+        select(-c(lcl, ucl))
       
-      pr_mean <- predict(model, type = "rmst") %>% 
-        distinct()
       
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        rename(rmean = est) %>% 
+        mutate(rmean = round(rmean, 4),
+               se = round(se, 4),
+               time = round(time,4) ,
+               "rmean in years (SE)"= ifelse(!is.na(rmean),
+                                             paste0(paste0(nice.num2(rmean)), " (",
+                                                    paste0(nice.num2(se)), ")"),
+                                             NA)) %>% 
+        select(-c(lcl, ucl, se, time))
+      
+      # survival predicted probabilities from extrapolations
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        mutate(est = round((est*100),4),
+               lcl = round((lcl*100),4),
+               ucl = round((ucl*100),4),
+               "Survival Rate % (95% CI)"= ifelse(!is.na(est),
+                                                  paste0(paste0(nice.num1(est)), " (",
+                                                         paste0(nice.num1(lcl)),"-",
+                                                         paste0(nice.num1(ucl)), ")"),
+                                                  NA)) %>% 
+        rename("surv" = est) %>% 
+        select(-c(lcl, ucl)) %>% 
+        pivot_wider(names_from = time, 
+                    values_from = c(`Survival Rate % (95% CI)`, surv),
+                    names_prefix = " year ",
+                    names_sep = "")
+      
+      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
-               Sex = "Both" ,
-               .pred_rmst = round(.pred_rmst,4) ,
-               .pred_quantile = round(.pred_quantile, 4)) %>% 
-        rename("RMST time" = .time,
-               "rmean" = .pred_rmst ,
-               "median" = .pred_quantile) %>% 
-        select(!c(.quantile))
-  
-     # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE ) %>% 
-        distinct() %>% 
-        tidyr::unnest(.pred) %>% 
-        mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j],
-               .pred_survival = round((.pred_survival*100),4),
-               Age = "All",
-               Sex = "Both",
-               "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
-                                                       paste0(nice.num1(.pred_survival)),
-                                                       NA)) %>% 
-        rename(time = .time,
-               "surv" = .pred_survival )
- 
+               Sex = "Both" )
       
-
-
       
-      rm(model)
+      rm(model,pr_survival_prob, pr_mean, pr_median )
+      
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
       }
@@ -313,43 +342,55 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
-        distinct() 
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        rename(median = est) %>% 
+        mutate(median = round(median, 4),
+               lcl = round(lcl, 4),
+               ucl = round(ucl, 4),
+               "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
+                                                           paste0(paste0(nice.num2(median)), " (",
+                                                                  paste0(nice.num2(lcl)),"-",
+                                                                  paste0(nice.num2(ucl)), ")"),
+                                                           NA)) %>% 
+        select(-c(lcl, ucl))
       
-      pr_mean <- predict(model, type = "rmst") %>% 
-        distinct() 
       
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        rename(rmean = est) %>% 
+        mutate(rmean = round(rmean, 4),
+               se = round(se, 4),
+               time = round(time,4) ,
+               "rmean in years (SE)"= ifelse(!is.na(rmean),
+                                             paste0(paste0(nice.num2(rmean)), " (",
+                                                    paste0(nice.num2(se)), ")"),
+                                             NA)) %>% 
+        select(-c(lcl, ucl, se, time))
+      
+      # survival predicted probabilities from extrapolations
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        mutate(est = round((est*100),4),
+               lcl = round((lcl*100),4),
+               ucl = round((ucl*100),4),
+               "Survival Rate % (95% CI)"= ifelse(!is.na(est),
+                                                  paste0(paste0(nice.num1(est)), " (",
+                                                         paste0(nice.num1(lcl)),"-",
+                                                         paste0(nice.num1(ucl)), ")"),
+                                                  NA)) %>% 
+        rename("surv" = est) %>% 
+        select(-c(lcl, ucl)) %>% 
+        pivot_wider(names_from = time, 
+                    values_from = c(`Survival Rate % (95% CI)`, surv),
+                    names_prefix = " year ",
+                    names_sep = "")
+      
+      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
-               Sex = "Both" ,
-               .pred_rmst = round(.pred_rmst,4) ,
-               .pred_quantile = round(.pred_quantile, 4)) %>% 
-        rename("RMST time" = .time,
-               "rmean" = .pred_rmst ,
-               "median" = .pred_quantile) %>% 
-        select(!c(.quantile))
-      
-      # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE ) %>% 
-        distinct() %>% 
-        tidyr::unnest(.pred) %>% 
-        filter(.time != 0.0) %>% 
-        mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j],
-               .pred_survival = round((.pred_survival*100),4),
-               Age = "All",
-               Sex = "Both",
-               "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
-                                                  paste0(nice.num1(.pred_survival)),
-                                                  NA)) %>% 
-        rename(time = .time,
-               "surv" = .pred_survival )
+               Sex = "Both" )
       
       
-      #print out progress
       rm(model)
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
       
@@ -395,39 +436,53 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
-        distinct() 
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        rename(median = est) %>% 
+        mutate(median = round(median, 4),
+               lcl = round(lcl, 4),
+               ucl = round(ucl, 4),
+               "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
+                                                           paste0(paste0(nice.num2(median)), " (",
+                                                                  paste0(nice.num2(lcl)),"-",
+                                                                  paste0(nice.num2(ucl)), ")"),
+                                                           NA)) %>% 
+        select(-c(lcl, ucl))
       
-      pr_mean <- predict(model, type = "rmst") %>% 
-        distinct() 
       
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        rename(rmean = est) %>% 
+        mutate(rmean = round(rmean, 4),
+               se = round(se, 4),
+               time = round(time,4) ,
+               "rmean in years (SE)"= ifelse(!is.na(rmean),
+                                             paste0(paste0(nice.num2(rmean)), " (",
+                                                    paste0(nice.num2(se)), ")"),
+                                             NA)) %>% 
+        select(-c(lcl, ucl, se, time))
+      
+      # survival predicted probabilities from extrapolations
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        mutate(est = round((est*100),4),
+               lcl = round((lcl*100),4),
+               ucl = round((ucl*100),4),
+               "Survival Rate % (95% CI)"= ifelse(!is.na(est),
+                                                  paste0(paste0(nice.num1(est)), " (",
+                                                         paste0(nice.num1(lcl)),"-",
+                                                         paste0(nice.num1(ucl)), ")"),
+                                                  NA)) %>% 
+        rename("surv" = est) %>% 
+        select(-c(lcl, ucl)) %>% 
+        pivot_wider(names_from = time, 
+                    values_from = c(`Survival Rate % (95% CI)`, surv),
+                    names_prefix = " year ",
+                    names_sep = "")
+      
+      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
-               Sex = "Both" ,
-               .pred_rmst = round(.pred_rmst,4) ,
-               .pred_quantile = round(.pred_quantile, 4)) %>% 
-        rename("RMST time" = .time,
-               "rmean" = .pred_rmst ,
-               "median" = .pred_quantile) %>% 
-        select(!c(.quantile))
-      
-      # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE ) %>% 
-        distinct() %>% 
-        tidyr::unnest(.pred) %>% 
-        mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j],
-               .pred_survival = round((.pred_survival*100),4),
-               Age = "All",
-               Sex = "Both",
-               "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
-                                                  paste0(nice.num1(.pred_survival)),
-                                                  NA)) %>% 
-        rename(time = .time,
-               "surv" = .pred_survival )
+               Sex = "Both" )
       
       
       rm(model)
@@ -474,39 +529,54 @@ for(j in 1:nrow(outcome_cohorts)) {
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- predict(model, type = "quantile", p = 0.5, conf.int = FALSE) %>% 
-        distinct() 
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        rename(median = est) %>% 
+        mutate(median = round(median, 4),
+               lcl = round(lcl, 4),
+               ucl = round(ucl, 4),
+               "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
+                                                           paste0(paste0(nice.num2(median)), " (",
+                                                                  paste0(nice.num2(lcl)),"-",
+                                                                  paste0(nice.num2(ucl)), ")"),
+                                                           NA)) %>% 
+        select(-c(lcl, ucl))
       
-      pr_mean <- predict(model, type = "rmst") %>% 
-        distinct() 
       
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        rename(rmean = est) %>% 
+        mutate(rmean = round(rmean, 4),
+               se = round(se, 4),
+               time = round(time,4) ,
+               "rmean in years (SE)"= ifelse(!is.na(rmean),
+                                             paste0(paste0(nice.num2(rmean)), " (",
+                                                    paste0(nice.num2(se)), ")"),
+                                             NA)) %>% 
+        select(-c(lcl, ucl, se, time))
+      
+      # survival predicted probabilities from extrapolations
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        mutate(est = round((est*100),4),
+               lcl = round((lcl*100),4),
+               ucl = round((ucl*100),4),
+               "Survival Rate % (95% CI)"= ifelse(!is.na(est),
+                                                  paste0(paste0(nice.num1(est)), " (",
+                                                         paste0(nice.num1(lcl)),"-",
+                                                         paste0(nice.num1(ucl)), ")"),
+                                                  NA)) %>% 
+        rename("surv" = est) %>% 
+        select(-c(lcl, ucl)) %>% 
+        pivot_wider(names_from = time, 
+                    values_from = c(`Survival Rate % (95% CI)`, surv),
+                    names_prefix = " year ",
+                    names_sep = "")
+      
+      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
-               Sex = "Both" ,
-               .pred_rmst = round(.pred_rmst,4) ,
-               .pred_quantile = round(.pred_quantile, 4)) %>% 
-        rename("RMST time" = .time,
-               "rmean" = .pred_rmst ,
-               "median" = .pred_quantile) %>%  
-        select(!c(.quantile))
+               Sex = "Both" )
       
-      # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model, type = "survival", times = c(1,5,10), conf.int = FALSE ) %>% 
-        distinct() %>% 
-        tidyr::unnest(.pred) %>% 
-        mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j],
-               .pred_survival = round((.pred_survival*100),4),
-               Age = "All",
-               Sex = "Both",
-               "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
-                                                  paste0(nice.num1(.pred_survival)),
-                                                  NA)) %>% 
-        rename(time = .time,
-               "surv" = .pred_survival )
       
       rm(model)
       #print out progress               
@@ -542,57 +612,59 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       #extract the hazard function over time
       hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard",tidy = TRUE) %>%
+        summary(t=(t + 1)/365, type = "hazard", tidy = TRUE) %>%
         mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      # fixing memory issues with getting confidence intervals/SE
-      # extract first entry and calculate CI/SE from this
-      model2 <- model
-      model2$data <- list(
-        m = model$data$m[1,], 
-        Y = model$data$Y[1,], 
-        mml = model$data$mml[1]
-      )
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        rename(median = est) %>% 
+        mutate(median = round(median, 4),
+          lcl = round(lcl, 4),
+          ucl = round(ucl, 4),
+          "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
+                                                      paste0(paste0(nice.num2(median)), " (",
+                                                             paste0(nice.num2(lcl)),"-",
+                                                             paste0(nice.num2(ucl)), ")"),
+                                                      NA)) %>% 
+        select(-c(lcl, ucl))
+        
       
-      pr_median <- predict(model2, type = "quantile", p = 0.5, conf.int = TRUE) %>% 
-        distinct() 
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        rename(rmean = est) %>% 
+        mutate(rmean = round(rmean, 4),
+               se = round(se, 4),
+               "rmean in years (SE)"= ifelse(!is.na(rmean),
+                                             paste0(paste0(nice.num2(rmean)), " (",
+                                                    paste0(nice.num2(se)), ")"),
+                                             NA)) %>% 
+        select(-c(lcl, ucl, se, time))
       
-      pr_mean <- predict(model2, type = "rmst", 
-                         times = (as.numeric(as.Date((max(data$observation_period_end_date_2019)))
-                        - as.Date((min(data$cohort_start_date)))) / 365), 
-                         se.fit = TRUE) %>% 
-        distinct()
-      
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median)
+      # survival predicted probabilities from extrapolations
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        mutate(est = round((est*100),4),
+               lcl = round((lcl*100),4),
+               ucl = round((ucl*100),4),
+               "Survival Rate % (95% CI)"= ifelse(!is.na(est),
+                                                  paste0(paste0(nice.num1(est)), " (",
+                                                         paste0(nice.num1(lcl)),"-",
+                                                         paste0(nice.num1(ucl)), ")"),
+                                                  NA)) %>% 
+        rename("surv" = est) %>% 
+        select(-c(lcl, ucl)) %>% 
+        pivot_wider(names_from = time, 
+                    values_from = c(`Survival Rate % (95% CI)`, surv),
+                    names_prefix = " year ",
+                    names_sep = "")
+
+      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
-               Sex = "Both" ,
-               .pred_rmst = round(.pred_rmst,4) ,
-               .pred_quantile = round(.pred_quantile, 4)) %>% 
-        rename("RMST time" = .time,
-               "rmean" = .pred_rmst ,
-               "median" = .pred_quantile) %>%  
-        select(!c(.quantile))
+               Sex = "Both" )
+    
       
-      # survival predicted probabilities from extrapolations
-      pred_survival_prob_results_temp[[i]] <- predict(model2, type = "survival", times = c(1,5,10), conf.int = TRUE) %>% 
-        distinct() %>% 
-        tidyr::unnest(.pred) %>% 
-        mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j],
-               .pred_survival = round((.pred_survival*100),4),
-               Age = "All",
-               Sex = "Both",
-               "Survival Rate % (95% CI)"= ifelse(!is.na(.pred_survival),
-                                                  paste0(nice.num1(.pred_survival)),
-                                                  NA)) %>% 
-        rename(time = .time,
-               "surv" = .pred_survival )
-      
-      rm(model, model2)
+      rm(model)
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
       
@@ -606,7 +678,6 @@ for(j in 1:nrow(outcome_cohorts)) {
   gofcombined <- dplyr::bind_rows(gof_results_temp)
   hotcombined <- dplyr::bind_rows(hazot_results_temp)   
   parcombined <- dplyr::bind_rows(parameters_results_temp)
-  surcombined <- dplyr::bind_rows(pred_survival_prob_results_temp)
   medcombined <- dplyr::bind_rows(pred_median_mean_results_temp)
   
   extrapolations_all[[j]] <- extrapolatedcombined
@@ -614,7 +685,6 @@ for(j in 1:nrow(outcome_cohorts)) {
   hazot_all[[j]] <- hotcombined
   parameters_all[[j]] <-  parcombined
   pred_median_mean_all[[j]] <- medcombined
-  pred_survival_prob_all[[j]] <- surcombined
 
   #print out progress               
   print(paste0(outcome_cohorts$cohort_name[j]," Extrapolation Analysis Completed ", Sys.time()))
@@ -634,8 +704,6 @@ parametersfinal <- dplyr::bind_rows(parameters_all)  %>%
   relocate(rate, .after = Sex) %>% 
   mutate(rate = coalesce(rate, `1`)) %>% 
   select(!c(`1`))
-predsurvivalprobfinal <- dplyr::bind_rows(pred_survival_prob_all)  %>%
-  mutate(Stratification = "None", Adjustment = "None")
 predmedmeanfinal <- dplyr::bind_rows(pred_median_mean_all)  %>%
   mutate(Stratification = "None", Adjustment = "None")
 
