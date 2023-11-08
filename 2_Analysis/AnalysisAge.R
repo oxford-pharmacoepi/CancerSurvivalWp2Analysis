@@ -1,5 +1,5 @@
 #################################################
-# AGE POPULATION
+# AGE ANALYSIS
 #################################################
 
 # km survival, risk table, median survival, hazard over time from the observed data for each cancer ----
@@ -397,6 +397,8 @@ for(j in 1:nrow(outcome_cohorts)) {
              Sex = "Both" )
     
     rm(surprobsKM, medianKM)
+    
+    print(paste0("Survival for 1, 5 and 10 years from observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
     
     # hazard over time ---
     # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
@@ -834,7 +836,7 @@ hotkmcombined_age <- dplyr::bind_rows(observedhazotKM_age) %>%
   rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
   mutate(Stratification = "Age", Adjustment = "None")
 
-#generate the risk table and remove entries < 5 patients
+#generate the risk table and remove entries < 10 patients
 risktableskm_age <- dplyr::bind_rows(observedrisktableKM_age) %>% 
   filter(details != "n.censor") %>% 
   mutate(Stratification = "Age", Adjustment = "None") %>% 
@@ -856,7 +858,7 @@ hotkmcombined_ageA <- dplyr::bind_rows(observedhazotKM_age) %>%
   rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
   mutate(Stratification = "None", Adjustment = "Age")
 
-#generate the risk table and remove entries < 5 patients
+#generate the risk table and remove entries < 10 patients
 risktableskm_ageA <- dplyr::bind_rows(observedrisktableKM_age) %>% 
   filter(details != "n.censor") %>% 
   mutate(Stratification = "None", Adjustment = "Age") %>% 

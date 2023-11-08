@@ -162,7 +162,7 @@ hotkmcombined <- dplyr::bind_rows(observedhazotKM) %>%
   rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
   mutate(Stratification = "None", Adjustment = "None")
 
-# generate results for risk table with those at risk 
+# generate results for risk table with those at risk and censor < 10 cases
 risktableskm <- dplyr::bind_rows(observedrisktableKM) %>% 
   filter(details != "n.censor") %>% 
   mutate(Stratification = "None", Adjustment = "None") %>% 

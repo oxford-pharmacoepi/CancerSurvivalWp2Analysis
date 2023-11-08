@@ -1,5 +1,5 @@
 #################################################
-# SEX POPULATION
+# SEX ANALYSIS
 #################################################
 
 # km survival, risk table, median survival, hazard over time from the observed data for each cancer ----
@@ -246,7 +246,7 @@ hotkmcombined_sex <- dplyr::bind_rows(observedhazotKM_sex) %>%
   rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
   mutate(Stratification = "Sex", Adjustment = "None")
 
-#generate the risk table and remove entries < 5 patients
+#generate the risk table and remove entries < 10 patients
 risktableskm_sex <- dplyr::bind_rows(observedrisktableKM_sex) %>% 
   filter(details != "n.censor") %>% 
   mutate(Stratification = "Sex", Adjustment = "None") %>% 
@@ -268,7 +268,7 @@ hotkmcombined_sexA <- dplyr::bind_rows(observedhazotKM_sex) %>%
   rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
   mutate(Stratification = "None", Adjustment = "Sex")
 
-#generate the risk table and remove entries < 5 patients
+#generate the risk table and remove entries < 10 patients
 risktableskm_sexA <- dplyr::bind_rows(observedrisktableKM_sex) %>% 
   filter(details != "n.censor") %>% 
   mutate(Stratification = "None", Adjustment = "Sex") %>% 
