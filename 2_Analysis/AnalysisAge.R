@@ -916,11 +916,18 @@ for(j in 1:nrow(outcome_cohorts)) {
         # 1knotspline
         tryCatch(
           model <- flexsurvspline(formula=Surv(time_years,status-1) ~ age_gr ,data=data,k = 1, scale = "hazard"),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
+          
+          tryCatch({
+          
           #extrapolation
           extrap_results_temp[[i]] <- model %>%
             summary(t=t/365, tidy = TRUE) %>%
@@ -1012,20 +1019,39 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
-        }
-        
-        
-        
+
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+          
+        } 
+          
+ 
       } else if(extrapolations[i] == "spline2") {
         # 2knotspline
         
         tryCatch(
           model <- flexsurvspline(formula=Surv(time_years,status-1) ~ age_gr , data=data , k = 2, scale = "hazard"),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
+          
+          
+          tryCatch({
           
           extrap_results_temp[[i]] <- model %>%
             summary(t=t/365, tidy = TRUE) %>%
@@ -1120,18 +1146,37 @@ for(j in 1:nrow(outcome_cohorts)) {
         
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
           
-        }
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+          
+        } 
+          
         
       } else if(extrapolations[i] == "spline3") {
         # 3knotspline
         
         tryCatch(
           model <- flexsurvspline(formula=Surv(time_years,status-1) ~ age_gr, data=data, k = 3, scale = "hazard"),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
+          
+          tryCatch({
           
           extrap_results_temp[[i]] <- model %>%
             summary(t=t/365, tidy = TRUE) %>%
@@ -1226,18 +1271,39 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
-        }
+          
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+          
+        } 
+
         
       } else if(extrapolations[i] == "spline5") {
         # 5knotspline
         
         tryCatch(
           model <- flexsurvspline(formula=Surv(time_years,status-1) ~ age_gr , data=data, k = 5, scale = "hazard"),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
+          
+          
+          tryCatch({
           
           extrap_results_temp[[i]] <- model %>%
             summary(t=t/365, tidy = TRUE) %>%
@@ -1331,105 +1397,138 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+          
         }
+          
         
       } else {
         
         #carry out models for different parametric methods survival
         tryCatch(
           model <- flexsurvreg(Surv(time_years, status) ~ age_gr, data=data, dist=extrapolations[i]),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
           
-          # extrapolations
-          extrap_results_temp[[i]] <- model %>%
-            summary(t=t/365, tidy = TRUE) %>%
-            mutate(Method = extrapolations_formatted[i], 
-                   Cancer = outcome_cohorts$cohort_name[j],
-                   Sex = "Both") %>% 
-            rename(Age = age_gr)
+          tryCatch({
+
+            # extrapolations
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j],
+                     Sex = "Both") %>% 
+              rename(Age = age_gr)
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ) %>% 
+              slice(rep(1:n(), each = nrow(agelevels))) %>% 
+              mutate(Age = levels(as.factor(data$age_gr)))
+            
+            #grab the parameters from the model
+            parameters_results_temp[[i]] <- model[["coefficients"]] %>%
+              enframe() %>%
+              pivot_wider(names_from = name, values_from = value) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ) %>% 
+              slice(rep(1:n(), each = nrow(agelevels))) %>% 
+              mutate(Age = levels(as.factor(data$age_gr)))
+            
+            #extract the hazard function over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard",tidy = TRUE) %>%
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ) %>% 
+              rename(Age = age_gr)
+            
+            # median and mean predicted survival
+            pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+              rename(median = est) %>% 
+              mutate(median = round(median, 4),
+                     lcl = round(lcl, 4),
+                     ucl = round(ucl, 4),
+                     "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
+                                                                 paste0(paste0(nice.num2(median)), " (",
+                                                                        paste0(nice.num2(lcl)),"-",
+                                                                        paste0(nice.num2(ucl)), ")"),
+                                                                 NA)) %>% 
+              select(-c(lcl, ucl))
+            
+            pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+              rename(rmean = est) %>% 
+              mutate(rmean = round(rmean, 4),
+                     se = round(se, 4),
+                     time = round(time,4) ,
+                     "rmean in years (SE)"= ifelse(!is.na(rmean),
+                                                   paste0(paste0(nice.num2(rmean)), " (",
+                                                          paste0(nice.num2(se)), ")"),
+                                                   NA)) %>% 
+              select(-c(lcl, ucl, se, time))
+            
+            pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+              mutate(est = round((est*100),4),
+                     lcl = round((lcl*100),4),
+                     ucl = round((ucl*100),4),
+                     "Survival Rate % (95% CI)"= ifelse(!is.na(est),
+                                                        paste0(paste0(nice.num1(est)), " (",
+                                                               paste0(nice.num1(lcl)),"-",
+                                                               paste0(nice.num1(ucl)), ")"),
+                                                        NA)) %>% 
+              rename("surv" = est) %>% 
+              select(-c(lcl, ucl)) %>% 
+              pivot_wider(names_from = time, 
+                          values_from = c(`Survival Rate % (95% CI)`, surv),
+                          names_prefix = " year ",
+                          names_sep = "")
+            
+            pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_median, pr_survival_prob, by = "age_gr" )
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              mutate(Method = extrapolations_formatted[i], 
+                     Cancer = outcome_cohorts$cohort_name[j], 
+                     Sex = "Both" ) %>% 
+              rename(Age = age_gr)
+            
+            rm(model, pr_mean, pr_median, pr_survival_prob)
+            
+            #print out progress               
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+            
+            
+          }, 
           
-          #get the goodness of fit for each model
-          gof_results_temp[[i]] <- model %>%
-            glance() %>%
-            mutate(Method = extrapolations_formatted[i], 
-                   Cancer = outcome_cohorts$cohort_name[j], 
-                   Sex = "Both" ) %>% 
-            slice(rep(1:n(), each = nrow(agelevels))) %>% 
-            mutate(Age = levels(as.factor(data$age_gr)))
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
           
-          #grab the parameters from the model
-          parameters_results_temp[[i]] <- model[["coefficients"]] %>%
-            enframe() %>%
-            pivot_wider(names_from = name, values_from = value) %>%
-            mutate(Method = extrapolations_formatted[i], 
-                   Cancer = outcome_cohorts$cohort_name[j], 
-                   Sex = "Both" ) %>% 
-            slice(rep(1:n(), each = nrow(agelevels))) %>% 
-            mutate(Age = levels(as.factor(data$age_gr)))
-          
-          #extract the hazard function over time
-          hazot_results_temp[[i]] <- model %>%
-            summary(t=(t + 1)/365, type = "hazard",tidy = TRUE) %>%
-            mutate(Method = extrapolations_formatted[i], 
-                   Cancer = outcome_cohorts$cohort_name[j], 
-                   Sex = "Both" ) %>% 
-            rename(Age = age_gr)
-          
-          # median and mean predicted survival
-          pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-            rename(median = est) %>% 
-            mutate(median = round(median, 4),
-                   lcl = round(lcl, 4),
-                   ucl = round(ucl, 4),
-                   "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                               paste0(paste0(nice.num2(median)), " (",
-                                                                      paste0(nice.num2(lcl)),"-",
-                                                                      paste0(nice.num2(ucl)), ")"),
-                                                               NA)) %>% 
-            select(-c(lcl, ucl))
-          
-          pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-            rename(rmean = est) %>% 
-            mutate(rmean = round(rmean, 4),
-                   se = round(se, 4),
-                   time = round(time,4) ,
-                   "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                 paste0(paste0(nice.num2(rmean)), " (",
-                                                        paste0(nice.num2(se)), ")"),
-                                                 NA)) %>% 
-            select(-c(lcl, ucl, se, time))
-          
-          pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-            mutate(est = round((est*100),4),
-                   lcl = round((lcl*100),4),
-                   ucl = round((ucl*100),4),
-                   "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                      paste0(paste0(nice.num1(est)), " (",
-                                                             paste0(nice.num1(lcl)),"-",
-                                                             paste0(nice.num1(ucl)), ")"),
-                                                      NA)) %>% 
-            rename("surv" = est) %>% 
-            select(-c(lcl, ucl)) %>% 
-            pivot_wider(names_from = time, 
-                        values_from = c(`Survival Rate % (95% CI)`, surv),
-                        names_prefix = " year ",
-                        names_sep = "")
-          
-          pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_median, pr_survival_prob, by = "age_gr" )
-          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-            mutate(Method = extrapolations_formatted[i], 
-                   Cancer = outcome_cohorts$cohort_name[j], 
-                   Sex = "Both" ) %>% 
-            rename(Age = age_gr)
-          
-          rm(model, pr_mean, pr_median, pr_survival_prob)
-          
-          #print out progress               
-          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+
+          )
           
         }
         
@@ -1532,11 +1631,18 @@ for(j in 1:nrow(outcome_cohorts)) {
           # 1knotspline
           tryCatch(
             model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1 ,data=data_age ,k = 1, scale = "hazard"),
-            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            error = function(e){
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
           )
           
           if (exists("model") == TRUE) {
+            
+            tryCatch({
+              
             #extrapolation
             extrap_results_temp[[i]] <- model %>%
               summary(t=t/365, tidy = TRUE) %>%
@@ -1629,20 +1735,37 @@ for(j in 1:nrow(outcome_cohorts)) {
             
             #print out progress               
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          
+            
+            }, 
+            
+            error = function(e) {
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+            
+            warning = function(w) {
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            
+            )
+          
           }
-          
-          
           
         } else if(extrapolations[i] == "spline2") {
           # 2knotspline
           
           tryCatch(
-            model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_age , k = 2, scale = "hazard"),
-            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            error = function(e){
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
           )
           
           if (exists("model") == TRUE) {
+            
+            tryCatch({
             
             extrap_results_temp[[i]] <- model %>%
               summary(t=t/365, tidy = TRUE) %>%
@@ -1736,6 +1859,19 @@ for(j in 1:nrow(outcome_cohorts)) {
             
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
             
+
+            }, 
+            
+            error = function(e) {
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+            
+            warning = function(w) {
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            
+            )
+            
           }
           
         } else if(extrapolations[i] == "spline3") {
@@ -1743,11 +1879,17 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           tryCatch(
             model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1, data=data_age, k = 3, scale = "hazard"),
-            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            error = function(e){
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
           )
           
           if (exists("model") == TRUE) {
+            
+            tryCatch({
             
             extrap_results_temp[[i]] <- model %>%
               summary(t=t/365, tidy = TRUE) %>%
@@ -1841,6 +1983,19 @@ for(j in 1:nrow(outcome_cohorts)) {
             
             #print out progress               
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          
+            }, 
+            
+            error = function(e) {
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+            
+            warning = function(w) {
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            
+            )
+            
           }
           
         } else if(extrapolations[i] == "spline5") {
@@ -1848,12 +2003,18 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           tryCatch(
             model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_age, k = 5, scale = "hazard"),
-            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            error = function(e){
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
           )
           
           if (exists("model") == TRUE) {
             
+            tryCatch({
+              
             extrap_results_temp[[i]] <- model %>%
               summary(t=t/365, tidy = TRUE) %>%
               mutate(Method = extrapolations_formatted[i], 
@@ -1945,6 +2106,20 @@ for(j in 1:nrow(outcome_cohorts)) {
             
             #print out progress               
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+            
+            }, 
+            
+            error = function(e) {
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+            
+            warning = function(w) {
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            
+            )
+            
+            
           }
           
         } else {
@@ -1952,11 +2127,17 @@ for(j in 1:nrow(outcome_cohorts)) {
           #carry out models for different parametric methods survival
           tryCatch(
             model <- flexsurvreg(Surv(time_years, status) ~ 1, data=data_age, dist=extrapolations[i]),
-            error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-            warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            error = function(e){
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+            warning = function(w){
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
           )
           
           if (exists("model") == TRUE) {
+            
+            tryCatch({
             
             # extrapolations
             extrap_results_temp[[i]] <- model %>%
@@ -2044,7 +2225,17 @@ for(j in 1:nrow(outcome_cohorts)) {
             #print out progress               
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
             
-          }
+            }, 
+            
+            error = function(e) {
+              cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+            
+            warning = function(w) {
+              cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for age model", "\n")
+              info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+            
+            )
           
           
         }
@@ -2082,6 +2273,8 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     #print out progress               
     print(paste0(outcome_cohorts$cohort_name[j]," Extrapolation Analysis Completed ", Sys.time()))
+  
+    }
   
 }
 

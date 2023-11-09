@@ -324,11 +324,18 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 1knotspline
       tryCatch(
         model <- flexsurvspline(formula=Surv(time_years,status-1) ~ sex ,data=data,k = 1, scale = "hazard"),
-        error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-        warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        error = function(e){
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+        warning = function(w){
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
       
       if (exists("model") == TRUE) {
+        
+        tryCatch({
+          
         #extrapolation
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
@@ -413,20 +420,37 @@ for(j in 1:nrow(outcome_cohorts)) {
         rm(model, pr_mean, pr_median, pr_survival_prob)
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+      
+        }, 
+        
+        error = function(e) {
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        
+        warning = function(w) {
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        
+        )
+      
       }
-      
-      
       
     } else if(extrapolations[i] == "spline2") {
       # 2knotspline
       
       tryCatch(
         model <- flexsurvspline(formula=Surv(time_years,status-1) ~ sex , data=data , k = 2, scale = "hazard"),
-        error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-        warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        error = function(e){
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+        warning = function(w){
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
       
       if (exists("model") == TRUE) {
+        
+        tryCatch({
         
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
@@ -517,6 +541,18 @@ for(j in 1:nrow(outcome_cohorts)) {
         
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
         
+        }, 
+        
+        error = function(e) {
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        
+        warning = function(w) {
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        
+        )
+        
       }
       
     } else if(extrapolations[i] == "spline3") {
@@ -524,11 +560,17 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       tryCatch(
         model <- flexsurvspline(formula=Surv(time_years,status-1) ~ sex, data=data, k = 3, scale = "hazard"),
-        error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-        warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        error = function(e){
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+        warning = function(w){
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
       
       if (exists("model") == TRUE) {
+        
+        tryCatch({
         
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
@@ -615,6 +657,19 @@ for(j in 1:nrow(outcome_cohorts)) {
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+      
+        }, 
+        
+        error = function(e) {
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        
+        warning = function(w) {
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        
+        )
+        
       }
       
     } else if(extrapolations[i] == "spline5") {
@@ -622,11 +677,17 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       tryCatch(
         model <- flexsurvspline(formula=Surv(time_years,status-1) ~ sex , data=data, k = 5, scale = "hazard"),
-        error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-        warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        error = function(e){
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+        warning = function(w){
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
       
       if (exists("model") == TRUE) {
+        
+        tryCatch({
         
         extrap_results_temp[[i]] <- model %>%
           summary(t=t/365, tidy = TRUE) %>%
@@ -712,6 +773,19 @@ for(j in 1:nrow(outcome_cohorts)) {
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+      
+        }, 
+        
+        error = function(e) {
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        
+        warning = function(w) {
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        
+        )
+        
       }
       
     } else {
@@ -719,11 +793,17 @@ for(j in 1:nrow(outcome_cohorts)) {
       #carry out models for different parametric methods survival
       tryCatch(
         model <- flexsurvreg(Surv(time_years, status) ~ sex, data=data, dist=extrapolations[i]),
-        error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-        warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        error = function(e){
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+        warning = function(w){
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
       
       if (exists("model") == TRUE) {
+        
+        tryCatch({
         
         # extrapolations
         extrap_results_temp[[i]] <- model %>%
@@ -811,11 +891,22 @@ for(j in 1:nrow(outcome_cohorts)) {
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
         
-      }
+        }, 
+        
+        error = function(e) {
+          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        
+        warning = function(w) {
+          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        
+        )
       
       
     }
     
+    }
     
   }
     
@@ -922,11 +1013,18 @@ for(j in 1:nrow(outcome_cohorts)) {
         # 1knotspline
         tryCatch(
           model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1 ,data=data_sex,k = 1, scale = "hazard"),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
+          
+          tryCatch({
+          
           #extrapolation
           extrap_results_temp[[i]] <- model %>%
             summary(t=t/365, tidy = TRUE) %>%
@@ -1019,20 +1117,37 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+        
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+        
         }
-        
-        
         
       } else if(extrapolations[i] == "spline2") {
         # 2knotspline
         
         tryCatch(
           model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_sex , k = 2, scale = "hazard"),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
+          
+          tryCatch({
           
           extrap_results_temp[[i]] <- model %>%
             summary(t=t/365, tidy = TRUE) %>%
@@ -1126,6 +1241,18 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
           
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+          
         }
         
       } else if(extrapolations[i] == "spline3") {
@@ -1133,11 +1260,17 @@ for(j in 1:nrow(outcome_cohorts)) {
         
         tryCatch(
           model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1, data=data_sex, k = 3, scale = "hazard"),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
+          
+          tryCatch({
           
           extrap_results_temp[[i]] <- model %>%
             summary(t=t/365, tidy = TRUE) %>%
@@ -1231,6 +1364,19 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+        
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+          
         }
         
       } else if(extrapolations[i] == "spline5") {
@@ -1238,11 +1384,17 @@ for(j in 1:nrow(outcome_cohorts)) {
         
         tryCatch(
           model <- flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_sex, k = 5, scale = "hazard"),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
+          
+          tryCatch({
           
           extrap_results_temp[[i]] <- model %>%
             summary(t=t/365, tidy = TRUE) %>%
@@ -1335,6 +1487,19 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+        
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+          
         }
         
       } else {
@@ -1342,11 +1507,17 @@ for(j in 1:nrow(outcome_cohorts)) {
         #carry out models for different parametric methods survival
         tryCatch(
           model <- flexsurvreg(Surv(time_years, status) ~ 1, data=data_sex, dist=extrapolations[i]),
-          error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-          warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          error = function(e){
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         )
         
         if (exists("model") == TRUE) {
+          
+          tryCatch({
           
           # extrapolations
           extrap_results_temp[[i]] <- model %>%
@@ -1433,6 +1604,18 @@ for(j in 1:nrow(outcome_cohorts)) {
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+          
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for sex model", "\n")
+            info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
           
         }
         

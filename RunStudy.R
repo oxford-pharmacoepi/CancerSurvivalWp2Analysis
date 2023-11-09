@@ -745,7 +745,7 @@ attritioncdm <- attritioncdm %>%
 info(logger, "SAVING RESULTS")
 write_csv(survivalResults, paste0(here(output.folder),"/", cdm_name(cdm), "_survival_estimates.csv"))
 write_csv(riskTableResults, paste0(here(output.folder),"/", cdm_name(cdm), "_risk_table.csv"))
-write_csv(medianResults, paste0(here(output.folder),"/", cdm_name(cdm), "_median_mean_survival.csv"))
+write_csv(medianResults, paste0(here(output.folder),"/", cdm_name(cdm), "_median_mean_survprob_survival.csv"))
 write_csv(hazOverTimeResults, paste0(here(output.folder),"/", cdm_name(cdm), "_hazard_overtime.csv"))
 write_csv(GOFResults, paste0(here(output.folder),"/", cdm_name(cdm), "_goodness_of_fit.csv"))
 write_csv(ExtrpolationParameters, paste0(here(output.folder),"/", cdm_name(cdm), "_extrapolation_parameters.csv"))
