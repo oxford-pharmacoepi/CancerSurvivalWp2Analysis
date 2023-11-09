@@ -41,7 +41,7 @@ tableone <- cdm$analysis %>%
   summariseCharacteristics(
     strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
-    ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+    ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
     tableIntersect = list(
       "Visits" = list(
         tableName = "visit_occurrence", value = "count", window = c(-365, 0)
@@ -65,7 +65,7 @@ suppressWarnings(
     summariseCharacteristics(
       strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
       minCellCount = 10,
-      ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+      ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
       tableIntersect = list(
         "Visits" = list(
           tableName = "visit_occurrence", value = "count", window = c(-365, 0))),
@@ -99,7 +99,7 @@ tableone <- cdm$analysis %>%
   summariseCharacteristics(
     strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
-    ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+    ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
 cohortIntersect = list(
   "outcome" = list(
     targetCohortTable = "outcome", value = "flag", window = c(0, 0) )
@@ -116,7 +116,7 @@ tableone_all_cancers <- cdm$analysis %>%
           summariseCharacteristics(
             strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
             minCellCount = 5,
-            ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+            ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
             cohortIntersect = list(
               "outcome" = list(
                 targetCohortTable = "outcome", value = "flag", window = c(0, 0)  
@@ -132,7 +132,7 @@ tableone_all_cancers <- cdm$analysis %>%
   summariseCharacteristics(
     strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
-    ageGroup = list(c(18, 29), c(30, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
+    ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)),
     tableIntersect = list(
       "outcome" = list(
         targetCohortTable = "outcome", value = "flag", window = c(0, 0) )
@@ -275,7 +275,7 @@ for(z in 1:length(unique(tabledata$strata_level))) {
         dplyr::filter(!stringr::str_detect(Description, 'Age Group:'))
       
       },
-    error = function(e) {info(logger, paste0(" Table one for 18 to 29 year olds not carried out for  ",unique(tableone$group_level)[tableonecancer], "see log for more information", e))},
+    error = function(e) {info(logger, paste0(" Table one not carried out for  ",unique(tableone$group_level)[tableonecancer], "see log for more information", e))},
     warning = function(w){info(logger, paste0(unique(tableone$group_level)[tableonecancer], ": ", w))}
   )  
 }

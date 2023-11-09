@@ -30,46 +30,24 @@ for(j in 1:nrow(outcome_cohorts)) {
       tidy() %>%
       rename(Age = strata) %>%
       mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], 
-             Age = str_replace(Age, "age_gr=18 to 29", "18 to 29"),
-             Age = str_replace(Age, "age_gr=30 to 39", "30 to 39"),
-             Age = str_replace(Age, "age_gr=40 to 49", "40 to 49"),
-             Age = str_replace(Age, "age_gr=50 to 59", "50 to 59"),
-             Age = str_replace(Age, "age_gr=60 to 69", "60 to 69"),
-             Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
-             Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
-             Age = str_replace(Age, "age_gr=> 90", "> 90") ,
+             Age = str_replace(Age, "age_gr=", ""),
              Sex = "Both") 
     
-    # 18 to 29
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) > 6000){
-      observedkm_1829 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",] %>%
+    # reduce the number of rows due to size of km outputs (doesnt effect results)
+    # 18 to 39
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 6000){
+      observedkm_1839 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) < 6000){
-      observedkm_1829 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",] %>%
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) < 6000){
+      observedkm_1839 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]) < 3000){
-      observedkm_1829 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",] %>%
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) < 3000){
+      observedkm_1839 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 2 == 1)
     } else {
-      observedkm_1829 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 29",]
-    }
-    
-    # 30 to 39
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) > 6000){
-      observedkm_3039 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",] %>%
-        filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) < 6000){
-      observedkm_3039 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",] %>%
-        filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]) < 3000){
-      observedkm_3039 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",] %>%
-        filter(row_number() %% 2 == 1)
-    } else {
-      observedkm_3039 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "30 to 39",]
+      observedkm_1839 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]
     }
 
     
@@ -138,48 +116,29 @@ for(j in 1:nrow(outcome_cohorts)) {
       observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]
     }       
     
-    # 80 to 89
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) > 6000){
-      observedkm_8089 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",] %>%
+    # 80+
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 6000){
+      observedkm_80 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) < 6000){
-      observedkm_8089 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",] %>%
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 3000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) < 6000){
+      observedkm_80 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]) < 3000){
-      observedkm_8089 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",] %>%
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) < 3000){
+      observedkm_80 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 2 == 1)
     } else {
-      observedkm_8089 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 to 89",]
-    }     
-    
-    
-    # 90+
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) > 6000){
-      observedkm_90 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",] %>%
-        filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) < 6000){
-      observedkm_90 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",] %>%
-        filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]) < 3000){
-      observedkm_90 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",] %>%
-        filter(row_number() %% 2 == 1)
-    } else {
-      observedkm_90 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "> 90",]
+      observedkm_80 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]
     }   
 
     observedkm_age[[j]] <- bind_rows(
-      observedkm_1829,
-      observedkm_3039,
+      observedkm_1839,
       observedkm_4049,
       observedkm_5059,
       observedkm_6069,
       observedkm_7079,
-      observedkm_8089,
-      observedkm_90)    
+      observedkm_80)    
         
     print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed")) 
     
@@ -193,131 +152,30 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     kmage <- do.call(data.frame, cols) %>%
       select(c(n.risk, n.event, n.censor, strata)) %>% 
-      rename(Age = strata) %>% 
-      mutate(Age = str_replace(Age, "age_gr=18 to 29", "18 to 29"),
-             Age = str_replace(Age, "age_gr=30 to 39", "30 to 39"),
-             Age = str_replace(Age, "age_gr=40 to 49", "40 to 49"),
-             Age = str_replace(Age, "age_gr=50 to 59", "50 to 59"),
-             Age = str_replace(Age, "age_gr=60 to 69", "60 to 69"),
-             Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
-             Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
-             Age = str_replace(Age, "age_gr=> 90", "> 90"))
+      mutate(strata = str_replace(strata, "age_gr=", ""))
     
-    # risk tables for different ages       
-    kmage_1829 <- kmage %>%
-      filter(Age == "18 to 29") %>%
-      select(!c(Age)) %>%
-      t() %>%
-      as_tibble() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier",
-             Cancer = outcome_cohorts$cohort_name[j],
-             Age = "18 to 29",
-             Sex = "Both" ,
-             details = c("n.risk", "n.event", "n.censor")) %>%
-      relocate(details)
     
-    kmage_3039 <- kmage %>%
-      filter(Age == "30 to 39") %>%
-      select(!c(Age)) %>%
-      t() %>%
-      as_tibble() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier",
-             Cancer = outcome_cohorts$cohort_name[j],
-             Age = "30 to 39",
-             Sex = "Both" ,
-             details = c("n.risk", "n.event", "n.censor")) %>%
-      relocate(details)
+    # risk tables for different age*sex groups
+    kmagegp <- list()
     
-    kmage_4049 <- kmage %>%
-      filter(Age == "40 to 49") %>%
-      select(!c(Age)) %>%
-      t() %>%
-      as_tibble() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier",
-             Cancer = outcome_cohorts$cohort_name[j],
-             Age = "40 to 49",
-             Sex = "Both" ,
-             details = c("n.risk", "n.event", "n.censor")) %>%
-      relocate(details)
+    for(k in 1: length(table(kmage$strata))) {
+      
+      kmagegp[[k]] <- kmage %>%
+        filter(strata == names(table(kmage$strata)[k])) %>%
+        select(!c(strata)) %>%
+        t() %>%
+        as_tibble() %>%
+        `colnames<-`(grid) %>%
+        mutate(Method = "Kaplan-Meier",
+               Cancer = outcome_cohorts$cohort_name[j],
+               agesex = names(table(kmage$strata)[k]) ,
+               details = c("n.risk", "n.event", "n.censor")) %>%
+        relocate(details) 
+      
+    }
     
-    kmage_5059 <- kmage %>%
-      filter(Age == "50 to 59") %>%
-      select(!c(Age)) %>%
-      t() %>%
-      as_tibble() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier",
-             Cancer = outcome_cohorts$cohort_name[j],
-             Age = "50 to 59",
-             Sex = "Both" ,
-             details = c("n.risk", "n.event", "n.censor")) %>%
-      relocate(details)
-    
-    kmage_6069 <- kmage %>%
-      filter(Age == "60 to 69") %>%
-      select(!c(Age)) %>%
-      t() %>%
-      as_tibble() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier",
-             Cancer = outcome_cohorts$cohort_name[j],
-             Age = "60 to 69",
-             Sex = "Both" ,
-             details = c("n.risk", "n.event", "n.censor")) %>%
-      relocate(details)
-    
-    kmage_7079 <- kmage %>%
-      filter(Age == "70 to 79") %>%
-      select(!c(Age)) %>%
-      t() %>%
-      as_tibble() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier",
-             Cancer = outcome_cohorts$cohort_name[j],
-             Age = "70 to 79",
-             Sex = "Both" ,
-             details = c("n.risk", "n.event", "n.censor")) %>%
-      relocate(details)
-    
-    kmage_8089 <- kmage %>%
-      filter(Age == "80 to 89") %>%
-      select(!c(Age)) %>%
-      t() %>%
-      as_tibble() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier",
-             Cancer = outcome_cohorts$cohort_name[j],
-             Age = "80 to 89",
-             Sex = "Both" ,
-             details = c("n.risk", "n.event", "n.censor")) %>%
-      relocate(details)
-    
-    kmage_90 <- kmage %>%
-      filter(Age == "> 90") %>%
-      select(!c(Age)) %>%
-      t() %>%
-      as_tibble() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier",
-             Cancer = outcome_cohorts$cohort_name[j],
-             Age = "> 90",
-             Sex = "Both" ,
-             details = c("n.risk", "n.event", "n.censor")) %>%
-      relocate(details)
-  
-   
-    # bind results for all ages
-    observedrisktableKM_age[[j]] <- bind_rows(kmage_1829, 
-                                              kmage_3039, 
-                                              kmage_4049,
-                                              kmage_5059,
-                                              kmage_6069,
-                                              kmage_7079,
-                                              kmage_8089,
-                                              kmage_90)
+    # bind results for age groups
+    observedrisktableKM_age[[j]] <- bind_rows(kmagegp)
     
     print(paste0("Extract risk table ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
     
@@ -332,14 +190,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       rename(Age = rowname, n = records, se =`se(rmean)`) %>% 
       mutate(rmean = round(rmean, 4),
              median = round(median, 4),
-            Age = str_replace(Age, "age_gr=18 to 29", "18 to 29"),
-             Age = str_replace(Age, "age_gr=30 to 39", "30 to 39"),
-             Age = str_replace(Age, "age_gr=40 to 49", "40 to 49"),
-             Age = str_replace(Age, "age_gr=50 to 59", "50 to 59"),
-             Age = str_replace(Age, "age_gr=60 to 69", "60 to 69"),
-             Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
-             Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
-             Age = str_replace(Age, "age_gr=> 90", "> 90") ,
+            Age = str_replace(Age, "age_gr=", ""),
             `0.95LCL` = round(`0.95LCL`, 4),
             `0.95UCL` = round(`0.95UCL`, 4),
             "rmean in years (SE)"= ifelse(!is.na(rmean),
@@ -368,14 +219,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       select(c(time, surv, lower, upper, strata)) %>% 
       rename(Age = strata) %>% 
       filter(time == 1 | time == 5 | time == 10 ) %>% 
-      mutate(Age = str_replace(Age, "age_gr=18 to 29", "18 to 29"),
-             Age = str_replace(Age, "age_gr=30 to 39", "30 to 39"),
-             Age = str_replace(Age, "age_gr=40 to 49", "40 to 49"),
-             Age = str_replace(Age, "age_gr=50 to 59", "50 to 59"),
-             Age = str_replace(Age, "age_gr=60 to 69", "60 to 69"),
-             Age = str_replace(Age, "age_gr=70 to 79", "70 to 79"),
-             Age = str_replace(Age, "age_gr=80 to 89", "80 to 89"),
-             Age = str_replace(Age, "age_gr=> 90", "> 90") ) %>% 
+      mutate(Age = str_replace(Age, "age_gr=", "") ) %>% 
       mutate(surv = round((surv*100),4),
              lower = round((lower*100),4),
              upper = round((upper*100),4),
@@ -430,14 +274,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       
     } else {
       
-      print(paste0("Trying Hazard over time results again removing 18-29 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
+      print(paste0("Trying Hazard over time results again removing 18-39 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(age_gr != "18 to 29") 
+        filter(age_gr != "18 to 39") 
     
     tryCatch(
       {
-        modelhot <- group_by(data,age_gr) %>% 
+        modelhot <- group_by(data, age_gr) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
           mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
@@ -447,13 +291,13 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0(" after removal of 18-29 age group:  Second attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))} ,
+        info(logger, paste0(" after removal of 18-39 age group:  Second attempt not carried out due to low sample numbers for ", outcome_cohorts$cohort_name[j], e))} ,
       warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     )
       
     }
     
-    # if model successful after removal of 18-29 age group if not remove 30-39 age group
+    # if model successful after removal of 18-39 age group if not remove 40-49 age group
     if (exists("modelhot") == TRUE) {
       
       observedhazotKM_age[[j]] <- modelhot 
@@ -463,45 +307,11 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       # if model falls over remove second age group
     } else {
-  
-  print(paste0("Trying Hazard over time results again removing 30-39 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
-  
-  data <- data %>% 
-    filter(age_gr != "18 to 29") %>% 
-    filter(age_gr != "30 to 39")
-
-    tryCatch(
-      {
-        modelhot <- group_by(data,age_gr) %>% 
-          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
-          ungroup %>%
-          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
-          rename(Age = age_gr)
-        
-      },
-      error = function(e) {
-        cat("An error occurred: ")
-        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0(" after removal of 30-39 age group: 3rd attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))
-      } ,
-      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
-    ) }
-    
- 
-    if (exists("modelhot") == TRUE) {
-      
-      observedhazotKM_age[[j]] <- modelhot 
-      
-      #print out progress               
-      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-      
-    }  else  {
       
       print(paste0("Trying Hazard over time results again removing 40-49 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(age_gr != "18 to 29") %>% 
-        filter(age_gr != "30 to 39") %>% 
+        filter(age_gr != "18 to 39") %>% 
         filter(age_gr != "40 to 49")
       
     tryCatch(
@@ -516,7 +326,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0(" after removal of 40-49 age group: 4th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))},
+        info(logger, paste0(" after removal of 40-49 age group: attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))},
       warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     ) 
       }
@@ -534,8 +344,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 50-59 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(age_gr != "18 to 29") %>% 
-        filter(age_gr != "30 to 39") %>% 
+        filter(age_gr != "18 to 39") %>% 
         filter(age_gr != "40 to 49") %>% 
         filter(age_gr != "50 to 59")
       
@@ -551,7 +360,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0("after removal of 50-59 age group: 5th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))} ,
+        info(logger, paste0("after removal of 50-59 age group: attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))} ,
       warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     ) }
     
@@ -568,8 +377,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 60-69 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(age_gr != "18 to 29") %>% 
-        filter(age_gr != "30 to 39") %>% 
+        filter(age_gr != "18 to 39") %>% 
         filter(age_gr != "40 to 49") %>% 
         filter(age_gr != "50 to 59") %>% 
         filter(age_gr != "60 to 69")
@@ -586,7 +394,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0("after removal of 60-69 age group:  6th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e)) },
+        info(logger, paste0("after removal of 60-69 age group:  attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e)) },
       warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     )
     }    
@@ -603,8 +411,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 70-79 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(age_gr != "18 to 29") %>% 
-        filter(age_gr != "30 to 39") %>% 
+        filter(age_gr != "18 to 39") %>% 
         filter(age_gr != "40 to 49") %>% 
         filter(age_gr != "50 to 59") %>% 
         filter(age_gr != "60 to 69") %>% 
@@ -621,7 +428,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       error = function(e) {
         cat("An error occurred: ")
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0("after removal of 70-79 age group: 7th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))},
+        info(logger, paste0("after removal of 70-79 age group: attempt not carried out due to low sample numbers for ", outcome_cohorts$cohort_name[j], e))},
       warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
     ) 
       }
@@ -632,43 +439,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       #print out progress               
       print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-      
-    } else {
-      
-      print(paste0("Trying Hazard over time results again removing 80-89 year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
-      
-      data <- data %>% 
-        filter(age_gr != "18 to 29") %>% 
-        filter(age_gr != "30 to 39") %>% 
-        filter(age_gr != "40 to 49") %>% 
-        filter(age_gr != "50 to 59") %>% 
-        filter(age_gr != "60 to 69") %>% 
-        filter(age_gr != "70 to 79") %>% 
-        filter(age_gr != "80 to 89")
-    
-    tryCatch(
-      {
-        modelhot <- group_by(data,age_gr) %>% 
-          do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
-          ungroup %>%
-          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Sex = "Both") %>% 
-          rename(Age = age_gr)
-      },
-      error = function(e) {
-        cat("An error occurred: ")
-        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , "trying again removing small sample numbers", "\n")
-        info(logger, paste0(" after removal of 80-89 age group: 8th attempt not carried out due to low sample numbers for ",outcome_cohorts$cohort_name[j], e))},
-      warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], ": ", w))}
-    )
-    }
-    
-    if (exists("modelhot") == TRUE) {
-      
-      observedhazotKM_age[[j]] <- modelhot
-      
-      #print out progress               
-      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age strat completed"))
-      
+
     } else {
       
       print(paste0("hazard over time age stratification not carried due to low sample numbers in all age groups ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
@@ -678,36 +449,20 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     if (exists("modelhot") == TRUE) {
 
-    # 18 to 29
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) > 6000){
-      observedhazotkm_1829 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",] %>%
+    # 18 to 39
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 6000){
+      observedhazotkm_1839 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) < 6000){
-      observedhazotkm_1829 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",] %>%
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) < 6000){
+      observedhazotkm_1839 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]) < 3000){
-      observedhazotkm_1829 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",] %>%
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) < 3000){
+      observedhazotkm_1839 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 2 == 1)
     } else {
-      observedhazotkm_1829 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 29",]
-    }
-    
-    # 30 to 39
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) > 6000){
-      observedhazotkm_3039 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",] %>%
-        filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) < 6000){
-      observedhazotkm_3039 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",] %>%
-        filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]) < 3000){
-      observedhazotkm_3039 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",] %>%
-        filter(row_number() %% 2 == 1)
-    } else {
-      observedhazotkm_3039 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "30 to 39",]
+      observedhazotkm_1839 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]
     }
     
     
@@ -776,48 +531,29 @@ for(j in 1:nrow(outcome_cohorts)) {
       observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]
     }       
     
-    # 80 to 89
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) > 6000){
-      observedhazotkm_8089 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",] %>%
+    # 80+
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 6000){
+      observedhazotkm_80 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) < 6000){
-      observedhazotkm_8089 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",] %>%
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 3000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) < 6000){
+      observedhazotkm_80 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]) < 3000){
-      observedhazotkm_8089 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",] %>%
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) < 3000){
+      observedhazotkm_80 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 2 == 1)
     } else {
-      observedhazotkm_8089 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 to 89",]
-    }     
-    
-    
-    # 90+
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) > 6000){
-      observedhazotkm_90 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",] %>%
-        filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) < 6000){
-      observedhazotkm_90 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",] %>%
-        filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]) < 3000){
-      observedhazotkm_90 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",] %>%
-        filter(row_number() %% 2 == 1)
-    } else {
-      observedhazotkm_90 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "> 90",]
+      observedhazotkm_80 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]
     }   
     
     observedhazotKM_age[[j]] <- bind_rows(
-      observedhazotkm_1829,
-      observedhazotkm_3039,
+      observedhazotkm_1839,
       observedhazotkm_4049,
       observedhazotkm_5059,
       observedhazotkm_6069,
       observedhazotkm_7079,
-      observedhazotkm_8089,
-      observedhazotkm_90)  
+      observedhazotkm_80)  
     
     rm(modelhot)
     }
@@ -2238,8 +1974,9 @@ for(j in 1:nrow(outcome_cohorts)) {
             )
           
           
+          }
+          
         }
-        
         
       }
       
@@ -2257,7 +1994,9 @@ for(j in 1:nrow(outcome_cohorts)) {
       parameters_results_temp <- list() 
       pred_median_mean_results_temp <- list()
       
-    }
+        
+        
+      }
     
     extrapolatedcombined <- dplyr::bind_rows(extrap_age)
     gofcombined <- dplyr::bind_rows(gof_age)
@@ -2274,8 +2013,6 @@ for(j in 1:nrow(outcome_cohorts)) {
     #print out progress               
     print(paste0(outcome_cohorts$cohort_name[j]," Extrapolation Analysis Completed ", Sys.time()))
   
-    }
-  
 }
 
 # Merge results together from each cancer and extrapolation into a dataframe ---
@@ -2286,10 +2023,10 @@ goffinalageS <- dplyr::bind_rows(gof_haz_ageS) %>%
 hazardotfinalageS <- dplyr::bind_rows(hazot_ageS) %>%
   mutate(Stratification = "Age", Adjustment = "None")
 parametersfinalageS <- dplyr::bind_rows(parameters_ageS)  %>%
-  mutate(Stratification = "Age", Adjustment = "None") %>% 
-  relocate(shape, .after = Sex) %>% 
-  relocate(rate, .after = Sex) %>% 
-  mutate(rate = coalesce(rate, `1`)) %>% 
+  mutate(Stratification = "Age", Adjustment = "None") %>%
+  relocate(shape, .after = Sex) %>%
+  relocate(rate, .after = Sex) %>%
+  mutate(rate = coalesce(rate, `1`)) %>%
   select(!c(`1`))
 predmedmeanfinalageS <- dplyr::bind_rows(pred_median_mean_ageS)  %>%
   mutate(Stratification = "Age", Adjustment = "None")

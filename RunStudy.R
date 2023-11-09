@@ -210,14 +210,12 @@ cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
       ageGroup =  list(
         "age_gr" =
           list(
-            "18 to 29" = c(18, 29),
-            "30 to 39" = c(30, 39),
+            "18 to 39" = c(18, 39),
             "40 to 49" = c(40, 49),
             "50 to 59" = c(50, 59),
             "60 to 69" = c(60, 69),
             "70 to 79" = c(70, 79),
-            "80 to 89" = c(80, 89),
-            "> 90" = c(90, 150)
+            "80 +" = c(80, 150)
           )
       )
     ) %>% 
@@ -632,7 +630,7 @@ CancerStudied <- c("Breast" , "Colorectal"  ,
                    "Prostate", "Stomach" )
 Method <- c("Kaplan-Meier", extrapolations_formatted)
 SexStudied <- (rep(rep(c("Male", "Female"), each = length(Method)), length(CancerStudied)))
-AgeStudied <- (rep(rep(c("> 90" , "18 to 29", "30 to 39", "40 to 49", "50 to 59", "60 to 69", "70 to 79", "80 to 89"), each = length(Method)), length(CancerStudied)))
+AgeStudied <- (rep(rep(c("80 +" , "18 to 39", "40 to 49", "50 to 59", "60 to 69", "70 to 79", "80 to 89"), each = length(Method)), length(CancerStudied)))
 
 
 # what has been run
