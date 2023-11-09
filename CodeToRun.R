@@ -1,6 +1,7 @@
 # Manage project dependencies ------
 # the following will prompt you to install the various packages used in the study 
-renv::activate()
+# install.packages("renv")
+#renv::activate()
 renv::restore()
 
 # Load packages ------
@@ -68,7 +69,7 @@ results_database_schema <- "..."
 # needs to be in lower case and NOT more than 10 characters
 table_stem <- "..."
 
-# create cdm reference ----
+# create cdm reference ---- DO NOT REMOVE "PREFIX" ARGUMENT IN THIS CODE
 cdm <- CDMConnector::cdm_from_con(con = db, 
                                   cdm_schema = cdm_database_schema,
                                   write_schema = c("schema" = results_database_schema, 
@@ -82,12 +83,13 @@ cdm$person %>%
   computeQuery()
 
 # Set study details -----
-# put in the start date from which you have usable data for this study
-# must be in format YYYY-MM-DD
+# if you do not have suitable data from 2000-01-01 
+# please put year of useable data starting from 1st jan 
+# must be in format YYYY-MM-DD ie. 20XX-01-01
 startdate <- "2000-01-01" 
 
 # Prior history -----
-# if you have a database where the observation period start date for each patient is the date of cancer diagnosis (ie. cancer registry)
+# if you have a database where the observation period start date for each patient is the date of cancer diagnosis (ie. some cancer registries)
 # set this value to FALSE. If your database has linkage or data where you can look in prior history before cancer diagnosis (e.g. primary care)
 # set as TRUE.
 priorhistory <- TRUE
@@ -96,8 +98,9 @@ priorhistory <- TRUE
 source(here("RunStudy.R"))
 # after the study is run you should have a zip folder in your output folder to share
 
-# drop the permanent tables from the study
-#CDMConnector::dropTable(cdm, dplyr::starts_with(table_stem))
+# drop the permanent tables from the study 
+# YOU MUST HAVE TABLE STEM SET ABOVE WITH A NAME ABOVE OTHERWISE IT WILL DELETE EVERYTHING!
+#CDMConnector::dropTable(cdm, dplyr::everything())
 
 # Disconnect from database
 #dbDisconnect(db)
