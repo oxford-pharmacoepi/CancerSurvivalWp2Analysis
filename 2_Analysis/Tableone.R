@@ -275,8 +275,14 @@ for(z in 1:length(unique(tabledata$strata_level))) {
         dplyr::filter(!stringr::str_detect(Description, 'Age Group:'))
       
       },
-    error = function(e) {info(logger, paste0(" Table one not carried out for  ",unique(tableone$group_level)[tableonecancer], "see log for more information", e))},
-    warning = function(w){info(logger, paste0(unique(tableone$group_level)[tableonecancer], ": ", w))}
+    error = function(e) {
+      cat(conditionMessage(e), "Table one not carried out for ", unique(tableone$group_level)[tableonecancer], "see log for more information")
+      info(logger, paste0(" Table one not carried out for  ",unique(tableone$group_level)[tableonecancer], " ", e))
+      
+      },
+    warning = function(w){
+      cat(conditionMessage(e), "Warning problem with table one ", unique(tableone$group_level)[tableonecancer], "see log for more information")
+      info(logger, paste0(unique(tableone$group_level)[tableonecancer], ": ", w))}
   )  
 }
   
