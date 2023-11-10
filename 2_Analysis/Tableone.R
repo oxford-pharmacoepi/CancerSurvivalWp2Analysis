@@ -292,8 +292,54 @@ tableone_clean_temp[[tableonecancer]] <- bind_rows(tb1_temp_age)
 }
 tableone_age <- dplyr::bind_rows(tableone_clean_temp) 
 
+# by age and sex
+tableone_clean_temp <- list()
+for(tableonecancer in 1:length(unique(tableone$group_level))) {
+  
+  tabledata <- tableone %>%
+    filter(group_level == unique(tableone$group_level)[tableonecancer]) %>% 
+    filter(strata_name == "sex and age_gr") 
+  
+  tb1_temp_age_sex <- list()
+  for(z in 1:length(unique(tabledata$strata_level))) {
+    
+    # because some age groups do not have data need to have try catches to make sure loop still continues even if data not available
+    tryCatch(
+      {
+        tb1_temp_age_sex[[z]] <- tabledata %>% 
+          filter(strata_level == unique(tabledata$strata_level)[z]) %>% 
+          reformat_table_one() %>% 
+          mutate(Cancer = unique(tabledata$group_level),
+                 Stratification = "agesex",
+                 Sex = "Both",
+                 agesex =  unique(tabledata$strata_level)[z] ,
+                 Database = db.name) %>% 
+          mutate(agesex = str_replace(agesex, " and ", "_")) %>% 
+          separate(col = "agesex",
+                   into = c("Sex", "Age"),
+                   sep = "_") %>% 
+          dplyr::filter(!stringr::str_detect(Description, 'Age Group:'))
+        
+      },
+      error = function(e) {
+        cat(conditionMessage(e), "Table one not carried out for ", unique(tableone$group_level)[tableonecancer], "see log for more information")
+        info(logger, paste0(" Table one not carried out for  ",unique(tableone$group_level)[tableonecancer], " ", e))
+        
+      },
+      warning = function(w){
+        cat(conditionMessage(e), "Warning problem with table one ", unique(tableone$group_level)[tableonecancer], "see log for more information")
+        info(logger, paste0(unique(tableone$group_level)[tableonecancer], ": ", w))}
+    )  
+  }
+  
+  tableone_clean_temp[[tableonecancer]] <- bind_rows(tb1_temp_age_sex)
+  
+  rm(tb1_temp_age_sex)
+}
+tableone_age_sex <- dplyr::bind_rows(tableone_clean_temp) 
+
 
 # combine all tableone outputs
-tableone_final <- dplyr::bind_rows(tableone_overall, tableone_sex, tableone_age)
+tableone_final <- dplyr::bind_rows(tableone_overall, tableone_sex, tableone_age, tableone_age_sex)
 
 info(logger, "CREATED TABLE ONE")
