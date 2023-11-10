@@ -147,7 +147,7 @@ if( "IncidentProstateCancer" %in% outcome_cohorts$cohort_name == TRUE){
 # take the first cancer in history to make sure incident cases
 cdm$analysis <- cdm$analysis %>% 
   group_by(subject_id) %>%
-  slice_min(order_by = c(cohort_start_date)) %>%
+  slice_min(order_by = cohort_start_date) %>%
   ungroup() %>% 
   compute_query()
 
@@ -269,7 +269,7 @@ cdm$analysis <- recordCohortAttrition(cohort = cdm$analysis,
   # take the first cancer in history to make sure incident cases
   cdm$analysis <- cdm$analysis %>% 
     group_by(subject_id) %>%
-    slice_min(order_by = c(cohort_start_date)) %>%
+    slice_min(order_by = cohort_start_date) %>%
     ungroup() %>% 
     compute_query()
   
