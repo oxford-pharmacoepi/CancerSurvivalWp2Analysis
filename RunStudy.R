@@ -473,9 +473,9 @@ source(here("2_Analysis","AnalysisAge.R"))
 info(logger, 'ANALYSIS RAN FOR AGE')
 
 # age*sex analysis KM only
-# info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
-# source(here("2_Analysis","AnalysisAgeSex.R"))
-# info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
+info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
+source(here("2_Analysis","AnalysisAgeSex.R"))
+info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
 
 #set option back to zero
 options(scipen = 0)
