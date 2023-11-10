@@ -495,6 +495,7 @@ survivalResults <- bind_rows(
   observedkmcombined_sexA , 
   observedkmcombined_age , 
   observedkmcombined_ageA , 
+  observedkmcombined_age_sex,
   extrapolatedfinal,
   extrapolatedfinalsex,
   extrapolatedfinalsexS,
@@ -540,6 +541,7 @@ medianResults <- bind_rows(
   medkmcombined_sexA , 
   medkmcombined_age ,
   medkmcombined_ageA ,
+  medkmcombined_age_sex,
   predmedmeanfinal,
   predmedmeanfinalsexS,
   predmedmeanfinalageS) %>%
@@ -561,6 +563,7 @@ hazOverTimeResults <- bind_rows(
   hotkmcombined_sexA, 
   hotkmcombined_age, 
   hotkmcombined_ageA,
+  hotkmcombined_age_sex,
   hazardotfinal, 
   hazardotfinalsex, 
   hazardotfinalsexS,
