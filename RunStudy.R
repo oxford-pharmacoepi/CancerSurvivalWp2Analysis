@@ -545,7 +545,6 @@ medianResults <- bind_rows(
   predmedmeanfinalageS) %>%
   mutate(Database = db.name) %>% 
   mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
-  select(!c(n.max, n.start, records, events)) %>% 
   mutate(Cancer = replace(Cancer, Cancer == "IncidentBreastCancer", "Breast")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentColorectalCancer", "Colorectal")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentHeadNeckCancer", "Head and Neck")) %>%
@@ -630,11 +629,11 @@ CancerStudied <- c("Breast" , "Colorectal"  ,
                    "Prostate", "Stomach" )
 Method <- c("Kaplan-Meier", extrapolations_formatted)
 SexStudied <- (rep(rep(c("Male", "Female"), each = length(Method)), length(CancerStudied)))
-AgeStudied <- (rep(rep(c("80 +" , "18 to 39", "40 to 49", "50 to 59", "60 to 69", "70 to 79", "80 to 89"), each = length(Method)), length(CancerStudied)))
+AgeStudied <- (rep(rep(c("80 +" , "18 to 39", "40 to 49", "50 to 59", "60 to 69", "70 to 79"), each = length(Method)), length(CancerStudied)))
 
 
 # what has been run
-runs <- survivalProbabilities %>% 
+runs <- survivalResults %>% 
   select(c("Cancer",
             "Method" ,
             "Stratification",
@@ -678,22 +677,22 @@ AnalysisRunSexA <- tibble(
 
 # AGE STRATIFICATION
 AnalysisRunAgeS <- tibble(
-  Cancer = rep(CancerStudied, each = (length(Method)*8)),
-  Method = rep(Method, (length(CancerStudied)*8)),
-  Sex = rep("Both", by = ((length(CancerStudied))*(length(Method))*8)),
+  Cancer = rep(CancerStudied, each = (length(Method)*6)),
+  Method = rep(Method, (length(CancerStudied)*6)),
+  Sex = rep("Both", by = ((length(CancerStudied))*(length(Method))*6)),
   Age = AgeStudied,
-  Adjustment = rep("None", by = ((length(CancerStudied))*(length(Method))*8)),
-  Stratification = rep("Age", by = ((length(CancerStudied))*(length(Method))*8))) %>% 
+  Adjustment = rep("None", by = ((length(CancerStudied))*(length(Method))*6)),
+  Stratification = rep("Age", by = ((length(CancerStudied))*(length(Method))*6))) %>% 
   mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)),Sex, "Male"))
 
 # AGE ADJUSTED
 AnalysisRunAgeA <- tibble(
-  Cancer = rep(CancerStudied, each = (length(Method)*8)),
-  Method = rep(Method, (length(CancerStudied)*8)),
+  Cancer = rep(CancerStudied, each = (length(Method)*6)),
+  Method = rep(Method, (length(CancerStudied)*6)),
   Sex = rep("Both", by = ((length(CancerStudied))*(length(Method))*8)),
   Age = AgeStudied,
-  Stratification = rep("None", by = ((length(CancerStudied))*(length(Method))*8)),
-  Adjustment = rep("Age", by = ((length(CancerStudied))*(length(Method))*8))) %>% 
+  Stratification = rep("None", by = ((length(CancerStudied))*(length(Method))*6)),
+  Adjustment = rep("Age", by = ((length(CancerStudied))*(length(Method))*6))) %>% 
   mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)),Sex, "Male"))
 
 # combine results
