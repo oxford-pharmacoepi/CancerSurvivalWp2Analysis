@@ -35,15 +35,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     # reduce the number of rows due to size of km outputs (doesnt effect results)
     # 18 to 39
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 6000){
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 4000){
       observedkm_1839 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) < 6000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) < 4000){
       observedkm_1839 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) < 3000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 1000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) < 2000){
       observedkm_1839 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -52,15 +52,15 @@ for(j in 1:nrow(outcome_cohorts)) {
 
     
     # 40 to 49
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 6000){
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 4000){
       observedkm_4049 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) < 6000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) < 4000){
       observedkm_4049 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) < 3000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 1000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) < 2000){
       observedkm_4049 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -69,15 +69,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     
     # 50 to 59
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 6000){
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 4000){
       observedkm_5059 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) < 6000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) < 4000){
       observedkm_5059 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) < 3000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 1000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) < 2000){
       observedkm_5059 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -85,15 +85,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     }   
     
     # 60 to 69
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 6000){
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 4000){
       observedkm_6069 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) < 6000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) < 4000){
       observedkm_6069 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) < 3000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 1000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) < 2000){
       observedkm_6069 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -101,15 +101,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     }    
     
     # 70 to 79
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 6000){
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 4000){
       observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) < 6000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) < 4000){
       observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) < 3000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 1000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) < 2000){
       observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -117,15 +117,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     }       
     
     # 80+
-    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 6000){
+    if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 4000){
       observedkm_80 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 3000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) < 6000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 2000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) < 4000){
       observedkm_80 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 2000 &
-               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) < 3000){
+    } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 1000 &
+               nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) < 2000){
       observedkm_80 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -234,13 +234,27 @@ for(j in 1:nrow(outcome_cohorts)) {
                   names_prefix = " year ",
                   names_sep = "")
     
-    observedmedianKM_age[[j]] <- inner_join(medianKM, surprobsKM, by = "Age")
+    # Extract rmean at 10 years
+    model_rm <- survfit(Surv(time_years, status) ~ age_gr, data=data)
+    rmean10 <- survival:::survmean(model_rm, rmean=c(10))$matrix %>% 
+      as.data.frame() %>% 
+      tibble::rownames_to_column() %>%  
+      select(rmean, `se(rmean)`, rowname) %>% 
+      rename(rmean10yr = rmean, se10yr =`se(rmean)`, Age = rowname) %>% 
+      mutate(Age = str_replace(Age, "age_gr=", "") ,
+             "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                 paste0(paste0(nice.num2(rmean10yr)), " (",
+                                                        paste0(nice.num2(se10yr)), ")"),
+                                                 NA))
+    
+    observedmedianKM_age[[j]] <- inner_join(medianKM, rmean10, by = "Age") %>% 
+    inner_join(surprobsKM, by = "Age")
     observedmedianKM_age[[j]] <- observedmedianKM_age[[j]] %>% 
       mutate(Method = "Kaplan-Meier", 
              Cancer = outcome_cohorts$cohort_name[j] ,
              Sex = "Both" )
     
-    rm(surprobsKM, medianKM)
+    rm(surprobsKM,medianKM,rmean10,model_rm,modelKM)
     
     print(paste0("Survival for 1, 5 and 10 years from observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
     
@@ -450,15 +464,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     if (exists("modelhot") == TRUE) {
 
     # 18 to 39
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 6000){
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 4000){
       observedhazotkm_1839 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) < 6000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) < 4000){
       observedhazotkm_1839 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 3 == 1)
     } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) < 3000){
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) < 1000){
       observedhazotkm_1839 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -467,15 +481,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     
     # 40 to 49
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 6000){
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 4000){
       observedhazotkm_4049 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) < 6000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) < 4000){
       observedhazotkm_4049 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) < 3000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 1000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) < 2000){
       observedhazotkm_4049 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -484,15 +498,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     
     # 50 to 59
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 6000){
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 4000){
       observedhazotkm_5059 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) < 6000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) < 4000){
       observedhazotkm_5059 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) < 3000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 1000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) < 2000){
       observedhazotkm_5059 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -500,15 +514,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     }   
     
     # 60 to 69
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 6000){
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 4000){
       observedhazotkm_6069 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) < 6000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) < 4000){
       observedhazotkm_6069 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) < 3000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 1000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) < 2000){
       observedhazotkm_6069 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -516,15 +530,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     }    
     
     # 70 to 79
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 6000){
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 4000){
       observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) < 6000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) < 4000){
       observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) < 3000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 1000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) < 4000){
       observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -532,15 +546,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     }       
     
     # 80+
-    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 6000){
+    if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 4000){
       observedhazotkm_80 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 3000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) < 6000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 2000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) < 4000){
       observedhazotkm_80 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 2000 &
-               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) < 3000){
+    } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 1000 &
+               nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) < 2000){
       observedhazotkm_80 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",] %>%
         filter(row_number() %% 2 == 1)
     } else {
@@ -728,6 +742,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                  NA)) %>% 
             select(-c(lcl, ucl, se, time))
           
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+            rename(rmean10yrs = est) %>%
+            mutate(rmean10yrs = round(rmean10yrs, 4),
+                   se = round(se, 4),
+                   time = round(time,4) ,
+                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                       paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                              paste0(nice.num2(se)), ")"),
+                                                       NA)) %>%
+            select(-c(lcl, ucl, se, time))
+          
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             mutate(est = round((est*100),4),
                    lcl = round((lcl*100),4),
@@ -744,14 +769,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                         names_prefix = " year ",
                         names_sep = "")
           
-          pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_median, pr_survival_prob, by = "age_gr" )
+          pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_mean10, by = "age_gr" ) %>% 
+            inner_join(pr_median, by = "age_gr" ) %>% 
+            inner_join(pr_survival_prob, by = "age_gr")
+          
           pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
             mutate(Method = extrapolations_formatted[i], 
                    Cancer = outcome_cohorts$cohort_name[j], 
                    Sex = "Both" ) %>% 
             rename(Age = age_gr)
 
-          rm(model, pr_mean, pr_median, pr_survival_prob)
+          rm(model, pr_mean, pr_median, pr_survival_prob, pr_mean10)
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
@@ -855,6 +883,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                  NA)) %>% 
             select(-c(lcl, ucl, se, time))
           
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+            rename(rmean10yrs = est) %>%
+            mutate(rmean10yrs = round(rmean10yrs, 4),
+                   se = round(se, 4),
+                   time = round(time,4) ,
+                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                       paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                              paste0(nice.num2(se)), ")"),
+                                                       NA)) %>%
+            select(-c(lcl, ucl, se, time))
+          
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             mutate(est = round((est*100),4),
                    lcl = round((lcl*100),4),
@@ -871,14 +910,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                         names_prefix = " year ",
                         names_sep = "")
           
-          pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_median, pr_survival_prob, by = "age_gr" )
+          pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_mean10, by = "age_gr" ) %>% 
+            inner_join(pr_median, by = "age_gr" ) %>% 
+            inner_join(pr_survival_prob, by = "age_gr")
+          
           pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
             mutate(Method = extrapolations_formatted[i], 
                    Cancer = outcome_cohorts$cohort_name[j], 
                    Sex = "Both" ) %>% 
             rename(Age = age_gr)
           
-          rm(model, pr_mean, pr_median, pr_survival_prob)
+          rm(model, pr_mean, pr_median, pr_survival_prob, pr_mean10)
+          
+          
         
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
           
@@ -980,6 +1024,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                  NA)) %>% 
             select(-c(lcl, ucl, se, time))
           
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+            rename(rmean10yrs = est) %>%
+            mutate(rmean10yrs = round(rmean10yrs, 4),
+                   se = round(se, 4),
+                   time = round(time,4) ,
+                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                       paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                              paste0(nice.num2(se)), ")"),
+                                                       NA)) %>%
+            select(-c(lcl, ucl, se, time))
+          
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             mutate(est = round((est*100),4),
                    lcl = round((lcl*100),4),
@@ -996,14 +1051,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                         names_prefix = " year ",
                         names_sep = "")
           
-          pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_median, pr_survival_prob, by = "age_gr" )
+          pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_mean10, by = "age_gr" ) %>% 
+            inner_join(pr_median, by = "age_gr" ) %>% 
+            inner_join(pr_survival_prob, by = "age_gr")
+          
           pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
             mutate(Method = extrapolations_formatted[i], 
                    Cancer = outcome_cohorts$cohort_name[j], 
                    Sex = "Both" ) %>% 
             rename(Age = age_gr)
           
-          rm(model, pr_mean, pr_median, pr_survival_prob)
+          rm(model, pr_mean, pr_median, pr_survival_prob, pr_mean10)
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
@@ -1106,6 +1164,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                  NA)) %>% 
             select(-c(lcl, ucl, se, time))
           
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+            rename(rmean10yrs = est) %>%
+            mutate(rmean10yrs = round(rmean10yrs, 4),
+                   se = round(se, 4),
+                   time = round(time,4) ,
+                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                       paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                              paste0(nice.num2(se)), ")"),
+                                                       NA)) %>%
+            select(-c(lcl, ucl, se, time))
+          
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             mutate(est = round((est*100),4),
                    lcl = round((lcl*100),4),
@@ -1122,14 +1191,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                         names_prefix = " year ",
                         names_sep = "")
           
-          pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_median, pr_survival_prob, by = "age_gr" )
+          pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_mean10, by = "age_gr" ) %>% 
+            inner_join(pr_median, by = "age_gr" ) %>% 
+            inner_join(pr_survival_prob, by = "age_gr")
+          
           pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
             mutate(Method = extrapolations_formatted[i], 
                    Cancer = outcome_cohorts$cohort_name[j], 
                    Sex = "Both" ) %>% 
             rename(Age = age_gr)
           
-          rm(model, pr_mean, pr_median, pr_survival_prob)
+          rm(model, pr_mean, pr_median, pr_survival_prob, pr_mean10)
           
           #print out progress               
           print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
@@ -1225,6 +1297,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                    NA)) %>% 
               select(-c(lcl, ucl, se, time))
             
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+              rename(rmean10yrs = est) %>%
+              mutate(rmean10yrs = round(rmean10yrs, 4),
+                     se = round(se, 4),
+                     time = round(time,4) ,
+                     "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                         paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                                paste0(nice.num2(se)), ")"),
+                                                         NA)) %>%
+              select(-c(lcl, ucl, se, time))
+            
             pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
               mutate(est = round((est*100),4),
                      lcl = round((lcl*100),4),
@@ -1241,14 +1324,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                           names_prefix = " year ",
                           names_sep = "")
             
-            pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_median, pr_survival_prob, by = "age_gr" )
+            pred_median_mean_results_temp[[i]] <- inner_join(pr_mean, pr_mean10, by = "age_gr" ) %>% 
+              inner_join(pr_median, by = "age_gr" ) %>% 
+              inner_join(pr_survival_prob, by = "age_gr")
+            
             pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
               mutate(Method = extrapolations_formatted[i], 
                      Cancer = outcome_cohorts$cohort_name[j], 
                      Sex = "Both" ) %>% 
               rename(Age = age_gr)
             
-            rm(model, pr_mean, pr_median, pr_survival_prob)
+            rm(model, pr_mean, pr_median, pr_survival_prob, pr_mean10)
             
             #print out progress               
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
@@ -1443,6 +1529,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                    NA)) %>% 
               select(-c(lcl, ucl, se, time))
             
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+              rename(rmean10yrs = est) %>%
+              mutate(rmean10yrs = round(rmean10yrs, 4),
+                     se = round(se, 4),
+                     time = round(time,4) ,
+                     "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                         paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                                paste0(nice.num2(se)), ")"),
+                                                         NA)) %>%
+              select(-c(lcl, ucl, se, time))
+            
             # survival predicted probabilities from extrapolations
             pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
               mutate(est = round((est*100),4),
@@ -1460,14 +1557,14 @@ for(j in 1:nrow(outcome_cohorts)) {
                           names_prefix = " year ",
                           names_sep = "")
             
-            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_mean10, pr_median, pr_survival_prob )
             pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
               mutate(Method = extrapolations_formatted[i], 
                      Cancer = outcome_cohorts$cohort_name[j], 
                      Sex = "Both", 
                      Age = names(table(data_age$age_gr)))
             
-            rm(model,pr_survival_prob, pr_mean, pr_median )
+            rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10 )
             
             #print out progress               
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
@@ -1567,6 +1664,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                    NA)) %>% 
               select(-c(lcl, ucl, se, time))
             
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+              rename(rmean10yrs = est) %>%
+              mutate(rmean10yrs = round(rmean10yrs, 4),
+                     se = round(se, 4),
+                     time = round(time,4) ,
+                     "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                         paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                                paste0(nice.num2(se)), ")"),
+                                                         NA)) %>%
+              select(-c(lcl, ucl, se, time))
+            
             # survival predicted probabilities from extrapolations
             pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
               mutate(est = round((est*100),4),
@@ -1584,14 +1692,14 @@ for(j in 1:nrow(outcome_cohorts)) {
                           names_prefix = " year ",
                           names_sep = "")
             
-            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_mean10, pr_median, pr_survival_prob )
             pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
               mutate(Method = extrapolations_formatted[i], 
                      Cancer = outcome_cohorts$cohort_name[j], 
                      Sex = "Both", 
                      Age = names(table(data_age$age_gr)))
             
-            rm(model,pr_survival_prob, pr_mean, pr_median )
+            rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10 )
             
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
             
@@ -1691,6 +1799,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                    NA)) %>% 
               select(-c(lcl, ucl, se, time))
             
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+              rename(rmean10yrs = est) %>%
+              mutate(rmean10yrs = round(rmean10yrs, 4),
+                     se = round(se, 4),
+                     time = round(time,4) ,
+                     "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                         paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                                paste0(nice.num2(se)), ")"),
+                                                         NA)) %>%
+              select(-c(lcl, ucl, se, time))
+            
             # survival predicted probabilities from extrapolations
             pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
               mutate(est = round((est*100),4),
@@ -1708,14 +1827,14 @@ for(j in 1:nrow(outcome_cohorts)) {
                           names_prefix = " year ",
                           names_sep = "")
             
-            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_mean10, pr_median, pr_survival_prob )
             pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
               mutate(Method = extrapolations_formatted[i], 
                      Cancer = outcome_cohorts$cohort_name[j], 
                      Sex = "Both", 
                      Age = names(table(data_age$age_gr)))
             
-            rm(model,pr_survival_prob, pr_mean, pr_median )
+            rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10 )
             
             #print out progress               
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
@@ -1814,6 +1933,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                    NA)) %>% 
               select(-c(lcl, ucl, se, time))
             
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+              rename(rmean10yrs = est) %>%
+              mutate(rmean10yrs = round(rmean10yrs, 4),
+                     se = round(se, 4),
+                     time = round(time,4) ,
+                     "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                         paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                                paste0(nice.num2(se)), ")"),
+                                                         NA)) %>%
+              select(-c(lcl, ucl, se, time))
+            
             # survival predicted probabilities from extrapolations
             pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
               mutate(est = round((est*100),4),
@@ -1831,14 +1961,14 @@ for(j in 1:nrow(outcome_cohorts)) {
                           names_prefix = " year ",
                           names_sep = "")
             
-            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_mean10, pr_median, pr_survival_prob )
             pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
               mutate(Method = extrapolations_formatted[i], 
                      Cancer = outcome_cohorts$cohort_name[j], 
                      Sex = "Both", 
                      Age = names(table(data_age$age_gr)))
             
-            rm(model,pr_survival_prob, pr_mean, pr_median )
+            rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10 )
             
             #print out progress               
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
@@ -1932,6 +2062,17 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                    NA)) %>% 
               select(-c(lcl, ucl, se, time))
             
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+              rename(rmean10yrs = est) %>%
+              mutate(rmean10yrs = round(rmean10yrs, 4),
+                     se = round(se, 4),
+                     time = round(time,4) ,
+                     "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
+                                                         paste0(paste0(nice.num2(rmean10yrs)), " (",
+                                                                paste0(nice.num2(se)), ")"),
+                                                         NA)) %>%
+              select(-c(lcl, ucl, se, time))
+            
             # survival predicted probabilities from extrapolations
             pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
               mutate(est = round((est*100),4),
@@ -1949,14 +2090,14 @@ for(j in 1:nrow(outcome_cohorts)) {
                           names_prefix = " year ",
                           names_sep = "")
             
-            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_median, pr_survival_prob )
+            pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean, pr_mean10, pr_median, pr_survival_prob )
             pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
               mutate(Method = extrapolations_formatted[i], 
                      Cancer = outcome_cohorts$cohort_name[j], 
                      Sex = "Both", 
                      Age = names(table(data_age$age_gr)))
             
-            rm(model,pr_survival_prob, pr_mean, pr_median )
+            rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10 )
             
             #print out progress               
             print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))

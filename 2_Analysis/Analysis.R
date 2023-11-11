@@ -29,13 +29,13 @@ observedkm[[j]] <- survfit(Surv(time_years, status) ~ 1, data=data) %>%
   mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both")
 
 # reduce the size of KM for plotting
-if(nrow(observedkm[[j]]) > 6000){
+if(nrow(observedkm[[j]]) > 4000){
   observedkm[[j]] <- observedkm[[j]] %>%
     filter(row_number() %% 4 == 1)
-} else if(nrow(observedkm[[j]]) > 3000 & nrow(observedkm[[j]]) < 6000 ){
+} else if(nrow(observedkm[[j]]) > 2000 & nrow(observedkm[[j]]) < 4000 ){
   observedkm[[j]] <- observedkm[[j]] %>%
     filter(row_number() %% 3 == 1)
-} else if(nrow(observedkm[[j]]) > 2000 & nrow(observedkm[[j]]) < 3000 ){
+} else if(nrow(observedkm[[j]]) > 1000 & nrow(observedkm[[j]]) < 2000 ){
   observedkm[[j]] <- observedkm[[j]] %>%
     filter(row_number() %% 2 == 1)
 }
@@ -149,13 +149,13 @@ observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status)
   mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") 
 
 # reduce the size of haz over time for plotting
-if(nrow(observedhazotKM[[j]]) > 6000){
+if(nrow(observedhazotKM[[j]]) > 4000){
   observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
     filter(row_number() %% 4 == 1)
-}else if(nrow(observedhazotKM[[j]]) > 3000 & nrow(observedhazotKM[[j]]) < 6000 ){
+}else if(nrow(observedhazotKM[[j]]) > 2000 & nrow(observedhazotKM[[j]]) < 4000 ){
   observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
     filter(row_number() %% 3 == 1)
-}else if(nrow(observedhazotKM[[j]]) > 2000 & nrow(observedhazotKM[[j]]) < 3000 ){
+}else if(nrow(observedhazotKM[[j]]) > 1000 & nrow(observedhazotKM[[j]]) < 2000 ){
   observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
     filter(row_number() %% 2 == 1)
 }

@@ -36,7 +36,225 @@ for(j in 1:nrow(outcome_cohorts)) {
              strata = str_replace(strata, "sex_age_gp=", "")) %>%  
              separate(col = "strata",
                       into = c("Age", "Sex"),
-                      sep = "_")
+                      sep = "_",
+                      remove = F) %>% 
+      rename(sex_age_gp = strata)
+    
+    
+    # 18 to 39 female
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 4000){
+      observedkm_1839f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 4000){
+      observedkm_1839f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 2000){
+      observedkm_1839f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_1839f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]
+    }
+    
+    # 18 to 39 male
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 4000){
+      observedkm_1839m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 4000){
+      observedkm_1839m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 2000){
+      observedkm_1839m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_1839m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]
+    }
+    
+    
+    # 40 to 49 female
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 4000){
+      observedkm_4049f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 4000){
+      observedkm_4049f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 2000){
+      observedkm_4049f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_4049f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]
+    }
+    
+    # 40 to 49 male
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 4000){
+      observedkm_4049m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 4000){
+      observedkm_4049m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 2000){
+      observedkm_4049m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_4049m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]
+    }
+    
+    
+    # 50 to 59 female
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 4000){
+      observedkm_5059f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 4000){
+      observedkm_5059f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 2000){
+      observedkm_5059f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_5059f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]
+    }
+    
+    # 50 to 59 male
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 4000){
+      observedkm_5059m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 4000){
+      observedkm_5059m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 2000){
+      observedkm_5059m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_5059m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]
+    }
+    
+    
+    
+    # 60 to 69 female
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 4000){
+      observedkm_6069f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 4000){
+      observedkm_6069f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 2000){
+      observedkm_6069f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_6069f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]
+    }
+    
+    # 60 to 69 male
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 4000){
+      observedkm_6069m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 4000){
+      observedkm_6069m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 2000){
+      observedkm_6069m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_6069m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]
+    }
+    
+    
+    # 70 to 79 female
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 4000){
+      observedkm_7079f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 4000){
+      observedkm_7079f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 2000){
+      observedkm_7079f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_7079f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]
+    }
+    
+    # 70 to 79 male
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 4000){
+      observedkm_7079m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 4000){
+      observedkm_7079m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 2000){
+      observedkm_7079m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_7079m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]
+    }
+    
+    
+    
+    # 80+ female
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 4000){
+      observedkm_80f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 4000){
+      observedkm_80f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 2000){
+      observedkm_80f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_80f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]
+    }
+    
+    # 80+ male
+    if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 4000){
+      observedkm_80m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
+        filter(row_number() %% 4 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 2000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 4000){
+      observedkm_80m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
+        filter(row_number() %% 3 == 1)
+    } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 1000 &
+               nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 2000){
+      observedkm_80m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
+        filter(row_number() %% 2 == 1)
+    } else {
+      observedkm_80m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]
+    }
+    
+    
+    observedkm_age_sex[[j]] <- bind_rows(
+      observedkm_1839f,
+      observedkm_1839m,
+      observedkm_4049f,
+      observedkm_4049m,
+      observedkm_5059f,
+      observedkm_5059m,
+      observedkm_6069f,
+      observedkm_6069m,
+      observedkm_7079f,
+      observedkm_7079m,
+      observedkm_80f,
+      observedkm_80m)  
+    
     
     print(paste0("KM for observed data age*sex strat ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
     
@@ -471,15 +689,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       #remove rows for plotting purposes
       # 18 to 39 female
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 4000){
         observedhazotkm_1839f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 4000){
         observedhazotkm_1839f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 2000){
         observedhazotkm_1839f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -487,15 +705,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       }
       
       # 18 to 39 male
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 4000){
         observedhazotkm_1839m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 4000){
         observedhazotkm_1839m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 2000){
         observedhazotkm_1839m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -504,15 +722,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       
 
       # 40 to 49 female
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 4000){
         observedhazotkm_4049f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 4000){
         observedhazotkm_4049f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 2000){
         observedhazotkm_4049f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -520,15 +738,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       }
       
       # 40 to 49 male
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 4000){
         observedhazotkm_4049m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 4000){
         observedhazotkm_4049m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 2000){
         observedhazotkm_4049m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -537,15 +755,15 @@ for(j in 1:nrow(outcome_cohorts)) {
 
 
       # 50 to 59 female
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 4000){
         observedhazotkm_5059f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 4000){
         observedhazotkm_5059f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 2000){
         observedhazotkm_5059f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -553,15 +771,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       }
       
       # 50 to 59 male
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 4000){
         observedhazotkm_5059m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 4000){
         observedhazotkm_5059m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 2000){
         observedhazotkm_5059m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -571,15 +789,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       
 
       # 60 to 69 female
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 4000){
         observedhazotkm_6069f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 4000){
         observedhazotkm_6069f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 2000){
         observedhazotkm_6069f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -587,15 +805,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       }
       
       # 60 to 69 male
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 4000){
         observedhazotkm_6069m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 4000){
         observedhazotkm_6069m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 2000){
         observedhazotkm_6069m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -604,15 +822,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       
 
       # 70 to 79 female
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 4000){
         observedhazotkm_7079f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 4000){
         observedhazotkm_7079f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 2000){
         observedhazotkm_7079f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -620,15 +838,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       }
       
       # 70 to 79 male
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 4000){
         observedhazotkm_7079m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 4000){
         observedhazotkm_7079m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 2000){
         observedhazotkm_7079m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -638,15 +856,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       
 
       # 80+ female
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 4000){
         observedhazotkm_80f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 4000){
         observedhazotkm_80f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 2000){
         observedhazotkm_80f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
           filter(row_number() %% 2 == 1)
       } else {
@@ -654,15 +872,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       }
       
       # 80+ male
-      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 6000){
+      if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 4000){
         observedhazotkm_80m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
           filter(row_number() %% 4 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 3000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 6000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 2000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 4000){
         observedhazotkm_80m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
           filter(row_number() %% 3 == 1)
-      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 2000 &
-                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 3000){
+      } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 1000 &
+                 nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 2000){
         observedhazotkm_80m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
           filter(row_number() %% 2 == 1)
       } else {
