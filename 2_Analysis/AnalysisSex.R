@@ -403,18 +403,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                paste0(paste0(nice.num2(rmean)), " (",
                                                       paste0(nice.num2(se)), ")"),
                                                NA)) %>% 
-          select(-c(lcl, ucl, se, time))
+          select(-c(lcl, ucl, time))
         
         pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-          rename(rmean10yrs = est) %>%
-          mutate(rmean10yrs = round(rmean10yrs, 4),
+          rename(rmean10yr = est) %>%
+          mutate(rmean10yr = round(rmean10yr, 4),
                  se = round(se, 4),
                  time = round(time,4) ,
-                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                     paste0(paste0(nice.num2(rmean10yrs)), " (",
+                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                     paste0(paste0(nice.num2(rmean10yr)), " (",
                                                             paste0(nice.num2(se)), ")"),
                                                      NA)) %>%
-          select(-c(lcl, ucl, se, time))
+          rename(se10yr = se) %>% 
+          select(-c(lcl, ucl, time))
         
         pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
           mutate(est = round((est*100),4),
@@ -537,18 +538,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                paste0(paste0(nice.num2(rmean)), " (",
                                                       paste0(nice.num2(se)), ")"),
                                                NA)) %>% 
-          select(-c(lcl, ucl, se, time))
+          select(-c(lcl, ucl, time))
         
-        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-          rename(rmean10yrs = est) %>%
-          mutate(rmean10yrs = round(rmean10yrs, 4),
+        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+          rename(rmean10yr = est) %>% 
+          mutate(rmean10yr = round(rmean10yr, 4),
                  se = round(se, 4),
                  time = round(time,4) ,
-                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                     paste0(paste0(nice.num2(rmean10yrs)), " (",
+                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                     paste0(paste0(nice.num2(rmean10yr)), " (",
                                                             paste0(nice.num2(se)), ")"),
-                                                     NA)) %>%
-          select(-c(lcl, ucl, se, time))
+                                                     NA)) %>% 
+          rename(se10yr = se) %>% 
+          select(-c(lcl, ucl, time))
         
         pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
           mutate(est = round((est*100),4),
@@ -666,18 +668,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                paste0(paste0(nice.num2(rmean)), " (",
                                                       paste0(nice.num2(se)), ")"),
                                                NA)) %>% 
-          select(-c(lcl, ucl, se, time))
+          select(-c(lcl, ucl, time))
         
-        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-          rename(rmean10yrs = est) %>%
-          mutate(rmean10yrs = round(rmean10yrs, 4),
+        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+          rename(rmean10yr = est) %>% 
+          mutate(rmean10yr = round(rmean10yr, 4),
                  se = round(se, 4),
                  time = round(time,4) ,
-                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                     paste0(paste0(nice.num2(rmean10yrs)), " (",
+                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                     paste0(paste0(nice.num2(rmean10yr)), " (",
                                                             paste0(nice.num2(se)), ")"),
-                                                     NA)) %>%
-          select(-c(lcl, ucl, se, time))
+                                                     NA)) %>% 
+          rename(se10yr = se) %>% 
+          select(-c(lcl, ucl, time))
         
         pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
           mutate(est = round((est*100),4),
@@ -795,18 +798,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                paste0(paste0(nice.num2(rmean)), " (",
                                                       paste0(nice.num2(se)), ")"),
                                                NA)) %>% 
-          select(-c(lcl, ucl, se, time))
+          select(-c(lcl, ucl, time))
         
-        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-          rename(rmean10yrs = est) %>%
-          mutate(rmean10yrs = round(rmean10yrs, 4),
+        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+          rename(rmean10yr = est) %>% 
+          mutate(rmean10yr = round(rmean10yr, 4),
                  se = round(se, 4),
                  time = round(time,4) ,
-                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                     paste0(paste0(nice.num2(rmean10yrs)), " (",
+                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                     paste0(paste0(nice.num2(rmean10yr)), " (",
                                                             paste0(nice.num2(se)), ")"),
-                                                     NA)) %>%
-          select(-c(lcl, ucl, se, time))
+                                                     NA)) %>% 
+          rename(se10yr = se) %>% 
+          select(-c(lcl, ucl, time))
         
         pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
           mutate(est = round((est*100),4),
@@ -925,18 +929,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                paste0(paste0(nice.num2(rmean)), " (",
                                                       paste0(nice.num2(se)), ")"),
                                                NA)) %>% 
-          select(-c(lcl, ucl, se, time))
+          select(-c(lcl, ucl, time))
         
-        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-          rename(rmean10yrs = est) %>%
-          mutate(rmean10yrs = round(rmean10yrs, 4),
+        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+          rename(rmean10yr = est) %>% 
+          mutate(rmean10yr = round(rmean10yr, 4),
                  se = round(se, 4),
                  time = round(time,4) ,
-                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                     paste0(paste0(nice.num2(rmean10yrs)), " (",
+                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                     paste0(paste0(nice.num2(rmean10yr)), " (",
                                                             paste0(nice.num2(se)), ")"),
-                                                     NA)) %>%
-          select(-c(lcl, ucl, se, time))
+                                                     NA)) %>% 
+          rename(se10yr = se) %>% 
+          select(-c(lcl, ucl, time))
         
         pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
           mutate(est = round((est*100),4),
@@ -1162,18 +1167,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                  paste0(paste0(nice.num2(rmean)), " (",
                                                         paste0(nice.num2(se)), ")"),
                                                  NA)) %>% 
-            select(-c(lcl, ucl, se, time))
+            select(-c(lcl, ucl, time))
           
-          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-            rename(rmean10yrs = est) %>%
-            mutate(rmean10yrs = round(rmean10yrs, 4),
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+            rename(rmean10yr = est) %>% 
+            mutate(rmean10yr = round(rmean10yr, 4),
                    se = round(se, 4),
                    time = round(time,4) ,
-                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                       paste0(paste0(nice.num2(rmean10yrs)), " (",
+                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                       paste0(paste0(nice.num2(rmean10yr)), " (",
                                                               paste0(nice.num2(se)), ")"),
-                                                       NA)) %>%
-            select(-c(lcl, ucl, se, time))
+                                                       NA)) %>% 
+            rename(se10yr = se) %>% 
+            select(-c(lcl, ucl, time))
           
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             mutate(est = round((est*100),4),
@@ -1296,18 +1302,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                  paste0(paste0(nice.num2(rmean)), " (",
                                                         paste0(nice.num2(se)), ")"),
                                                  NA)) %>% 
-            select(-c(lcl, ucl, se, time))
+            select(-c(lcl, ucl, time))
           
-          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-            rename(rmean10yrs = est) %>%
-            mutate(rmean10yrs = round(rmean10yrs, 4),
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+            rename(rmean10yr = est) %>% 
+            mutate(rmean10yr = round(rmean10yr, 4),
                    se = round(se, 4),
                    time = round(time,4) ,
-                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                       paste0(paste0(nice.num2(rmean10yrs)), " (",
+                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                       paste0(paste0(nice.num2(rmean10yr)), " (",
                                                               paste0(nice.num2(se)), ")"),
-                                                       NA)) %>%
-            select(-c(lcl, ucl, se, time))
+                                                       NA)) %>% 
+            rename(se10yr = se) %>% 
+            select(-c(lcl, ucl, time))
           
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             mutate(est = round((est*100),4),
@@ -1429,18 +1436,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                  paste0(paste0(nice.num2(rmean)), " (",
                                                         paste0(nice.num2(se)), ")"),
                                                  NA)) %>% 
-            select(-c(lcl, ucl, se, time))
+            select(-c(lcl, ucl, time))
           
-          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-            rename(rmean10yrs = est) %>%
-            mutate(rmean10yrs = round(rmean10yrs, 4),
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+            rename(rmean10yr = est) %>% 
+            mutate(rmean10yr = round(rmean10yr, 4),
                    se = round(se, 4),
                    time = round(time,4) ,
-                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                       paste0(paste0(nice.num2(rmean10yrs)), " (",
+                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                       paste0(paste0(nice.num2(rmean10yr)), " (",
                                                               paste0(nice.num2(se)), ")"),
-                                                       NA)) %>%
-            select(-c(lcl, ucl, se, time))
+                                                       NA)) %>% 
+            rename(se10yr = se) %>% 
+            select(-c(lcl, ucl, time))
           
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             mutate(est = round((est*100),4),
@@ -1562,18 +1570,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                  paste0(paste0(nice.num2(rmean)), " (",
                                                         paste0(nice.num2(se)), ")"),
                                                  NA)) %>% 
-            select(-c(lcl, ucl, se, time))
+            select(-c(lcl, ucl, time))
           
-          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-            rename(rmean10yrs = est) %>%
-            mutate(rmean10yrs = round(rmean10yrs, 4),
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+            rename(rmean10yr = est) %>% 
+            mutate(rmean10yr = round(rmean10yr, 4),
                    se = round(se, 4),
                    time = round(time,4) ,
-                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                       paste0(paste0(nice.num2(rmean10yrs)), " (",
+                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                       paste0(paste0(nice.num2(rmean10yr)), " (",
                                                               paste0(nice.num2(se)), ")"),
-                                                       NA)) %>%
-            select(-c(lcl, ucl, se, time))
+                                                       NA)) %>% 
+            rename(se10yr = se) %>% 
+            select(-c(lcl, ucl, time))
           
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             mutate(est = round((est*100),4),
@@ -1689,18 +1698,19 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                  paste0(paste0(nice.num2(rmean)), " (",
                                                         paste0(nice.num2(se)), ")"),
                                                  NA)) %>% 
-            select(-c(lcl, ucl, se, time))
+            select(-c(lcl, ucl, time))
           
-          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-            rename(rmean10yrs = est) %>%
-            mutate(rmean10yrs = round(rmean10yrs, 4),
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+            rename(rmean10yr = est) %>% 
+            mutate(rmean10yr = round(rmean10yr, 4),
                    se = round(se, 4),
                    time = round(time,4) ,
-                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yrs),
-                                                       paste0(paste0(nice.num2(rmean10yrs)), " (",
+                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                       paste0(paste0(nice.num2(rmean10yr)), " (",
                                                               paste0(nice.num2(se)), ")"),
-                                                       NA)) %>%
-            select(-c(lcl, ucl, se, time))
+                                                       NA)) %>% 
+            rename(se10yr = se) %>% 
+            select(-c(lcl, ucl, time))
           
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             mutate(est = round((est*100),4),
