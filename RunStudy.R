@@ -521,7 +521,8 @@ riskTableResults <- bind_rows(
   risktableskm_sex , 
   risktableskm_sexA , 
   risktableskm_age ,
-  risktableskm_ageA 
+  risktableskm_ageA,
+  risktableskm_age_sex
   ) %>%
   mutate(Database = db.name) %>% 
   mutate(Sex = if_else(!(grepl("IncidentProstateCancer", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
@@ -601,8 +602,6 @@ GOFResults <- bind_rows(
   mutate(Cancer = replace(Cancer, Cancer == "IncidentPancreaticCancer", "Pancreatic")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentProstateCancer", "Prostate")) %>%
   mutate(Cancer = replace(Cancer, Cancer == "IncidentStomachCancer", "Stomach")) 
-
-
 
 # parameters of the extrapolated models
 ExtrpolationParameters <-bind_rows(

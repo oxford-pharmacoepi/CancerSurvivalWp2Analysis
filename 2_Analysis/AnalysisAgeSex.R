@@ -889,7 +889,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       }
 
 
-      observedhazotKM_age[[j]] <- bind_rows(
+      observedhazotKM_age_sex[[j]] <- bind_rows(
         observedhazotkm_1839f,
         observedhazotkm_1839m,
         observedhazotkm_4049f,
@@ -948,7 +948,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     }
   
     # bind results for age*sex groups
-    observedrisktableKM_age_sex[[j]] <- bind_rows(kmagesexgp)
+    risktableKM_age_sex[[j]] <- bind_rows(kmagesexgp)
     
     # KM median survival---
     modelKM <- survfit(Surv(time_years, status) ~ sex_age_gp, data=data) %>%
