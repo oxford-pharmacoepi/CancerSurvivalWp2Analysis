@@ -642,7 +642,7 @@ runs <- survivalResults %>%
             "Age" )) %>% 
   dplyr::distinct() %>% 
   dplyr::mutate(Run = "Yes") %>% 
-  dplyr::unite(ID, c( Cancer, Method, Age, Sex, Adjustment, Stratification ), remove = FALSE) %>% 
+  tidyr::unite(ID, c( Cancer, Method, Age, Sex, Adjustment, Stratification ), remove = FALSE) %>% 
   dplyr::select(c(ID, Run))
 
 # ALL
@@ -701,7 +701,7 @@ AnalysisRunSummary <- dplyr::bind_rows(AnalysisRunAll,
                                 AnalysisRunSexA,
                                 AnalysisRunAgeS,
                                 AnalysisRunAgeA ) %>% 
-  dplyr::unite(ID, c( Cancer, Method, Age, Sex, Adjustment, Stratification ), remove = FALSE)
+  tidyr::unite(ID, c( Cancer, Method, Age, Sex, Adjustment, Stratification ), remove = FALSE)
 
 
 # combine with what has been run to get a rendered file of results summary

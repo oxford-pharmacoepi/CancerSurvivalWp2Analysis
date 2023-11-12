@@ -218,7 +218,7 @@ for(tableonecancer in 1:length(unique(tableone$group_level))) {
     tb1_tempM <- tabledata %>% 
       dplyr::filter(strata_level == "Male") %>% 
       reformat_table_one() %>% 
-      dplyr::dplyr::mutate(Cancer = unique(tabledata$group_level),
+      dplyr::mutate(Cancer = unique(tabledata$group_level),
              Stratification = "Sex",
              Sex = "Male" ,
              Age = "All" ,

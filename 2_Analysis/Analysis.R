@@ -234,7 +234,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       if (exists("model") == TRUE) {
       #extrapolation
       extrap_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        summary(t=t/365, tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
@@ -257,11 +257,11 @@ for(j in 1:nrow(outcome_cohorts)) {
 
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
         dplyr::rename(median = est) %>% 
         dplyr::mutate(median = round(median, 4),
                lcl = round(lcl, 4),
@@ -273,7 +273,7 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                            NA)) %>% 
         dplyr::select(-c(lcl, ucl))
       
-      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean = est) %>% 
         dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
@@ -284,7 +284,7 @@ for(j in 1:nrow(outcome_cohorts)) {
                                              NA)) %>% 
         dplyr::select(-c(lcl, ucl, time))
       
-      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
         dplyr::rename(rmean10yr = est) %>%
         dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
@@ -297,7 +297,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
         dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
@@ -346,7 +346,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         tryCatch({
       
       extrap_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        summary(t=t/365, tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
@@ -369,11 +369,11 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
         dplyr::rename(median = est) %>% 
         dplyr::mutate(median = round(median, 4),
                lcl = round(lcl, 4),
@@ -386,7 +386,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         dplyr::select(-c(lcl, ucl))
       
       
-      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean = est) %>% 
         dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
@@ -397,7 +397,7 @@ for(j in 1:nrow(outcome_cohorts)) {
                                              NA)) %>% 
         dplyr::select(-c(lcl, ucl, time))
       
-      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean10yr = est) %>% 
         dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
@@ -410,7 +410,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
         dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
@@ -466,7 +466,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         tryCatch({
       
       extrap_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        summary(t=t/365, tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
 
       #get the goodness of fit for each model
@@ -490,11 +490,11 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
         dplyr::rename(median = est) %>% 
         dplyr::mutate(median = round(median, 4),
                lcl = round(lcl, 4),
@@ -507,7 +507,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         dplyr::select(-c(lcl, ucl))
       
       
-      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean = est) %>% 
         dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
@@ -518,7 +518,7 @@ for(j in 1:nrow(outcome_cohorts)) {
                                              NA)) %>% 
         dplyr::select(-c(lcl, ucl, se, time))
       
-      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean10yr = est) %>% 
         dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
@@ -531,7 +531,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
         dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
@@ -592,7 +592,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         tryCatch({
       
       extrap_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        summary(t=t/365, tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
@@ -615,11 +615,11 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
         dplyr::rename(median = est) %>% 
         dplyr::mutate(median = round(median, 4),
                lcl = round(lcl, 4),
@@ -632,7 +632,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         dplyr::select(-c(lcl, ucl))
       
       
-      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean = est) %>% 
         dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
@@ -643,7 +643,7 @@ for(j in 1:nrow(outcome_cohorts)) {
                                              NA)) %>% 
         dplyr::select(-c(lcl, ucl, time))
       
-      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean10yr = est) %>% 
         dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
@@ -656,7 +656,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
         dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
@@ -718,7 +718,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       # extrapolations
       extrap_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        summary(t=t/365, tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
@@ -734,11 +734,11 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       #extract the hazard function over time
       hazot_results_temp[[i]] <- model %>%
-        flexsurv::summary(t=(t + 1)/365, type = "hazard", tidy = TRUE) %>%
+        summary(t=(t + 1)/365, type = "hazard", tidy = TRUE) %>%
         dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
         dplyr::rename(median = est) %>% 
         dplyr::mutate(median = round(median, 4),
           lcl = round(lcl, 4),
@@ -751,7 +751,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         dplyr::select(-c(lcl, ucl))
         
       
-      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean = est) %>% 
         dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
@@ -761,7 +761,7 @@ for(j in 1:nrow(outcome_cohorts)) {
                                              NA)) %>% 
         dplyr::select(-c(lcl, ucl, time))
       
-      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean10yr = est) %>% 
         dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
@@ -774,7 +774,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
         dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
