@@ -20,13 +20,13 @@ level(logger) <- "INFO"
 
 # get concept sets from cohorts----
 cancerconcepts <- CodelistGenerator::codesFromCohort(
-  path = here("1_InstantiateCohorts", "Cohorts" ) ,
+  path = here::here("1_InstantiateCohorts", "Cohorts" ) ,
   cdm = cdm,
   withConceptDetails = FALSE)
 
 
 # read the cohorts using CDM connector (need this for analysis) ----
-outcome_cohorts <- CDMConnector::readCohortSet(here(
+outcome_cohorts <- CDMConnector::readCohortSet(here::here(
   "1_InstantiateCohorts",
   "Cohorts" 
 ))
@@ -51,7 +51,7 @@ info(logger, "SUBSETTED CDM")
 # instantiate exclusion
 info(logger, "INSTANTIATE EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CANCER)")
 
-codelistExclusion <- CodelistGenerator::codesFromConceptSet(here("1_InstantiateCohorts", "Exclusion"), cdm)
+codelistExclusion <- CodelistGenerator::codesFromConceptSet(here::here("1_InstantiateCohorts", "Exclusion"), cdm)
 
 cdm <- CDMConnector::generateConceptCohortSet(cdm = cdm, 
                                               conceptSet = codelistExclusion, 
@@ -175,7 +175,7 @@ cdm$analysis <- CDMConnector::recordCohortAttrition(cohort = cdm$analysis,
   # instantiate exclusion
   info(logger, "INSTANTIATE EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CANCER)")
   
-  codelistExclusion <- CodelistGenerator::codesFromConceptSet(here("1_InstantiateCohorts", "Exclusion"), cdm)
+  codelistExclusion <- CodelistGenerator::codesFromConceptSet(here::here("1_InstantiateCohorts", "Exclusion"), cdm)
   
   cdm <- CDMConnector::generateConceptCohortSet(cdm = cdm, 
                                                 conceptSet = codelistExclusion, 
@@ -457,22 +457,22 @@ t <- seq(0, timeinyrs*365.25, by=60) # can make smaller
 
 #whole population
 info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
-source(here("2_Analysis","Analysis.R"))
+source(here::here("2_Analysis","Analysis.R"))
 info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
 
 #sex analysis
 info(logger, 'RUNNING ANALYSIS FOR SEX')
-source(here("2_Analysis","AnalysisSex.R"))
+source(here::here("2_Analysis","AnalysisSex.R"))
 info(logger, 'ANALYSIS RAN FOR SEX')
 
 #age analysis
 info(logger, 'RUNNING ANALYSIS FOR AGE')
-source(here("2_Analysis","AnalysisAge.R"))
+source(here::here("2_Analysis","AnalysisAge.R"))
 info(logger, 'ANALYSIS RAN FOR AGE')
 
 # age*sex analysis KM only
 info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
-source(here("2_Analysis","AnalysisAgeSex.R"))
+source(here::here("2_Analysis","AnalysisAgeSex.R"))
 info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
 
 #set option back to zero
@@ -480,7 +480,7 @@ info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
 
 #running tableone characterisation
 info(logger, 'RUNNING TABLE ONE ANALYSIS')
-source(here("2_Analysis","Tableone.R"))
+source(here::here("2_Analysis","Tableone.R"))
 info(logger, 'TABLE ONE ANALYSIS RAN')
   
 ##################################################################
@@ -740,16 +740,16 @@ attritioncdm <- attritioncdm %>%
 
 # save results as csv for data partner can review
 info(logger, "SAVING RESULTS")
-readr::write_csv(survivalResults, paste0(here(output.folder),"/", cdm_name(cdm), "_survival_estimates.csv"))
-readr::write_csv(riskTableResults, paste0(here(output.folder),"/", cdm_name(cdm), "_risk_table.csv"))
-readr::write_csv(medianResults, paste0(here(output.folder),"/", cdm_name(cdm), "_median_mean_survprob_survival.csv"))
-readr::write_csv(hazOverTimeResults, paste0(here(output.folder),"/", cdm_name(cdm), "_hazard_overtime.csv"))
-readr::write_csv(GOFResults, paste0(here(output.folder),"/", cdm_name(cdm), "_goodness_of_fit.csv"))
-readr::write_csv(ExtrpolationParameters, paste0(here(output.folder),"/", cdm_name(cdm), "_extrapolation_parameters.csv"))
-readr::write_csv(AnalysisRunSummary, paste0(here(output.folder),"/", cdm_name(cdm), "_analyses_run_summary.csv"))
-readr::write_csv(tableone_final, paste0(here(output.folder),"/", cdm_name(cdm), "_tableone_summary.csv"))
-readr::write_csv(snapshotcdm, paste0(here(output.folder),"/", cdm_name(cdm), "_cdm_snapshot.csv"))
-readr::write_csv(attritioncdm, paste0(here(output.folder),"/", cdm_name(cdm), "_cohort_attrition.csv"))
+readr::write_csv(survivalResults, paste0(here::here(output.folder),"/", cdm_name(cdm), "_survival_estimates.csv"))
+readr::write_csv(riskTableResults, paste0(here::here(output.folder),"/", cdm_name(cdm), "_risk_table.csv"))
+readr::write_csv(medianResults, paste0(here::here(output.folder),"/", cdm_name(cdm), "_median_mean_survprob_survival.csv"))
+readr::write_csv(hazOverTimeResults, paste0(here::here(output.folder),"/", cdm_name(cdm), "_hazard_overtime.csv"))
+readr::write_csv(GOFResults, paste0(here::here(output.folder),"/", cdm_name(cdm), "_goodness_of_fit.csv"))
+readr::write_csv(ExtrpolationParameters, paste0(here::here(output.folder),"/", cdm_name(cdm), "_extrapolation_parameters.csv"))
+readr::write_csv(AnalysisRunSummary, paste0(here::here(output.folder),"/", cdm_name(cdm), "_analyses_run_summary.csv"))
+readr::write_csv(tableone_final, paste0(here::here(output.folder),"/", cdm_name(cdm), "_tableone_summary.csv"))
+readr::write_csv(snapshotcdm, paste0(here::here(output.folder),"/", cdm_name(cdm), "_cdm_snapshot.csv"))
+readr::write_csv(attritioncdm, paste0(here::here(output.folder),"/", cdm_name(cdm), "_cohort_attrition.csv"))
 info(logger, "SAVED RESULTS")
 
 # # Time taken
@@ -764,7 +764,7 @@ info(logger, paste0("Study took: ",
 print("Zipping results to output folder")
 
 zip::zip(
-zipfile = here(output.folder, paste0("Results_", cdmName(cdm), ".zip")),
+zipfile = here::here(output.folder, paste0("Results_", cdmName(cdm), ".zip")),
 files = list.files(output.folder),
 root = output.folder)
 

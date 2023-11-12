@@ -16,43 +16,43 @@ for(j in 1:nrow(outcome_cohorts)) {
   
   #subset the data by cancer type
   data <- Pop %>%
-    filter(cohort_definition_id == j) 
+    dplyr::filter(cohort_definition_id == j) 
   
   #age levels
   agesexlevels <- data %>%
-    group_by(sex_age_gp) %>% summarise(count = n())
+    dplyr::group_by(sex_age_gp) %>% dplyr::summarise(count = n())
   
   #determines if both sexes in the data
   sexlevels <- data %>%
-    group_by(sex) %>% summarise(count = n()) %>% tally()
+    dplyr::group_by(sex) %>% dplyr::summarise(count = n()) %>% dplyr::tally()
   
   if(sexlevels == 2){
     
     # carry out km estimate --- 
-    observedkm_age_sex[[j]] <- survfit (Surv(time_years, status) ~ sex_age_gp, data=data) %>%
+    observedkm_age_sex[[j]] <- survival::survfit(Surv(time_years, status) ~ sex_age_gp, data=data) %>%
       tidy() %>%
-      mutate(Method = "Kaplan-Meier", 
+      dplyr::mutate(Method = "Kaplan-Meier", 
              Cancer = outcome_cohorts$cohort_name[j], 
              strata = str_replace(strata, "sex_age_gp=", "")) %>%  
-             separate(col = "strata",
+             tidyr::separate(col = "strata",
                       into = c("Age", "Sex"),
                       sep = "_",
                       remove = F) %>% 
-      rename(sex_age_gp = strata)
+      dplyr::rename(sex_age_gp = strata)
     
     
     # 18 to 39 female
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 4000){
       observedkm_1839f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 4000){
       observedkm_1839f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 2000){
       observedkm_1839f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_1839f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]
     }
@@ -60,15 +60,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 18 to 39 male
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 4000){
       observedkm_1839m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 4000){
       observedkm_1839m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 2000){
       observedkm_1839m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_1839m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]
     }
@@ -77,15 +77,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 40 to 49 female
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 4000){
       observedkm_4049f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 4000){
       observedkm_4049f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 2000){
       observedkm_4049f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_4049f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]
     }
@@ -93,15 +93,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 40 to 49 male
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 4000){
       observedkm_4049m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 4000){
       observedkm_4049m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 2000){
       observedkm_4049m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_4049m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]
     }
@@ -110,15 +110,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 50 to 59 female
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 4000){
       observedkm_5059f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 4000){
       observedkm_5059f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 2000){
       observedkm_5059f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_5059f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]
     }
@@ -126,15 +126,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 50 to 59 male
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 4000){
       observedkm_5059m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 4000){
       observedkm_5059m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 2000){
       observedkm_5059m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_5059m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]
     }
@@ -144,15 +144,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 60 to 69 female
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 4000){
       observedkm_6069f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 4000){
       observedkm_6069f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 2000){
       observedkm_6069f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_6069f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]
     }
@@ -160,15 +160,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 60 to 69 male
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 4000){
       observedkm_6069m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 4000){
       observedkm_6069m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 2000){
       observedkm_6069m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_6069m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]
     }
@@ -177,15 +177,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 70 to 79 female
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 4000){
       observedkm_7079f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 4000){
       observedkm_7079f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 2000){
       observedkm_7079f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_7079f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]
     }
@@ -193,15 +193,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 70 to 79 male
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 4000){
       observedkm_7079m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 4000){
       observedkm_7079m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 2000){
       observedkm_7079m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_7079m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]
     }
@@ -211,15 +211,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 80+ female
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 4000){
       observedkm_80f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 4000){
       observedkm_80f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 2000){
       observedkm_80f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_80f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Female",]
     }
@@ -227,15 +227,15 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 80+ male
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 4000){
       observedkm_80m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
-        filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 4 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 2000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 4000){
       observedkm_80m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
-        filter(row_number() %% 3 == 1)
+        dplyr::filter(row_number() %% 3 == 1)
     } else if (nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 1000 &
                nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 2000){
       observedkm_80m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
-        filter(row_number() %% 2 == 1)
+        dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_80m <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "80 +_Male",]
     }
@@ -254,7 +254,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       observedkm_7079m,
       observedkm_80f,
       observedkm_80m) %>% 
-    select(!c(sex_age_gp))
+    dplyr::select(!c(sex_age_gp))
     
     
     print(paste0("KM for observed data age*sex strat ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
@@ -266,11 +266,11 @@ for(j in 1:nrow(outcome_cohorts)) {
     print(paste0("Trying Hazard over time results for all age*sex groups ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
     
     tryCatch( {
-        modelhot <- group_by(data, sex_age_gp) %>% 
+        modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
-          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-          separate(col = "sex_age_gp",
+          dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+          tidyr::separate(col = "sex_age_gp",
                    into = c("Age", "Sex"),
                    sep = "_" ,
                    remove = F) },
@@ -294,14 +294,14 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 18-39 year old female age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") 
+        dplyr::filter(sex_age_gp != "18 to 39_Female") 
       
       tryCatch({
-          modelhot <- group_by(data, sex_age_gp) %>% 
+          modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
             do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
             ungroup %>%
-            mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-            separate(col = "sex_age_gp",
+            dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+            tidyr::separate(col = "sex_age_gp",
                      into = c("Age", "Sex"),
                      sep = "_" ,
                      remove = F)
@@ -330,15 +330,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 18-39 male age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") %>% 
-        filter(sex_age_gp != "18 to 39_Male")
+        dplyr::filter(sex_age_gp != "18 to 39_Female") %>% 
+        dplyr::filter(sex_age_gp != "18 to 39_Male")
       
       tryCatch( {
-          modelhot <- group_by(data, sex_age_gp) %>% 
+          modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
             do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
             ungroup %>%
-            mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-            separate(col = "sex_age_gp",
+            dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+            tidyr::separate(col = "sex_age_gp",
                      into = c("Age", "Sex"),
                      sep = "_" ,
                      remove = F)
@@ -365,16 +365,16 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 40-49 year old female age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") %>% 
-        filter(sex_age_gp != "18 to 39_Male") %>% 
-        filter(sex_age_gp != "40 to 49_Female")
+        dplyr::filter(sex_age_gp != "18 to 39_Female") %>% 
+        dplyr::filter(sex_age_gp != "18 to 39_Male") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Female")
       
       tryCatch( {
-          modelhot <- group_by(data, sex_age_gp) %>% 
+          modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
             do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
             ungroup %>%
-            mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-            separate(col = "sex_age_gp",
+            dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+            tidyr::separate(col = "sex_age_gp",
                      into = c("Age", "Sex"),
                      sep = "_" ,
                      remove = F)
@@ -401,17 +401,17 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 40-49 age male group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") %>% 
-        filter(sex_age_gp != "18 to 39_Male") %>% 
-        filter(sex_age_gp != "40 to 49_Female") %>% 
-        filter(sex_age_gp != "40 to 49_Male")
+        dplyr::filter(sex_age_gp != "18 to 39_Female") %>% 
+        dplyr::filter(sex_age_gp != "18 to 39_Male") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Female") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Male")
       
       tryCatch( {
-          modelhot <- group_by(data, sex_age_gp) %>% 
+          modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
             do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
             ungroup %>%
-            mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-            separate(col = "sex_age_gp",
+            dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+            tidyr::separate(col = "sex_age_gp",
                      into = c("Age", "Sex"),
                      sep = "_" ,
                      remove = F)
@@ -440,19 +440,19 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 50-59 female year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") %>% 
-        filter(sex_age_gp != "18 to 39_Male") %>% 
-        filter(sex_age_gp != "40 to 49_Female") %>% 
-        filter(sex_age_gp != "40 to 49_Male") %>% 
-        filter(sex_age_gp != "50 to 59_Female")
+        dplyr::filter(sex_age_gp != "18 to 39_Female") %>% 
+        dplyr::filter(sex_age_gp != "18 to 39_Male") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Female") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Male") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Female")
       
       
       tryCatch({
-          modelhot <- group_by(data, sex_age_gp) %>% 
+          modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
             do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
             ungroup %>%
-            mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-            separate(col = "sex_age_gp",
+            dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+            tidyr::separate(col = "sex_age_gp",
                      into = c("Age", "Sex"),
                      sep = "_" ,
                      remove = F)
@@ -478,18 +478,18 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 50 to 59_male year old age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") %>% 
-        filter(sex_age_gp != "18 to 39_Male") %>% 
-        filter(sex_age_gp != "40 to 49_Female") %>% 
-        filter(sex_age_gp != "40 to 49_Male") %>% 
-        filter(sex_age_gp != "50 to 59_Female") %>% 
-        filter(sex_age_gp != "50 to 59_Male")
+        dplyr::filter(sex_age_gp != "18 to 39_Female") %>% 
+        dplyr::filter(sex_age_gp != "18 to 39_Male") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Female") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Male") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Female") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Male")
       
-      tryCatch({modelhot <- group_by(data, sex_age_gp) %>% 
+      tryCatch({modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
             do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
             ungroup %>%
-            mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-            separate(col = "sex_age_gp",
+            dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+            tidyr::separate(col = "sex_age_gp",
                  into = c("Age", "Sex"),
                  sep = "_" ,
                  remove = F)
@@ -517,20 +517,20 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 60 to 69 year old female age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") %>% 
-        filter(sex_age_gp != "18 to 39_Male") %>% 
-        filter(sex_age_gp != "40 to 49_Female") %>% 
-        filter(sex_age_gp != "40 to 49_Male") %>% 
-        filter(sex_age_gp != "50 to 59_Female") %>% 
-        filter(sex_age_gp != "50 to 59_Male") %>% 
-        filter(sex_age_gp != "60 to 69_Female")
+        dplyr::filter(sex_age_gp != "18 to 39_Female") %>% 
+        dplyr::filter(sex_age_gp != "18 to 39_Male") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Female") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Male") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Female") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Male") %>% 
+        dplyr::filter(sex_age_gp != "60 to 69_Female")
       
       tryCatch({
-        modelhot <- group_by(data, sex_age_gp) %>% 
+        modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
-          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-          separate(col = "sex_age_gp",
+          dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+          tidyr::separate(col = "sex_age_gp",
                    into = c("Age", "Sex"),
                    sep = "_" ,
                    remove = F)
@@ -558,20 +558,20 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 60 to 69 year old male age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") %>% 
-        filter(sex_age_gp != "18 to 39_Male") %>% 
-        filter(sex_age_gp != "40 to 49_Female") %>% 
-        filter(sex_age_gp != "40 to 49_Male") %>% 
-        filter(sex_age_gp != "50 to 59_Female") %>% 
-        filter(sex_age_gp != "50 to 59_Male") %>% 
-        filter(sex_age_gp != "60 to 69_Female") %>% 
-        filter(sex_age_gp != "60 to 69_Male")
+        dplyr::filter(sex_age_gp != "18 to 39_Female") %>% 
+        dplyr::filter(sex_age_gp != "18 to 39_Male") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Female") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Male") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Female") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Male") %>% 
+        dplyr::filter(sex_age_gp != "60 to 69_Female") %>% 
+        dplyr::filter(sex_age_gp != "60 to 69_Male")
       
-      tryCatch({ modelhot <- group_by(data, sex_age_gp) %>% 
+      tryCatch({ modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
-          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-        separate(col = "sex_age_gp",
+          dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+        tidyr::separate(col = "sex_age_gp",
                  into = c("Age", "Sex"),
                  sep = "_" ,
                  remove = F)
@@ -599,21 +599,21 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 70 to 79 year old female age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") %>% 
-        filter(sex_age_gp != "18 to 39_Male") %>% 
-        filter(sex_age_gp != "40 to 49_Female") %>% 
-        filter(sex_age_gp != "40 to 49_Male") %>% 
-        filter(sex_age_gp != "50 to 59_Female") %>% 
-        filter(sex_age_gp != "50 to 59_Male") %>% 
-        filter(sex_age_gp != "60 to 69_Female") %>% 
-        filter(sex_age_gp != "60 to 69_Male") %>% 
-        filter(sex_age_gp != "70 to 79_Female")
+        dplyr::filter(sex_age_gp != "18 to 39_Female") %>% 
+        dplyr::filter(sex_age_gp != "18 to 39_Male") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Female") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Male") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Female") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Male") %>% 
+        dplyr::filter(sex_age_gp != "60 to 69_Female") %>% 
+        dplyr::filter(sex_age_gp != "60 to 69_Male") %>% 
+        dplyr::filter(sex_age_gp != "70 to 79_Female")
       
-      tryCatch({modelhot <- group_by(data, sex_age_gp) %>% 
+      tryCatch({modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
-          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-        separate(col = "sex_age_gp",
+          dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+        tidyr::separate(col = "sex_age_gp",
                  into = c("Age", "Sex"),
                  sep = "_" ,
                  remove = F)
@@ -639,24 +639,24 @@ for(j in 1:nrow(outcome_cohorts)) {
       print(paste0("Trying Hazard over time results again removing 70 to 79 year old male age group ", Sys.time()," for ",outcome_cohorts$cohort_name[j]))
       
       data <- data %>% 
-        filter(sex_age_gp != "18 to 39_Female") %>% 
-        filter(sex_age_gp != "18 to 39_Male") %>% 
-        filter(sex_age_gp != "40 to 49_Female") %>% 
-        filter(sex_age_gp != "40 to 49_Male") %>% 
-        filter(sex_age_gp != "50 to 59_Female") %>% 
-        filter(sex_age_gp != "50 to 59_Male") %>% 
-        filter(sex_age_gp != "60 to 69_Female") %>% 
-        filter(sex_age_gp != "60 to 69_Male") %>% 
-        filter(sex_age_gp != "70 to 79_Female") %>% 
-        filter(sex_age_gp != "70 to 79_Male")
+        dplyr::filter(sex_age_gp != "18 to 39_Female") %>% 
+        dplyr::filter(sex_age_gp != "18 to 39_Male") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Female") %>% 
+        dplyr::filter(sex_age_gp != "40 to 49_Male") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Female") %>% 
+        dplyr::filter(sex_age_gp != "50 to 59_Male") %>% 
+        dplyr::filter(sex_age_gp != "60 to 69_Female") %>% 
+        dplyr::filter(sex_age_gp != "60 to 69_Male") %>% 
+        dplyr::filter(sex_age_gp != "70 to 79_Female") %>% 
+        dplyr::filter(sex_age_gp != "70 to 79_Male")
         
       
       tryCatch({
-        modelhot <- group_by(data, sex_age_gp) %>% 
+        modelhot <- dplyr::group_by(data, sex_age_gp) %>% 
           do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
           ungroup %>%
-          mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
-          separate(col = "sex_age_gp",
+          dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j]) %>% 
+          tidyr::separate(col = "sex_age_gp",
                    into = c("Age", "Sex"),
                    sep = "_" ,
                    remove = F)
@@ -692,15 +692,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 18 to 39 female
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 4000){
         observedhazotkm_1839f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 4000){
         observedhazotkm_1839f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]) < 2000){
         observedhazotkm_1839f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_1839f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Female",]
       }
@@ -708,15 +708,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 18 to 39 male
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 4000){
         observedhazotkm_1839m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 4000){
         observedhazotkm_1839m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]) < 2000){
         observedhazotkm_1839m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_1839m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "18 to 39_Male",]
       }
@@ -725,15 +725,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 40 to 49 female
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 4000){
         observedhazotkm_4049f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 4000){
         observedhazotkm_4049f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]) < 2000){
         observedhazotkm_4049f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_4049f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Female",]
       }
@@ -741,15 +741,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 40 to 49 male
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 4000){
         observedhazotkm_4049m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 4000){
         observedhazotkm_4049m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]) < 2000){
         observedhazotkm_4049m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_4049m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "40 to 49_Male",]
       }
@@ -758,15 +758,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 50 to 59 female
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 4000){
         observedhazotkm_5059f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 4000){
         observedhazotkm_5059f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]) < 2000){
         observedhazotkm_5059f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_5059f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Female",]
       }
@@ -774,15 +774,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 50 to 59 male
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 4000){
         observedhazotkm_5059m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 4000){
         observedhazotkm_5059m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]) < 2000){
         observedhazotkm_5059m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_5059m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "50 to 59_Male",]
       }
@@ -792,15 +792,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 60 to 69 female
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 4000){
         observedhazotkm_6069f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 4000){
         observedhazotkm_6069f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) < 2000){
         observedhazotkm_6069f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_6069f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]
       }
@@ -808,15 +808,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 60 to 69 male
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 4000){
         observedhazotkm_6069m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 4000){
         observedhazotkm_6069m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]) < 2000){
         observedhazotkm_6069m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_6069m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "60 to 69_Male",]
       }
@@ -825,15 +825,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 70 to 79 female
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 4000){
         observedhazotkm_7079f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 4000){
         observedhazotkm_7079f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]) < 2000){
         observedhazotkm_7079f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_7079f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Female",]
       }
@@ -841,15 +841,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 70 to 79 male
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 4000){
         observedhazotkm_7079m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 4000){
         observedhazotkm_7079m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]) < 2000){
         observedhazotkm_7079m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_7079m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "70 to 79_Male",]
       }
@@ -859,15 +859,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 80+ female
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 4000){
         observedhazotkm_80f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 4000){
         observedhazotkm_80f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]) < 2000){
         observedhazotkm_80f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_80f <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Female",]
       }
@@ -875,15 +875,15 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 80+ male
       if(nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 4000){
         observedhazotkm_80m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
-          filter(row_number() %% 4 == 1)
+          dplyr::filter(row_number() %% 4 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 2000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 4000){
         observedhazotkm_80m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
-          filter(row_number() %% 3 == 1)
+          dplyr::filter(row_number() %% 3 == 1)
       } else if (nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) > 1000 &
                  nrow(observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]) < 2000){
         observedhazotkm_80m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",] %>%
-          filter(row_number() %% 2 == 1)
+          dplyr::filter(row_number() %% 2 == 1)
       } else {
         observedhazotkm_80m <- observedhazotKM_age_sex[[j]][observedhazotKM_age_sex[[j]]$sex_age_gp == "80 +_Male",]
       }
@@ -902,7 +902,7 @@ for(j in 1:nrow(outcome_cohorts)) {
         observedhazotkm_7079m,
         observedhazotkm_80f,
         observedhazotkm_80m) %>% 
-        select(-c(sex_age_gp))
+        dplyr::select(-c(sex_age_gp))
       
       rm(modelhot)
     }
@@ -915,13 +915,13 @@ for(j in 1:nrow(outcome_cohorts)) {
     grid <-  grid[(str_detect(grid, "[1-9]\\.5", negate = TRUE )) & (str_detect(grid, "10.5", negate = TRUE )) &
                     (str_detect(grid, "20.5", negate = TRUE )) & (str_detect(grid, "30.5", negate = TRUE ))] # remove all the half years apart from the first half year
     
-    sprob <- survfit(Surv(time_years, status) ~ sex_age_gp, data=data) %>% 
+    sprob <- survival::survfit(Surv(time_years, status) ~ sex_age_gp, data=data) %>% 
       summary(times = grid, extend = TRUE)
     cols <- lapply(c(2:16) , function(x) sprob[x])
     
     kmagesex <- do.call(data.frame, cols) %>%
-      select(c(n.risk, n.event, n.censor, strata)) %>% 
-      mutate(strata = str_replace(strata, "sex_age_gp=", ""))
+      dplyr::select(c(n.risk, n.event, n.censor, strata)) %>% 
+      dplyr::mutate(strata = str_replace(strata, "sex_age_gp=", ""))
     
     
     # risk tables for different age groups
@@ -930,16 +930,16 @@ for(j in 1:nrow(outcome_cohorts)) {
     for(k in 1: length(table(kmagesex$strata))) {
       
       kmagesexgp[[k]] <- kmagesex %>%
-        filter(strata == names(table(kmagesex$strata)[k])) %>%
-        select(!c(strata)) %>%
+        dplyr::filter(strata == names(table(kmagesex$strata)[k])) %>%
+        dplyr::select(!c(strata)) %>%
         t() %>%
         as_tibble() %>%
         `colnames<-`(grid) %>%
-        mutate(Method = "Kaplan-Meier",
+        dplyr::mutate(Method = "Kaplan-Meier",
                Cancer = outcome_cohorts$cohort_name[j],
                agesex = names(table(kmagesex$strata)[k]) ,
                details = c("n.risk", "n.event", "n.censor")) %>%
-            separate(col = "agesex",
+            tidyr::separate(col = "agesex",
                      into = c("Age", "Sex"),
                      sep = "_") %>% 
         
@@ -951,14 +951,14 @@ for(j in 1:nrow(outcome_cohorts)) {
     observedrisktableKM_age_sex[[j]] <- bind_rows(kmagesexgp)
     
     # KM median survival---
-    modelKM <- survfit(Surv(time_years, status) ~ sex_age_gp, data=data) %>%
+    modelKM <- survival::survfit(Surv(time_years, status) ~ sex_age_gp, data=data) %>%
       summary()
     
     medianKM <- modelKM$table %>%
       as.data.frame() %>%
       tibble::rownames_to_column() %>%  
-      rename(agesex = rowname, n = records, se =`se(rmean)`) %>% 
-      mutate(rmean = round(rmean, 4),
+      dplyr::rename(agesex = rowname, n = records, se =`se(rmean)`) %>% 
+      dplyr::mutate(rmean = round(rmean, 4),
              median = round(median, 4),
              `0.95LCL` = round(`0.95LCL`, 4),
              `0.95UCL` = round(`0.95UCL`, 4),
@@ -972,25 +972,25 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                                 paste0(nice.num2(`0.95LCL`)),"-",
                                                                 paste0(nice.num2(`0.95UCL`)), ")"),
                                                          NA)) %>% 
-      select(-c(`0.95LCL`,`0.95UCL`, n.max, n.start)) %>% 
-      mutate(n  = replace(n, n ==  0 , NA),
+      dplyr::select(-c(`0.95LCL`,`0.95UCL`, n.max, n.start)) %>% 
+      dplyr::mutate(n  = replace(n, n ==  0 , NA),
              events = replace(events, events ==  0 , NA)) %>%
-      mutate(n  = replace(n, n <=  10 , "<10"),
+      dplyr::mutate(n  = replace(n, n <=  10 , "<10"),
              events  = replace(events, events <=  10 , "<10"))  %>%
-      mutate(n  = replace_na(n, "0"),
+      dplyr::mutate(n  = replace_na(n, "0"),
              events  = replace_na(events, "0")) %>% 
-      mutate(n = as.character(n),
+      dplyr::mutate(n = as.character(n),
              events = as.character(events))
     
     
     # Extract rmean at 10 years
-    model_rm <- survfit(Surv(time_years, status) ~ sex_age_gp, data=data)
+    model_rm <- survival::survfit(Surv(time_years, status) ~ sex_age_gp, data=data)
     rmean10 <- survival:::survmean(model_rm, rmean=c(10))$matrix %>% 
       as.data.frame() %>% 
       tibble::rownames_to_column() %>%  
-      select(rmean, `se(rmean)`, rowname) %>% 
-      rename(rmean10yr = rmean, se10yr =`se(rmean)`, agesex = rowname) %>% 
-      mutate(agesex = str_replace(agesex, "sex_age_gp=", "") ,
+      dplyr::select(rmean, `se(rmean)`, rowname) %>% 
+      dplyr::rename(rmean10yr = rmean, se10yr =`se(rmean)`, agesex = rowname) %>% 
+      dplyr::mutate(agesex = str_replace(agesex, "sex_age_gp=", "") ,
              "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
                                                  paste0(paste0(nice.num2(rmean10yr)), " (",
                                                         paste0(nice.num2(se10yr)), ")"),
@@ -1000,9 +1000,9 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     # survival probabilities ----
     surprobsKM <- do.call(data.frame, cols) %>%
-      select(c(time, surv, lower, upper, strata)) %>% 
-      filter(time == 1 | time == 5 | time == 10 ) %>% 
-      mutate(surv = round((surv*100),4),
+      dplyr::select(c(time, surv, lower, upper, strata)) %>% 
+      dplyr::filter(time == 1 | time == 5 | time == 10 ) %>% 
+      dplyr::mutate(surv = round((surv*100),4),
              lower = round((lower*100),4),
              upper = round((upper*100),4),
              strata = str_replace(strata, "sex_age_gp=", ""),
@@ -1011,20 +1011,20 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                        paste0(nice.num1(lower)),"-",
                                                        paste0(nice.num1(upper)), ")"),
                                                 NA)) %>% 
-      select(-c(lower, upper)) %>% 
-      rename(agesex = strata) %>% 
-      pivot_wider(names_from = time, 
+      dplyr::select(-c(lower, upper)) %>% 
+      dplyr::rename(agesex = strata) %>% 
+      tidyr::pivot_wider(names_from = time, 
                   values_from = c(`Survival Rate % (95% CI)`, surv),
                   names_prefix = " year ",
                   names_sep = "")
     
-    observedmedianKM_age_sex[[j]] <- inner_join(medianKM, rmean10, by = "agesex") %>% 
-      inner_join(surprobsKM, by = "agesex")
+    observedmedianKM_age_sex[[j]] <- dplyr::inner_join(medianKM, rmean10, by = "agesex") %>% 
+      dplyr::inner_join(surprobsKM, by = "agesex")
 
     observedmedianKM_age_sex[[j]] <- observedmedianKM_age_sex[[j]] %>% 
-      mutate(Method = "Kaplan-Meier", 
+      dplyr::mutate(Method = "Kaplan-Meier", 
              Cancer = outcome_cohorts$cohort_name[j]  ) %>% 
-    separate(col = "agesex",
+    tidyr::separate(col = "agesex",
              into = c("Age", "Sex"),
              sep = "_",
              remove = T) 
@@ -1043,23 +1043,23 @@ print(paste0("age*sex stratification KM analysis not carried out for ", outcome_
 
 # take the results from a list (one element for each cancer) and put into dataframe ----
 observedkmcombined_age_sex <- dplyr::bind_rows(observedkm_age_sex) %>%
-  rename(est = estimate ,ucl = conf.high, lcl = conf.low ) %>%
-  mutate(Stratification = "agesex", Adjustment = "None")
+  dplyr::rename(est = estimate ,ucl = conf.high, lcl = conf.low ) %>%
+  dplyr::mutate(Stratification = "agesex", Adjustment = "None")
 
 medkmcombined_age_sex <- dplyr::bind_rows(observedmedianKM_age_sex) %>%
-  mutate(Stratification = "agesex", Adjustment = "None")
+  dplyr::mutate(Stratification = "agesex", Adjustment = "None")
 
 hotkmcombined_age_sex <- dplyr::bind_rows(observedhazotKM_age_sex) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
-  mutate(Stratification = "agesex", Adjustment = "None")
+  dplyr::rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
+  dplyr::mutate(Stratification = "agesex", Adjustment = "None")
 
 #generate the risk table 
 risktableskm_age_sex <- dplyr::bind_rows(observedrisktableKM_age_sex) %>%
-filter(details != "n.censor") %>% 
-  mutate(Stratification = "agesex", Adjustment = "None") %>% 
-  mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
-  mutate(across(where(is.numeric), ~replace(., .<  10 , "<10"))) %>% 
-  mutate(across(everything(), as.character)) %>%
+dplyr::filter(details != "n.censor") %>% 
+  dplyr::mutate(Stratification = "agesex", Adjustment = "None") %>% 
+  dplyr::mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
+  dplyr::mutate(across(where(is.numeric), ~replace(., .<  10 , "<10"))) %>% 
+  dplyr::mutate(across(everything(), as.character)) %>%
   replace(is.na(.), "0")
 
 toc(func.toc=toc_min)

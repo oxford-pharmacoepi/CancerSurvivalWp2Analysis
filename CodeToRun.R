@@ -33,7 +33,7 @@ db.name <-"..."
 
 # Set output folder locations -----
 # the path to a folder where the results from this analysis will be saved
-output.folder <- here("Results",db.name)
+output.folder <- here::here("Results", db.name)
 
 # database connection details
 server     <- "..."
@@ -47,7 +47,7 @@ host       <- "..."
 # In this study we also use the DBI package to connect to the database
 # set up the dbConnect details below (see https://dbi.r-dbi.org/articles/dbi for more details)
 # you may need to install another package for this (although RPostgres is included with renv in case you are using postgres)
-db <- dbConnect("...",
+db <- DBI::dbConnect("...",
                 dbname = server_dbi,
                 port = port,
                 host = host, 
@@ -80,8 +80,8 @@ cdm <- CDMConnector::cdm_from_con(con = db,
 # to check whether the DBI connection is correct, 
 # running the next line should give you a count of your person table
 cdm$person %>% 
-  tally() %>% 
-  computeQuery()
+  dplyr::tally() %>% 
+  CDMConnector::computeQuery()
 
 # Set study details -----
 # if you do not have suitable data from 2000-01-01 
@@ -96,7 +96,7 @@ startdate <- "2000-01-01"
 priorhistory <- TRUE
 
 # Run the study ------
-source(here("RunStudy.R"))
+source(here::here("RunStudy.R"))
 # after the study is run you should have a zip folder in your output folder to share
 
 # drop the permanent tables from the study 
