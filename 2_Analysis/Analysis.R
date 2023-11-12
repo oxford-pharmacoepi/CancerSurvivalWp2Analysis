@@ -106,7 +106,7 @@ medianKM <- modelKM$table %>%
                                                             paste0(nice.num2(`0.95LCL`)),"-",
                                                             paste0(nice.num2(`0.95UCL`)), ")"),
                                                      NA)) %>% 
-  select(-c(`0.95LCL`,`0.95UCL`, name, n.max, n.start, se)) %>% 
+  select(-c(`0.95LCL`,`0.95UCL`, name, n.max, n.start)) %>% 
   mutate(n  = replace(n, n ==  0 , NA),
          events = replace(events, events ==  0 , NA)) %>%
   mutate(n  = replace(n, n <=  10 , "<10"),
