@@ -18,24 +18,24 @@ for(j in 1:nrow(outcome_cohorts)) {
 
 #subset the data by cancer type
 data <- Pop %>%
-  filter(cohort_definition_id == j)
+  dplyr::filter(cohort_definition_id == j)
 
 #carry out km estimate ---
 #take every other row from results
-observedkm[[j]] <- survfit(Surv(time_years, status) ~ 1, data=data) %>%
+observedkm[[j]] <- survival::survfit(Surv(time_years, status) ~ 1, data=data) %>%
   tidy() %>%
-  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both")
+  dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both")
 
 # reduce the size of KM for plotting
 if(nrow(observedkm[[j]]) > 4000){
   observedkm[[j]] <- observedkm[[j]] %>%
-    filter(row_number() %% 4 == 1)
+    dplyr::filter(row_number() %% 4 == 1)
 } else if(nrow(observedkm[[j]]) > 2000 & nrow(observedkm[[j]]) < 4000 ){
   observedkm[[j]] <- observedkm[[j]] %>%
-    filter(row_number() %% 3 == 1)
+    dplyr::filter(row_number() %% 3 == 1)
 } else if(nrow(observedkm[[j]]) > 1000 & nrow(observedkm[[j]]) < 2000 ){
   observedkm[[j]] <- observedkm[[j]] %>%
-    filter(row_number() %% 2 == 1)
+    dplyr::filter(row_number() %% 2 == 1)
 }
 
 
@@ -46,30 +46,30 @@ grid <- seq(0,floor(max(data$time_years)),by=0.5) #get the number of years every
 grid <-  grid[(str_detect(grid, "[1-9]\\.5", negate = TRUE )) & (str_detect(grid, "10.5", negate = TRUE )) &
                 (str_detect(grid, "20.5", negate = TRUE )) & (str_detect(grid, "30.5", negate = TRUE ))] # remove all the half years apart from the first half year
   
-sprob <- survfit(Surv(time_years, status) ~ 1, data=data) %>% 
+sprob <- survival::survfit(Surv(time_years, status) ~ 1, data=data) %>% 
   summary(times = grid, extend = TRUE)
 cols <- lapply(c(2:15) , function(x) sprob[x])
 
 observedrisktableKM[[j]] <- do.call(data.frame, cols) %>%
-  select(c(n.risk, n.event, n.censor)) %>% 
+  dplyr::select(c(n.risk, n.event, n.censor)) %>% 
   t() %>% 
   as_tibble() %>% 
   `colnames<-`(grid) %>% 
-  mutate(Method = "Kaplan-Meier", 
+  dplyr::mutate(Method = "Kaplan-Meier", 
          Cancer = outcome_cohorts$cohort_name[j],
          Sex = "Both" ,
          Age = "All",
          details = c("n.risk", "n.event", "n.censor")) %>% 
-  relocate(details)
+  dplyr::relocate(details)
 
 print(paste0("Extract risk table ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
 
 
 # get surv probs for specific times ---
 surprobsKM <- do.call(data.frame, cols) %>%
-  select(c(time, surv, lower, upper)) %>% 
-  filter(time == 1 | time == 5 | time == 10 ) %>% 
-  mutate(surv = round((surv*100),4),
+  dplyr::select(c(time, surv, lower, upper)) %>% 
+  dplyr::filter(time == 1 | time == 5 | time == 10 ) %>% 
+  dplyr::mutate(surv = round((surv*100),4),
          lower = round((lower*100),4),
          upper = round((upper*100),4),
          "Survival Rate % (95% CI)"= ifelse(!is.na(surv),
@@ -77,23 +77,23 @@ surprobsKM <- do.call(data.frame, cols) %>%
                                             paste0(nice.num1(lower)),"-",
                                             paste0(nice.num1(upper)), ")"),
                                                                 NA)) %>% 
-  select(-c(lower, upper)) %>% 
-  pivot_wider(names_from = time, 
+  dplyr::select(-c(lower, upper)) %>% 
+  tidyr::pivot_wider(names_from = time, 
               values_from = c(`Survival Rate % (95% CI)`, surv),
               names_prefix = " year ",
               names_sep = "")
 
 # KM median survival---
-modelKM <- survfit(Surv(time_years, status) ~ 1, data=data) %>%
+modelKM <- survival::survfit(Surv(time_years, status) ~ 1, data=data) %>%
   summary()
 
 medianKM <- modelKM$table %>%
   as.data.frame() %>%
   tibble::rownames_to_column() %>%  
-  pivot_longer(-rowname) %>% 
-  pivot_wider(names_from=rowname, values_from=value) %>% 
-  rename(n = records, se =`se(rmean)`) %>% 
-  mutate(rmean = round(rmean, 4),
+  tidyr::pivot_longer(-rowname) %>% 
+  tidyr::pivot_wider(names_from=rowname, values_from=value) %>% 
+  dplyr::rename(n = records, se =`se(rmean)`) %>% 
+  dplyr::mutate(rmean = round(rmean, 4),
          median = round(median, 4),
          `0.95LCL` = round(`0.95LCL`, 4),
          `0.95UCL` = round(`0.95UCL`, 4),
@@ -106,33 +106,33 @@ medianKM <- modelKM$table %>%
                                                             paste0(nice.num2(`0.95LCL`)),"-",
                                                             paste0(nice.num2(`0.95UCL`)), ")"),
                                                      NA)) %>% 
-  select(-c(`0.95LCL`,`0.95UCL`, name, n.max, n.start)) %>% 
-  mutate(n  = replace(n, n ==  0 , NA),
+  dplyr::select(-c(`0.95LCL`,`0.95UCL`, name, n.max, n.start)) %>% 
+  dplyr::mutate(n  = replace(n, n ==  0 , NA),
          events = replace(events, events ==  0 , NA)) %>%
-  mutate(n  = replace(n, n <=  10 , "<10"),
+  dplyr::mutate(n  = replace(n, n <=  10 , "<10"),
          events  = replace(events, events <=  10 , "<10"))  %>%
-  mutate(n  = replace_na(n, "0"),
+  dplyr::mutate(n  = replace_na(n, "0"),
          events  = replace_na(events, "0")) %>% 
-  mutate(n = as.character(n),
+  dplyr::mutate(n = as.character(n),
          events = as.character(events))
 
 # Extract rmean at 10 years
-model_rm <- survfit(Surv(time_years, status) ~ 1, data=data)
+model_rm <- survival::survfit(Surv(time_years, status) ~ 1, data=data)
 rmean10 <- survival:::survmean(model_rm, rmean=c(10))$matrix %>% 
   as.data.frame() %>% 
   tibble::rownames_to_column() %>%  
-  pivot_longer(-rowname) %>% 
-  pivot_wider(names_from=rowname, values_from=value) %>% 
-  select(rmean, `se(rmean)`) %>% 
-  rename(rmean10yr = rmean, se10yr =`se(rmean)`) %>% 
-  mutate("rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+  tidyr::pivot_longer(-rowname) %>% 
+  tidyr::pivot_wider(names_from=rowname, values_from=value) %>% 
+  dplyr::select(rmean, `se(rmean)`) %>% 
+  dplyr::rename(rmean10yr = rmean, se10yr =`se(rmean)`) %>% 
+  dplyr::mutate("rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
                                   paste0(paste0(nice.num2(rmean10yr)), " (",
                                          paste0(nice.num2(se10yr)), ")"),
                                   NA))
 
-observedmedianKM[[j]] <- bind_cols(medianKM, rmean10, surprobsKM)
+observedmedianKM[[j]] <- dplyr::bind_cols(medianKM, rmean10, surprobsKM)
 observedmedianKM[[j]] <- observedmedianKM[[j]] %>% 
-  mutate(Method = "Kaplan-Meier", 
+  dplyr::mutate(Method = "Kaplan-Meier", 
          Cancer = outcome_cohorts$cohort_name[j] ,
          Age = "All", 
          Sex = "Both" )
@@ -145,18 +145,18 @@ print(paste0("Median survival from KM from observed data ", Sys.time()," for ",o
 # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
 
 observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>%
-  mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") 
+  dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") 
 
 # reduce the size of haz over time for plotting
 if(nrow(observedhazotKM[[j]]) > 4000){
   observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
-    filter(row_number() %% 4 == 1)
+    dplyr::filter(row_number() %% 4 == 1)
 }else if(nrow(observedhazotKM[[j]]) > 2000 & nrow(observedhazotKM[[j]]) < 4000 ){
   observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
-    filter(row_number() %% 3 == 1)
+    dplyr::filter(row_number() %% 3 == 1)
 }else if(nrow(observedhazotKM[[j]]) > 1000 & nrow(observedhazotKM[[j]]) < 2000 ){
   observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
-    filter(row_number() %% 2 == 1)
+    dplyr::filter(row_number() %% 2 == 1)
 }
 
 print(paste0("Hazard over time results for KM ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
@@ -165,23 +165,23 @@ print(paste0("Hazard over time results for KM ", Sys.time()," for ",outcome_coho
 
 # take the results from a list (one element for each cancer) and put into dataframe for KM survival
 observedkmcombined <- dplyr::bind_rows(observedkm) %>%
-  rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%
-  mutate(Stratification = "None", Adjustment = "None")
+  dplyr::rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%
+  dplyr::mutate(Stratification = "None", Adjustment = "None")
 
 medkmcombined <- dplyr::bind_rows(observedmedianKM) %>%
-  mutate(Stratification = "None", Adjustment = "None")
+  dplyr::mutate(Stratification = "None", Adjustment = "None")
 
 hotkmcombined <- dplyr::bind_rows(observedhazotKM) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
-  mutate(Stratification = "None", Adjustment = "None")
+  dplyr::rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
+  dplyr::mutate(Stratification = "None", Adjustment = "None")
 
 # generate results for risk table with those at risk and censor < 10 cases
 risktableskm <- dplyr::bind_rows(observedrisktableKM) %>% 
-  filter(details != "n.censor") %>% 
-  mutate(Stratification = "None", Adjustment = "None") %>% 
-  mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
-  mutate(across(everything(), ~replace(., .<=  10 , "<10"))) %>% 
-  mutate(across(everything(), as.character)) %>%
+  dplyr::filter(details != "n.censor") %>% 
+  dplyr::mutate(Stratification = "None", Adjustment = "None") %>% 
+  dplyr::mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
+  dplyr::mutate(across(everything(), ~replace(., .<=  10 , "<10"))) %>% 
+  dplyr::mutate(across(everything(), as.character)) %>%
   replace(is.na(.), "0") 
   
 toc(func.toc=toc_min)
@@ -213,7 +213,7 @@ for(j in 1:nrow(outcome_cohorts)) {
 
   #subset the data by cancer type
   data <- Pop %>%
-    filter(cohort_definition_id == j) 
+    dplyr::filter(cohort_definition_id == j) 
   
   #carry out extrapolation for each cancer
   for(i in 1:length(extrapolations)) {   # Head of for-loop
@@ -222,7 +222,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       # 1knotspline
      tryCatch(
-        model <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard"),
+        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard"),
         error = function(e){
           cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
           info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
@@ -234,36 +234,36 @@ for(j in 1:nrow(outcome_cohorts)) {
       if (exists("model") == TRUE) {
       #extrapolation
       extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        broom::glance() %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #grab the parameters and knots from the model
       coefs.p <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(names_from = name, values_from = value) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        tibble::enframe() %>%
+        tidyr::pivot_wider(names_from = name, values_from = value) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       knots.p <- model[["knots"]] %>%
-        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
-        enframe() %>%
-        pivot_wider(names_from = name, values_from = value)
+        stats::setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
+        tibble::enframe() %>%
+        tidyr::pivot_wider(names_from = name, values_from = value)
       
-      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
+      parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p )
 
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-        rename(median = est) %>% 
-        mutate(median = round(median, 4),
+      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        dplyr::rename(median = est) %>% 
+        dplyr::mutate(median = round(median, 4),
                lcl = round(lcl, 4),
                ucl = round(ucl, 4),
                "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
@@ -271,34 +271,34 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                                   paste0(nice.num2(lcl)),"-",
                                                                   paste0(nice.num2(ucl)), ")"),
                                                            NA)) %>% 
-        select(-c(lcl, ucl))
+        dplyr::select(-c(lcl, ucl))
       
-      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-        rename(rmean = est) %>% 
-        mutate(rmean = round(rmean, 4),
+      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        dplyr::rename(rmean = est) %>% 
+        dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
                time = round(time,4) ,
                "rmean in years (SE)"= ifelse(!is.na(rmean),
                                              paste0(paste0(nice.num2(rmean)), " (",
                                                     paste0(nice.num2(se)), ")"),
                                              NA)) %>% 
-        select(-c(lcl, ucl, time))
+        dplyr::select(-c(lcl, ucl, time))
       
-      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-        rename(rmean10yr = est) %>%
-        mutate(rmean10yr = round(rmean10yr, 4),
+      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+        dplyr::rename(rmean10yr = est) %>%
+        dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
                time = round(time,4) ,
                "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
                                                    paste0(paste0(nice.num2(rmean10yr)), " (",
                                                           paste0(nice.num2(se)), ")"),
                                                    NA)) %>%
-        rename(se10yr = se) %>% 
-        select(-c(lcl, ucl, time))
+        dplyr::rename(se10yr = se) %>% 
+        dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-        mutate(est = round((est*100),4),
+      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
                "Survival Rate % (95% CI)"= ifelse(!is.na(est),
@@ -306,16 +306,16 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                          paste0(nice.num1(lcl)),"-",
                                                          paste0(nice.num1(ucl)), ")"),
                                                   NA)) %>% 
-        rename("surv" = est) %>% 
-        select(-c(lcl, ucl)) %>% 
-        pivot_wider(names_from = time, 
+        dplyr::rename("surv" = est) %>% 
+        dplyr::select(-c(lcl, ucl)) %>% 
+        tidyr::pivot_wider(names_from = time, 
                     values_from = c(`Survival Rate % (95% CI)`, surv),
                     names_prefix = " year ",
                     names_sep = "")
       
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
+      pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-        mutate(Method = extrapolations_formatted[i], 
+        dplyr::mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
@@ -332,7 +332,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 2knotspline
       
       tryCatch(
-        model <- flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 2, scale = "hazard"),
+        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 2, scale = "hazard"),
         error = function(e){
           cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
           info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
@@ -346,36 +346,36 @@ for(j in 1:nrow(outcome_cohorts)) {
         tryCatch({
       
       extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        broom::glance() %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #extract parameters
       #grab the parameters and knots from the model
       coefs.p <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(names_from = name, values_from = value) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        tibble::enframe() %>%
+        tidyr::pivot_wider(names_from = name, values_from = value) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       knots.p <- model[["knots"]] %>%
-        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
-        enframe() %>%
-        pivot_wider(names_from = name, values_from = value)
-      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
+        stats::setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
+        tibble::enframe() %>%
+        tidyr::pivot_wider(names_from = name, values_from = value)
+      parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p )
       
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-        rename(median = est) %>% 
-        mutate(median = round(median, 4),
+      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        dplyr::rename(median = est) %>% 
+        dplyr::mutate(median = round(median, 4),
                lcl = round(lcl, 4),
                ucl = round(ucl, 4),
                "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
@@ -383,35 +383,35 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                                   paste0(nice.num2(lcl)),"-",
                                                                   paste0(nice.num2(ucl)), ")"),
                                                            NA)) %>% 
-        select(-c(lcl, ucl))
+        dplyr::select(-c(lcl, ucl))
       
       
-      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-        rename(rmean = est) %>% 
-        mutate(rmean = round(rmean, 4),
+      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        dplyr::rename(rmean = est) %>% 
+        dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
                time = round(time,4) ,
                "rmean in years (SE)"= ifelse(!is.na(rmean),
                                              paste0(paste0(nice.num2(rmean)), " (",
                                                     paste0(nice.num2(se)), ")"),
                                              NA)) %>% 
-        select(-c(lcl, ucl, time))
+        dplyr::select(-c(lcl, ucl, time))
       
-      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
-        rename(rmean10yr = est) %>% 
-        mutate(rmean10yr = round(rmean10yr, 4),
+      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+        dplyr::rename(rmean10yr = est) %>% 
+        dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
                time = round(time,4) ,
                "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
                                                    paste0(paste0(nice.num2(rmean10yr)), " (",
                                                           paste0(nice.num2(se)), ")"),
                                                    NA)) %>% 
-        rename(se10yr = se) %>% 
-        select(-c(lcl, ucl, time))
+        dplyr::rename(se10yr = se) %>% 
+        dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-        mutate(est = round((est*100),4),
+      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
                "Survival Rate % (95% CI)"= ifelse(!is.na(est),
@@ -419,16 +419,16 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                          paste0(nice.num1(lcl)),"-",
                                                          paste0(nice.num1(ucl)), ")"),
                                                   NA)) %>% 
-        rename("surv" = est) %>% 
-        select(-c(lcl, ucl)) %>% 
-        pivot_wider(names_from = time, 
+        dplyr::rename("surv" = est) %>% 
+        dplyr::select(-c(lcl, ucl)) %>% 
+        tidyr::pivot_wider(names_from = time, 
                     values_from = c(`Survival Rate % (95% CI)`, surv),
                     names_prefix = " year ",
                     names_sep = "")
       
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
+      pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-        mutate(Method = extrapolations_formatted[i], 
+        dplyr::mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
@@ -456,7 +456,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 3knotspline
       
       tryCatch(
-        model <- flexsurvspline(formula=Surv(time_years,status-1)~1, data=data, k = 3, scale = "hazard"),
+        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1)~1, data=data, k = 3, scale = "hazard"),
         error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
         warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
@@ -466,37 +466,37 @@ for(j in 1:nrow(outcome_cohorts)) {
         tryCatch({
       
       extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
 
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        broom::glance() %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #extract parameters
       #grab the parameters and knots from the model
       coefs.p <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(names_from = name, values_from = value) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        tibble::enframe() %>%
+        tidyr::pivot_wider(names_from = name, values_from = value) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       knots.p <- model[["knots"]] %>%
-        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
-        enframe() %>%
-        pivot_wider(names_from = name, values_from = value)
+        stats::setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
+        tibble::enframe() %>%
+        tidyr::pivot_wider(names_from = name, values_from = value)
       
-      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
+      parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p )
       
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-        rename(median = est) %>% 
-        mutate(median = round(median, 4),
+      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        dplyr::rename(median = est) %>% 
+        dplyr::mutate(median = round(median, 4),
                lcl = round(lcl, 4),
                ucl = round(ucl, 4),
                "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
@@ -504,35 +504,35 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                                   paste0(nice.num2(lcl)),"-",
                                                                   paste0(nice.num2(ucl)), ")"),
                                                            NA)) %>% 
-        select(-c(lcl, ucl))
+        dplyr::select(-c(lcl, ucl))
       
       
-      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-        rename(rmean = est) %>% 
-        mutate(rmean = round(rmean, 4),
+      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        dplyr::rename(rmean = est) %>% 
+        dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
                time = round(time,4) ,
                "rmean in years (SE)"= ifelse(!is.na(rmean),
                                              paste0(paste0(nice.num2(rmean)), " (",
                                                     paste0(nice.num2(se)), ")"),
                                              NA)) %>% 
-        select(-c(lcl, ucl, se, time))
+        dplyr::select(-c(lcl, ucl, se, time))
       
-      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
-        rename(rmean10yr = est) %>% 
-        mutate(rmean10yr = round(rmean10yr, 4),
+      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+        dplyr::rename(rmean10yr = est) %>% 
+        dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
                time = round(time,4) ,
                "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
                                                    paste0(paste0(nice.num2(rmean10yr)), " (",
                                                           paste0(nice.num2(se)), ")"),
                                                    NA)) %>% 
-        rename(se10yr = se) %>% 
-        select(-c(lcl, ucl, time))
+        dplyr::rename(se10yr = se) %>% 
+        dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-        mutate(est = round((est*100),4),
+      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
                "Survival Rate % (95% CI)"= ifelse(!is.na(est),
@@ -540,16 +540,16 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                          paste0(nice.num1(lcl)),"-",
                                                          paste0(nice.num1(ucl)), ")"),
                                                   NA)) %>% 
-        rename("surv" = est) %>% 
-        select(-c(lcl, ucl)) %>% 
-        pivot_wider(names_from = time, 
+        dplyr::rename("surv" = est) %>% 
+        dplyr::select(-c(lcl, ucl)) %>% 
+        tidyr::pivot_wider(names_from = time, 
                     values_from = c(`Survival Rate % (95% CI)`, surv),
                     names_prefix = " year ",
                     names_sep = "")
       
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
+      pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-        mutate(Method = extrapolations_formatted[i], 
+        dplyr::mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
@@ -578,7 +578,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       # 5knotspline
       
       tryCatch(
-        model <- flexsurvspline(formula=Surv(time_years,status-1)~1, data=data, k = 5, scale = "hazard"),
+        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1)~1, data=data, k = 5, scale = "hazard"),
         error = function(e){
           cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
           info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
@@ -592,36 +592,36 @@ for(j in 1:nrow(outcome_cohorts)) {
         tryCatch({
       
       extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        broom::glance() %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       coefs.p <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(names_from = name, values_from = value) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        tibble::enframe() %>%
+        tidyr::pivot_wider(names_from = name, values_from = value) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       knots.p <- model[["knots"]] %>%
-        setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
+        stats::setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
                       "SplineInternal4" ,"SplineInternal5" , "SplineUpperB")) %>%
-        enframe() %>%
-        pivot_wider(names_from = name, values_from = value)
+        tibble::enframe() %>%
+        tidyr::pivot_wider(names_from = name, values_from = value)
       
-      parameters_results_temp[[i]] <- bind_cols(coefs.p,  knots.p )
+      parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p )
       
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-        rename(median = est) %>% 
-        mutate(median = round(median, 4),
+      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        dplyr::rename(median = est) %>% 
+        dplyr::mutate(median = round(median, 4),
                lcl = round(lcl, 4),
                ucl = round(ucl, 4),
                "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
@@ -629,35 +629,35 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                                   paste0(nice.num2(lcl)),"-",
                                                                   paste0(nice.num2(ucl)), ")"),
                                                            NA)) %>% 
-        select(-c(lcl, ucl))
+        dplyr::select(-c(lcl, ucl))
       
       
-      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-        rename(rmean = est) %>% 
-        mutate(rmean = round(rmean, 4),
+      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        dplyr::rename(rmean = est) %>% 
+        dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
                time = round(time,4) ,
                "rmean in years (SE)"= ifelse(!is.na(rmean),
                                              paste0(paste0(nice.num2(rmean)), " (",
                                                     paste0(nice.num2(se)), ")"),
                                              NA)) %>% 
-        select(-c(lcl, ucl, time))
+        dplyr::select(-c(lcl, ucl, time))
       
-      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
-        rename(rmean10yr = est) %>% 
-        mutate(rmean10yr = round(rmean10yr, 4),
+      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+        dplyr::rename(rmean10yr = est) %>% 
+        dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
                time = round(time,4) ,
                "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
                                                    paste0(paste0(nice.num2(rmean10yr)), " (",
                                                           paste0(nice.num2(se)), ")"),
                                                    NA)) %>% 
-        rename(se10yr = se) %>% 
-        select(-c(lcl, ucl, time))
+        dplyr::rename(se10yr = se) %>% 
+        dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-        mutate(est = round((est*100),4),
+      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
                "Survival Rate % (95% CI)"= ifelse(!is.na(est),
@@ -665,16 +665,16 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                          paste0(nice.num1(lcl)),"-",
                                                          paste0(nice.num1(ucl)), ")"),
                                                   NA)) %>% 
-        rename("surv" = est) %>% 
-        select(-c(lcl, ucl)) %>% 
-        pivot_wider(names_from = time, 
+        dplyr::rename("surv" = est) %>% 
+        dplyr::select(-c(lcl, ucl)) %>% 
+        tidyr::pivot_wider(names_from = time, 
                     values_from = c(`Survival Rate % (95% CI)`, surv),
                     names_prefix = " year ",
                     names_sep = "")
       
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
+      pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-        mutate(Method = extrapolations_formatted[i], 
+        dplyr::mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
@@ -703,7 +703,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       #carry out models for different parametric methods survival
       tryCatch(
-      model <- flexsurvreg(Surv(time_years, status)~1, data=data, dist=extrapolations[i]),
+      model <- flexsurv::flexsurvreg(Surv(time_years, status)~1, data=data, dist=extrapolations[i]),
       error = function(e){
         cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
         info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
@@ -718,29 +718,29 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       # extrapolations
       extrap_results_temp[[i]] <- model %>%
-        summary(t=t/365, tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=t/365, tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
-        glance() %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        broom::glance() %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #grab the parameters from the model
       parameters_results_temp[[i]] <- model[["coefficients"]] %>%
-        enframe() %>%
-        pivot_wider(names_from = name, values_from = value) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        tibble::enframe() %>%
+        tidyr::pivot_wider(names_from = name, values_from = value) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       #extract the hazard function over time
       hazot_results_temp[[i]] <- model %>%
-        summary(t=(t + 1)/365, type = "hazard", tidy = TRUE) %>%
-        mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        flexsurv::summary(t=(t + 1)/365, type = "hazard", tidy = TRUE) %>%
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
-      pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-        rename(median = est) %>% 
-        mutate(median = round(median, 4),
+      pr_median <- flexsurv::summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+        dplyr::rename(median = est) %>% 
+        dplyr::mutate(median = round(median, 4),
           lcl = round(lcl, 4),
           ucl = round(ucl, 4),
           "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
@@ -748,34 +748,34 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                              paste0(nice.num2(lcl)),"-",
                                                              paste0(nice.num2(ucl)), ")"),
                                                       NA)) %>% 
-        select(-c(lcl, ucl))
+        dplyr::select(-c(lcl, ucl))
         
       
-      pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-        rename(rmean = est) %>% 
-        mutate(rmean = round(rmean, 4),
+      pr_mean <- flexsurv::summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+        dplyr::rename(rmean = est) %>% 
+        dplyr::mutate(rmean = round(rmean, 4),
                se = round(se, 4),
                "rmean in years (SE)"= ifelse(!is.na(rmean),
                                              paste0(paste0(nice.num2(rmean)), " (",
                                                     paste0(nice.num2(se)), ")"),
                                              NA)) %>% 
-        select(-c(lcl, ucl, time))
+        dplyr::select(-c(lcl, ucl, time))
       
-      pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
-        rename(rmean10yr = est) %>% 
-        mutate(rmean10yr = round(rmean10yr, 4),
+      pr_mean10 <- flexsurv::summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+        dplyr::rename(rmean10yr = est) %>% 
+        dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                se = round(se, 4),
                time = round(time,4) ,
                "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
                                                    paste0(paste0(nice.num2(rmean10yr)), " (",
                                                           paste0(nice.num2(se)), ")"),
                                                    NA)) %>% 
-        rename(se10yr = se) %>% 
-        select(-c(lcl, ucl, time))
+        dplyr::rename(se10yr = se) %>% 
+        dplyr::select(-c(lcl, ucl, time))
       
       # survival predicted probabilities from extrapolations
-      pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-        mutate(est = round((est*100),4),
+      pr_survival_prob <- flexsurv::summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+        dplyr::mutate(est = round((est*100),4),
                lcl = round((lcl*100),4),
                ucl = round((ucl*100),4),
                "Survival Rate % (95% CI)"= ifelse(!is.na(est),
@@ -783,16 +783,16 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                          paste0(nice.num1(lcl)),"-",
                                                          paste0(nice.num1(ucl)), ")"),
                                                   NA)) %>% 
-        rename("surv" = est) %>% 
-        select(-c(lcl, ucl)) %>% 
-        pivot_wider(names_from = time, 
+        dplyr::rename("surv" = est) %>% 
+        dplyr::select(-c(lcl, ucl)) %>% 
+        tidyr::pivot_wider(names_from = time, 
                     values_from = c(`Survival Rate % (95% CI)`, surv),
                     names_prefix = " year ",
                     names_sep = "")
       
-      pred_median_mean_results_temp[[i]] <- bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
+      pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-        mutate(Method = extrapolations_formatted[i], 
+        dplyr::mutate(Method = extrapolations_formatted[i], 
                Cancer = outcome_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
@@ -840,19 +840,19 @@ for(j in 1:nrow(outcome_cohorts)) {
 
 # Merge results together from each cancer and extrapolation into a dataframe ---
 extrapolatedfinal <- dplyr::bind_rows(extrapolations_all)  %>%
-  mutate(Stratification = "None", Adjustment = "None")
+  dplyr::mutate(Stratification = "None", Adjustment = "None")
 goffinal <- dplyr::bind_rows(gof_haz_all)  %>%
-  mutate(Stratification = "None", Adjustment = "None")
+  dplyr::mutate(Stratification = "None", Adjustment = "None")
 hazardotfinal <- dplyr::bind_rows(hazot_all)  %>%
-  mutate(Stratification = "None", Adjustment = "None")
+  dplyr::mutate(Stratification = "None", Adjustment = "None")
 parametersfinal <- dplyr::bind_rows(parameters_all)  %>%
-  mutate(Stratification = "None", Adjustment = "None") %>% 
-  relocate(shape, .after = Sex) %>% 
-  relocate(rate, .after = Sex) %>% 
-  mutate(rate = coalesce(rate, `1`)) %>% 
-  select(!c(`1`))
+  dplyr::mutate(Stratification = "None", Adjustment = "None") %>% 
+  dplyr::relocate(shape, .after = Sex) %>% 
+  dplyr::relocate(rate, .after = Sex) %>% 
+  dplyr::mutate(rate = coalesce(rate, `1`)) %>% 
+  dplyr::select(!c(`1`))
 predmedmeanfinal <- dplyr::bind_rows(pred_median_mean_all)  %>%
-  mutate(Stratification = "None", Adjustment = "None")
+  dplyr::mutate(Stratification = "None", Adjustment = "None")
 
 toc(func.toc=toc_min)
 
