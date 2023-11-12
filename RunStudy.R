@@ -455,7 +455,7 @@ t <- seq(0, timeinyrs*365.25, by=60) # can make smaller
 
 #Run analysis ----
 # set up so notation doesnt include scientific
-options(scipen = 999)
+#options(scipen = 999)
 
 #whole population
 info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
@@ -478,7 +478,7 @@ source(here("2_Analysis","AnalysisAgeSex.R"))
 info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
 
 #set option back to zero
-options(scipen = 0)
+#options(scipen = 0)
 
 #running tableone characterisation
 info(logger, 'RUNNING TABLE ONE ANALYSIS')

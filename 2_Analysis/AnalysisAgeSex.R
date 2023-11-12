@@ -253,7 +253,8 @@ for(j in 1:nrow(outcome_cohorts)) {
       observedkm_7079f,
       observedkm_7079m,
       observedkm_80f,
-      observedkm_80m)  
+      observedkm_80m) %>% 
+    select(!c(sex_age_gp))
     
     
     print(paste0("KM for observed data age*sex strat ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
@@ -900,7 +901,8 @@ for(j in 1:nrow(outcome_cohorts)) {
         observedhazotkm_7079f,
         observedhazotkm_7079m,
         observedhazotkm_80f,
-        observedhazotkm_80m)  
+        observedhazotkm_80m) %>% 
+        select(-c(sex_age_gp))
       
       rm(modelhot)
     }
@@ -919,34 +921,32 @@ for(j in 1:nrow(outcome_cohorts)) {
     
     kmagesex <- do.call(data.frame, cols) %>%
       select(c(n.risk, n.event, n.censor, strata)) %>% 
-      mutate(strata = str_replace(strata, "sex_age_gp=", "")) %>% 
-      separate(col = "strata",
-               into = c("Age", "Sex"),
-               sep = "_",
-               remove = F)
-
-    # risk tables for different age*sex groups
+      mutate(strata = str_replace(strata, "sex_age_gp=", ""))
+    
+    
+    # risk tables for different age groups
     kmagesexgp <- list()
     
     for(k in 1: length(table(kmagesex$strata))) {
       
       kmagesexgp[[k]] <- kmagesex %>%
-      filter(strata == names(table(kmagesex$strata)[k])) %>%
-      select(!c(Age, Sex, strata)) %>%
-      t() %>%
-      as_tibble() %>%
-      `colnames<-`(grid) %>%
-      mutate(Method = "Kaplan-Meier",
-             Cancer = outcome_cohorts$cohort_name[j],
-             agesex = names(table(kmagesex$strata)[k]) ,
-             details = c("n.risk", "n.event", "n.censor")) %>%
-      relocate(details) %>% 
-        separate(col = "agesex",
-                 into = c("Age", "Sex"),
-                 sep = "_")
+        filter(strata == names(table(kmagesex$strata)[k])) %>%
+        select(!c(strata)) %>%
+        t() %>%
+        as_tibble() %>%
+        `colnames<-`(grid) %>%
+        mutate(Method = "Kaplan-Meier",
+               Cancer = outcome_cohorts$cohort_name[j],
+               agesex = names(table(kmagesex$strata)[k]) ,
+               details = c("n.risk", "n.event", "n.censor")) %>%
+            separate(col = "agesex",
+                     into = c("Age", "Sex"),
+                     sep = "_") %>% 
+        
+        relocate(details) 
       
     }
-    
+  
     # bind results for age*sex groups
     observedrisktableKM_age_sex[[j]] <- bind_rows(kmagesexgp)
     
@@ -972,10 +972,6 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                                 paste0(nice.num2(`0.95LCL`)),"-",
                                                                 paste0(nice.num2(`0.95UCL`)), ")"),
                                                          NA)) %>% 
-      separate(col = "agesex",
-               into = c("Age", "Sex"),
-               sep = "_",
-               remove = F) %>% 
       select(-c(`0.95LCL`,`0.95UCL`, n.max, n.start, se)) %>% 
       mutate(n  = replace(n, n ==  0 , NA),
              events = replace(events, events ==  0 , NA)) %>%
@@ -985,6 +981,20 @@ for(j in 1:nrow(outcome_cohorts)) {
              events  = replace_na(events, "0")) %>% 
       mutate(n = as.character(n),
              events = as.character(events))
+    
+    
+    # Extract rmean at 10 years
+    model_rm <- survfit(Surv(time_years, status) ~ sex_age_gp, data=data)
+    rmean10 <- survival:::survmean(model_rm, rmean=c(10))$matrix %>% 
+      as.data.frame() %>% 
+      tibble::rownames_to_column() %>%  
+      select(rmean, `se(rmean)`, rowname) %>% 
+      rename(rmean10yr = rmean, se10yr =`se(rmean)`, agesex = rowname) %>% 
+      mutate(agesex = str_replace(agesex, "sex_age_gp=", "") ,
+             "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
+                                                 paste0(paste0(nice.num2(rmean10yr)), " (",
+                                                        paste0(nice.num2(se10yr)), ")"),
+                                                 NA)) 
     
     print(paste0("Median survival from KM from observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
     
@@ -1002,22 +1012,24 @@ for(j in 1:nrow(outcome_cohorts)) {
                                                        paste0(nice.num1(upper)), ")"),
                                                 NA)) %>% 
       select(-c(lower, upper)) %>% 
-      separate(col = "strata",
-               into = c("Age", "Sex"),
-               sep = "_",
-               remove = F) %>% 
       rename(agesex = strata) %>% 
       pivot_wider(names_from = time, 
                   values_from = c(`Survival Rate % (95% CI)`, surv),
                   names_prefix = " year ",
                   names_sep = "")
     
-    observedmedianKM_age_sex[[j]] <- inner_join(medianKM, surprobsKM, by = c("agesex", "Age", "Sex"))
+    observedmedianKM_age_sex[[j]] <- inner_join(medianKM, rmean10, by = "agesex") %>% 
+      inner_join(surprobsKM, by = "agesex")
+
     observedmedianKM_age_sex[[j]] <- observedmedianKM_age_sex[[j]] %>% 
       mutate(Method = "Kaplan-Meier", 
-             Cancer = outcome_cohorts$cohort_name[j]  )
+             Cancer = outcome_cohorts$cohort_name[j]  ) %>% 
+    separate(col = "agesex",
+             into = c("Age", "Sex"),
+             sep = "_",
+             remove = T) 
     
-    rm(surprobsKM, medianKM)
+    rm(surprobsKM,medianKM,rmean10,model_rm,modelKM)
     
     print(paste0("Survival for 1, 5 and 10 years from observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
 
@@ -1038,7 +1050,7 @@ medkmcombined_age_sex <- dplyr::bind_rows(observedmedianKM_age_sex) %>%
   mutate(Stratification = "agesex", Adjustment = "None")
 
 hotkmcombined_age_sex <- dplyr::bind_rows(observedhazotKM_age_sex) %>%
-  rename(est = hazard, ucl = upper.ci, lcl = lower.ci, sexAge = sex_age_gp ) %>%
+  rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
   mutate(Stratification = "agesex", Adjustment = "None")
 
 #generate the risk table 

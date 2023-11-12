@@ -15,8 +15,6 @@ observedrisktableKM <- list()
 
 # loop to carry out for each cancer
 for(j in 1:nrow(outcome_cohorts)) {
-  
-options(scipen = 999)
 
 #subset the data by cancer type
 data <- Pop %>%
@@ -204,8 +202,6 @@ pred_median_mean_all <- list() # extract the predicted median and RMST, surv pro
 
 # Running analysis for each cancer
 for(j in 1:nrow(outcome_cohorts)) {
-  
-  options(scipen = 999)
   
   # create empty lists for temp results for each cancer
   extrap_results_temp <- list() 

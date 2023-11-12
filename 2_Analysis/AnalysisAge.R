@@ -15,8 +15,6 @@ observedrisktableKM_age <- list()
 # loop to carry out for each cancer
 for(j in 1:nrow(outcome_cohorts)) {
   
-  options(scipen = 999)
-  
   #subset the data by cancer type
   data <- Pop %>%
     filter(cohort_definition_id == j)
@@ -155,7 +153,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       mutate(strata = str_replace(strata, "age_gr=", ""))
     
     
-    # risk tables for different age*sex groups
+    # risk tables for different age groups
     kmagegp <- list()
     
     for(k in 1: length(table(kmage$strata))) {
@@ -168,7 +166,8 @@ for(j in 1:nrow(outcome_cohorts)) {
         `colnames<-`(grid) %>%
         mutate(Method = "Kaplan-Meier",
                Cancer = outcome_cohorts$cohort_name[j],
-               agesex = names(table(kmage$strata)[k]) ,
+               Age = names(table(kmage$strata)[k]) ,
+               Sex = "Both" ,
                details = c("n.risk", "n.event", "n.censor")) %>%
         relocate(details) 
       
@@ -637,8 +636,6 @@ parameters_age <- list() # parameters from each model
 pred_median_mean_age <- list() # extract the predicted median and RMST and surv prob at 1 5 and 10 years from extrapolation methods
 
 for(j in 1:nrow(outcome_cohorts)) {
-  
-  options(scipen = 999)
 
   # set up temp tables
   extrap_results_temp <- list() 
@@ -1410,8 +1407,6 @@ parameters_ageS <- list()
 pred_median_mean_ageS <- list()
 
 for(j in 1:nrow(outcome_cohorts)) { 
-  
-  options(scipen = 999)
   
   #temp results
   extrap_results_temp <- list() 

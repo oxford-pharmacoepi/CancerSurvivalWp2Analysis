@@ -15,8 +15,6 @@ observedrisktableKM_sex <- list()
 # loop to carry out for each cancer
 for(j in 1:nrow(outcome_cohorts)) {
   
-  options(scipen = 999)
-  
   #subset the data by cancer type
   data <- Pop %>%
     filter(cohort_definition_id == j)
@@ -311,9 +309,7 @@ parameters_sex <- list() # parameters from each model
 pred_median_mean_sex <- list() # extract the predicted median and RMST, surv prob 1,5,10 from extrapolation methods
 
 for(j in 1:nrow(outcome_cohorts)) { 
-  
-  options(scipen = 999)
-  
+
   #temp lists to store results
   extrap_results_temp <- list() 
   gof_results_temp <- list() 
@@ -1048,9 +1044,7 @@ parameters_sexS <- list()
 pred_median_mean_sexS <- list()
 
 for(j in 1:nrow(outcome_cohorts)) { 
-  
-  options(scipen = 999)
-  
+
   #temp results
   extrap_results_temp <- list() 
   gof_results_temp <- list() 
