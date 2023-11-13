@@ -424,27 +424,7 @@ server <-	function(input, output, session) {
     
     table <- table %>% 
       relocate(`rmean 10yrs in years (SE)`, .after = `rmean in years (SE)`)
-    # mutate(rmean=nice.num2(rmean)) %>%
-    # mutate(`se(rmean)`=nice.num2(`se(rmean)`)) %>%
-    # mutate(median=nice.num2(median)) %>%
-    # mutate(`0.95LCL`=nice.num2(`0.95LCL`)) %>%
-    # mutate(`0.95UCL`=nice.num2(`0.95UCL`)) %>%
-    # relocate(Cancer) %>% 
-    # mutate(median= ifelse(!is.na(median),
-    #                           paste0(median, " (",
-    #                                  `0.95LCL`," to ", 
-    #                                  `0.95UCL`, ")")),
-    #        rmean = ifelse(!is.na(rmean),
-    #                       paste0(rmean, " (",
-    #                              `se(rmean)`, ")"))
-    #        
-    #        
-    #        ) %>% 
-    #   rename(`Median Survival in Years (95%CI)` = median) %>% 
-    #   rename(`RMean Survival in Years (SE)` = rmean) %>% 
-    #   select(-c(`0.95LCL`, `0.95UCL`, `se(rmean)` ))
-    
-    
+
     datatable(table,
               rownames= FALSE,
               extensions = 'Buttons',
