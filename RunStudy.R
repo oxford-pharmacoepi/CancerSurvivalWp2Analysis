@@ -1,7 +1,6 @@
 # calculating the number of years of extrapolation for your database ----
 # amount of followup in your database plus 10 years
-# so if your databases has 20 years of followup you would be 30 here
-timeinyrs <- as.numeric(floor(((CDMConnector::asDate("2019-12-31") - CDMConnector::asDate(startdate)) / 365))) + 10
+timeinyrs <- as.numeric(floor(((lubridate::as_date("2019-12-31") - lubridate::as_date(startdate)) / 365))) + 10
 
 #Create folder for the results
 if (!file.exists(output.folder)){
