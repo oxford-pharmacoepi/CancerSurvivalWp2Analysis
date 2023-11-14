@@ -6,6 +6,10 @@ timeinyrs <- as.numeric(floor(((as.Date("2019-12-31") - as.Date(startdate)) / 36
 #Create folder for the results
 if (!file.exists(output.folder)){
   dir.create(output.folder, recursive = TRUE)}
+#create a folder in the shiny to put the results to display
+shiny.folder <- here::here("Shiny", "data")
+if (!file.exists(shiny.folder)){
+  dir.create(shiny.folder, recursive = TRUE)}
 
 #start the clock
 start<-Sys.time()
