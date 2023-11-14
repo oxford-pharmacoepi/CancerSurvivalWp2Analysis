@@ -8,4 +8,4 @@ Results/*
 Analysis.R
 troubleshooting.R
 old code/*
-shiny/data/*
+shiny/data/Results.rds
