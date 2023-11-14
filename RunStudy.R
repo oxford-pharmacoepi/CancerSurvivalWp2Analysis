@@ -1,7 +1,7 @@
 # calculating the number of years of extrapolation for your database ----
 # amount of followup in your database plus 10 years
 # so if your databases has 20 years of followup you would be 30 here
-timeinyrs <- as.numeric(floor(((as.Date("2019-12-31") - as.Date(startdate)) / 365))) + 10
+timeinyrs <- as.numeric(floor(((CDMConnector::asDate("2019-12-31") - CDMConnector::asDate(startdate)) / 365))) + 10
 
 #Create folder for the results
 if (!file.exists(output.folder)){
@@ -112,7 +112,7 @@ cdm$analysis <- cdm$outcome %>%
               select("person_id",  "observation_period_end_date") %>% 
               distinct(),
             by = c("subject_id"= "person_id")) %>% 
-  compute_query() %>% 
+  CDMConnector::computeQuery() %>% 
   dplyr::filter(cohort_start_date >= startdate) %>% 
   dplyr::filter(cohort_start_date <= '2019-12-31') %>% 
   dplyr::mutate(observation_period_end_date_2019 = ifelse(observation_period_end_date >= '2019-12-31', '2019-12-31', NA)) %>%
@@ -129,7 +129,7 @@ cdm$analysis <- cdm$outcome %>%
          future_observation = time_days) %>%
   dplyr::rename(anymalignacy = flag_cancerexcludnonmelaskincancer_minf_to_m1 ) %>% 
   
-  compute_query()
+  CDMConnector::computeQuery()
 
 # see if there is prostate cancer in database then run this code and put in both if statements
 # remove females from prostate cancer cohort (misdiagnosis)
@@ -151,7 +151,7 @@ cdm$analysis <- cdm$analysis %>%
   dplyr::group_by(subject_id) %>%
   dplyr::slice_min(order_by = cohort_start_date) %>%
   dplyr::ungroup() %>% 
-  compute_query()
+  CDMConnector::computeQuery()
 
 # remove those with any a prior malignancy (apart from skin cancer in prior history)
 cdm$analysis <- cdm$analysis %>% 
@@ -235,7 +235,7 @@ cdm$analysis <- CDMConnector::recordCohortAttrition(cohort = cdm$analysis,
                        dplyr::select("person_id",  "observation_period_end_date") %>% 
                        dplyr::distinct(),
               by = c("subject_id"= "person_id")) %>% 
-    compute_query() %>% 
+    CDMConnector::computeQuery() %>% 
     dplyr::filter(cohort_start_date >= startdate) %>% 
     dplyr::filter(cohort_start_date <= '2019-12-31') %>% 
     dplyr::mutate(observation_period_end_date_2019 = ifelse(observation_period_end_date >= '2019-12-31', '2019-12-31', NA)) %>%
@@ -251,7 +251,7 @@ cdm$analysis <- CDMConnector::recordCohortAttrition(cohort = cdm$analysis,
     dplyr::mutate(sex_age_gp = str_c(age_gr, sex, sep = "_"),
            future_observation = time_days) %>%
     dplyr::rename(anymalignacy = date_cancerexcludnonmelaskincancer_minf_to_0 ) %>% 
-    compute_query()
+    CDMConnector::computeQuery()
   
   # see if there is prostate cancer in database then run this code and put in both if statements
   # remove females from prostate cancer cohort (misdiagnosis)
@@ -273,7 +273,7 @@ cdm$analysis <- CDMConnector::recordCohortAttrition(cohort = cdm$analysis,
     dplyr::group_by(subject_id) %>%
     dplyr::slice_min(order_by = cohort_start_date) %>%
     dplyr::ungroup() %>% 
-    compute_query()
+    CDMConnector::computeQuery()
   
   # create a filter that checks the dates on any malignancy (apart from non melanoma skin cancer)
   # and sees if this date is before cohort entry for cancers of interest. If there are dates of
@@ -306,7 +306,7 @@ cdm$analysis <- cdm$analysis %>%
   dplyr::group_by(subject_id) %>% 
   dplyr::filter( n() == 1 ) %>% 
   dplyr::ungroup() %>% 
-  compute_query()
+  CDMConnector::computeQuery()
 
 cdm$analysis <- CDMConnector::recordCohortAttrition(cohort = cdm$analysis,
                                       reason="Exclude patients with multiple cancers on different sites diagnosed on same day" )
