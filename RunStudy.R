@@ -6,7 +6,7 @@ timeinyrs <- as.numeric(floor(((lubridate::as_date("2019-12-31") - lubridate::as
 if (!file.exists(output.folder)){
   dir.create(output.folder, recursive = TRUE)}
 #create a folder in the shiny to put the results to display
-shiny.folder <- here::here("Shiny", "data")
+shiny.folder <- here::here("shiny", "data")
 if (!file.exists(shiny.folder)){
   dir.create(shiny.folder, recursive = TRUE)}
 
