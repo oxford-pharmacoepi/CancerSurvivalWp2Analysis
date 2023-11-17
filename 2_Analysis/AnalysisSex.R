@@ -33,30 +33,46 @@ for(j in 1:nrow(outcome_cohorts)) {
              Sex = str_replace(Sex,"sex=Female", "Female")) 
     
     # reduce the size of KM for plotting
-    if(nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 4000){
+    if(nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 6000){
       observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 2000 &
+        dplyr::filter(row_number() %% 10 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 4000 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) < 6000){
+      observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",] %>%
+        dplyr::filter(row_number() %% 8 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 3000 &
                nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) < 4000){
       observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",] %>%
+        dplyr::filter(row_number() %% 5 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 1500 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) < 3000){
+      observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",] %>%
         dplyr::filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 1000 &
-               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) < 2000){
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) > 750 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]) < 1500){
       observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",] %>%
         dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedkm_female <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Female",]
     }
 
-    if(nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 4000){
+    if(nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 6000){
       observedkm_male <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
-    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 2000 &
+        dplyr::filter(row_number() %% 10 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 4000 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) < 6000){
+      observedkm_male <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",] %>%
+        dplyr::filter(row_number() %% 8 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 3000 &
                nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) < 4000){
       observedkm_male <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",] %>%
+        dplyr::filter(row_number() %% 5 == 1)
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 1500 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) < 3000){
+      observedkm_male <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",] %>%
         dplyr::filter(row_number() %% 3 == 1)
-    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 1000 &
-               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) < 2000){
+    } else if (nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) > 750 &
+               nrow(observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",]) < 1500){
       observedkm_male <- observedkm_sex[[j]][observedkm_sex[[j]]$Sex == "Male",] %>%
         dplyr::filter(row_number() %% 2 == 1)
     } else {
@@ -203,30 +219,46 @@ for(j in 1:nrow(outcome_cohorts)) {
       dplyr::rename(Sex = sex) 
     
     # reduce the size of haz over time for plotting
-    if(nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 4000){
+    if(nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 6000){
       observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 2000 &
+        dplyr::filter(row_number() %% 10 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 4000 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) < 6000){
+      observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",] %>%
+        dplyr::filter(row_number() %% 8 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 3000 &
                nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) < 4000){
       observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",] %>%
+        dplyr::filter(row_number() %% 5 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 1500 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) < 3000){
+      observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",] %>%
         dplyr::filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 1000 &
-               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) < 2000){
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 750 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) < 1500){
       observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",] %>%
         dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]
     }
     
-    if(nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 4000){
+    if(nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 6000){
       observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
-    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 2000 &
+        dplyr::filter(row_number() %% 10 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 4000 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) < 6000){
+      observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",] %>%
+        dplyr::filter(row_number() %% 8 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 3000 &
                nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) < 4000){
       observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",] %>%
+        dplyr::filter(row_number() %% 5 == 1)
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 1500 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) < 3000){
+      observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",] %>%
         dplyr::filter(row_number() %% 3 == 1)
-    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 1000 &
-               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) < 2000){
+    } else if (nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 750 &
+               nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) < 1500){
       observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",] %>%
         dplyr::filter(row_number() %% 2 == 1)
     } else {

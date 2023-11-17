@@ -27,13 +27,19 @@ observedkm[[j]] <- survival::survfit(Surv(time_years, status) ~ 1, data=data) %>
   dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both")
 
 # reduce the size of KM for plotting
-if(nrow(observedkm[[j]]) > 4000){
+if(nrow(observedkm[[j]]) > 6000){
   observedkm[[j]] <- observedkm[[j]] %>%
-    dplyr::filter(row_number() %% 4 == 1)
-} else if(nrow(observedkm[[j]]) > 2000 & nrow(observedkm[[j]]) < 4000 ){
+    dplyr::filter(row_number() %% 10 == 1)
+} else if(nrow(observedkm[[j]]) > 4000 & nrow(observedkm[[j]]) < 6000 ){
+  observedkm[[j]] <- observedkm[[j]] %>%
+    dplyr::filter(row_number() %% 8 == 1)
+} else if(nrow(observedkm[[j]]) > 3000 & nrow(observedkm[[j]]) < 4000 ){
+  observedkm[[j]] <- observedkm[[j]] %>%
+    dplyr::filter(row_number() %% 5 == 1)
+} else if(nrow(observedkm[[j]]) > 1500 & nrow(observedkm[[j]]) < 3000 ){
   observedkm[[j]] <- observedkm[[j]] %>%
     dplyr::filter(row_number() %% 3 == 1)
-} else if(nrow(observedkm[[j]]) > 1000 & nrow(observedkm[[j]]) < 2000 ){
+} else if(nrow(observedkm[[j]]) > 750 & nrow(observedkm[[j]]) < 1500 ){
   observedkm[[j]] <- observedkm[[j]] %>%
     dplyr::filter(row_number() %% 2 == 1)
 }
@@ -148,13 +154,19 @@ observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status)
   dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") 
 
 # reduce the size of haz over time for plotting
-if(nrow(observedhazotKM[[j]]) > 4000){
+if(nrow(observedhazotKM[[j]]) > 6000){
   observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
-    dplyr::filter(row_number() %% 4 == 1)
-}else if(nrow(observedhazotKM[[j]]) > 2000 & nrow(observedhazotKM[[j]]) < 4000 ){
+    dplyr::filter(row_number() %% 10 == 1)
+}else if(nrow(observedhazotKM[[j]]) > 4000 & nrow(observedhazotKM[[j]]) < 6000 ){
+  observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
+    dplyr::filter(row_number() %% 8 == 1)
+}else if(nrow(observedhazotKM[[j]]) > 3000 & nrow(observedhazotKM[[j]]) < 4000 ){
+  observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
+    dplyr::filter(row_number() %% 5 == 1)
+}else if(nrow(observedhazotKM[[j]]) > 1500 & nrow(observedhazotKM[[j]]) < 4000 ){
   observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
     dplyr::filter(row_number() %% 3 == 1)
-}else if(nrow(observedhazotKM[[j]]) > 1000 & nrow(observedhazotKM[[j]]) < 2000 ){
+}else if(nrow(observedhazotKM[[j]]) > 750 & nrow(observedhazotKM[[j]]) < 1500 ){
   observedhazotKM[[j]] <- observedhazotKM[[j]] %>%
     dplyr::filter(row_number() %% 2 == 1)
 }

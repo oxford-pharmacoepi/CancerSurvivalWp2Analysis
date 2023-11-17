@@ -33,6 +33,21 @@ cdm <- CDMConnector::generateConceptCohortSet(cdm = cdm,
 
 info(logger, "INSTANTIATED CONDITIONS")
 
+# instantiate obesity using diagnosis and measurements
+info(logger, "INSTANTIATE OBESITY")
+
+obesity_cohorts <- CDMConnector::readCohortSet(here::here(
+  "1_InstantiateCohorts",
+  "Obesity" 
+))
+
+cdm <- CDMConnector::generateCohortSet(cdm = cdm, 
+                                              cohortSet = obesity_cohorts, 
+                                              name = "obesity",
+                                              computeAttrition = TRUE,
+                                              overwrite = TRUE)
+
+info(logger, "INSTANTIATED OBESITY")
 
 info(logger, "CREATE TABLE ONE SUMMARY")
 
@@ -53,13 +68,16 @@ tableone <- cdm$analysis %>%
       ),
       "Conditions" = list(
         targetCohortTable = "conditions", value = "flag", window = c(-Inf, 0)
+      ),
+      "Obesity" = list(
+        targetCohortTable = "obesity", value = "flag", window = c(-Inf, 0)
       )
+  
     )
   )
 )
 
 suppressWarnings(
-  
   tableone_all_cancers <- cdm$analysis %>% 
     dplyr::mutate(cohort_definition_id = 10) %>% 
     PatientProfiles::summariseCharacteristics(
@@ -75,7 +93,9 @@ suppressWarnings(
         "Conditions" = list(
           targetCohortTable = "conditions", value = "flag", window = c(-Inf, 0)),
         "outcome" = list(
-          targetCohortTable = "outcome", value = "flag", window = c(0, 0)  
+          targetCohortTable = "outcome", value = "flag", window = c(0, 0)),
+        "Obesity" = list(
+          targetCohortTable = "obesity", value = "flag", window = c(-Inf, 0)
         )
       )
       
@@ -225,14 +245,22 @@ for(tableonecancer in 1:length(unique(tableone$group_level))) {
              Database = db.name)
     
     tb1_temp <- tb1_tempM
+    
   }
   
   tableone_clean_temp[[tableonecancer]] <- tb1_temp
-  
+
   rm(tb1_temp )
   
 }
 tableone_sex <- dplyr::bind_rows(tableone_clean_temp) 
+
+tabledata <- tableone %>%
+  dplyr::filter(group_level == unique(tableone$group_level)[tableonecancer]) %>% 
+  dplyr::filter(strata_name == "sex") %>% 
+  dplyr::filter(group_level == "Prostatecancer") %>% 
+  reformat_table_one()
+
 
 # by age
 tableone_clean_temp <- list()
@@ -243,6 +271,7 @@ for(tableonecancer in 1:length(unique(tableone$group_level))) {
     dplyr::filter(strata_name == "age_gr") 
   
 tb1_temp_age <- list()
+
 for(z in 1:length(unique(tabledata$strata_level))) {
   
 # because some age groups do not have data need to have try catches to make sure loop still continues even if data not available

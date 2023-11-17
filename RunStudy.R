@@ -5,10 +5,6 @@ timeinyrs <- as.numeric(floor(((lubridate::as_date("2019-12-31") - lubridate::as
 #Create folder for the results
 if (!file.exists(output.folder)){
   dir.create(output.folder, recursive = TRUE)}
-#create a folder in the shiny to put the results to display
-shiny.folder <- here::here("shiny", "data")
-if (!file.exists(shiny.folder)){
-  dir.create(shiny.folder, recursive = TRUE)}
 
 #start the clock
 start<-Sys.time()
@@ -342,6 +338,7 @@ nice.num2<-function(x) {
   base::trimws(format(round(x,2),
                 big.mark=",", nsmall = 2, digits=2, scientific=FALSE))}
 
+
 reformat_table_one <- function(table_one_summary){
   
   reformatted_table1 <- data.frame(x = character(),  y = character())
@@ -400,6 +397,23 @@ reformat_table_one <- function(table_one_summary){
   }
   }
   
+  #obesity variables
+  obesity_var <- table_one_summary %>%
+    dplyr::filter(stringr::str_detect(variable, 'Obesity flag -inf')) %>%
+    dplyr::select(variable_level) %>%
+    dplyr::distinct() %>%
+    dplyr::pull(variable_level)
+  
+  if(length(obesity_var) != 0) {
+    for (i in (1:length(obesity_var))){
+      reformatted_table1 <- dplyr::bind_rows(reformatted_table1, data.frame(x = paste0(obesity_var[[i]], " n (%)"),
+                                                                            y = paste0(table_one_summary %>% dplyr::filter(variable_level == obesity_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
+                                                                                       " (",
+                                                                                       round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == obesity_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
+                                                                                       ")")))
+    }
+  }
+  
   #medication variables
   medication_var <- table_one_summary %>%
     dplyr::filter(stringr::str_detect(variable, 'Medications flag -365')) %>%
@@ -455,8 +469,6 @@ extrapolations_formatted <- c("Gompertz", "WeibullPH" ,"Exponential", "Log-logis
 t <- seq(0, timeinyrs*365.25, by=60) # can make smaller
 
 #Run analysis ----
-# set up so notation doesnt include scientific
-#options(scipen = 999)
 
 #whole population
 info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
@@ -477,9 +489,6 @@ info(logger, 'ANALYSIS RAN FOR AGE')
 info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
 source(here::here("2_Analysis","AnalysisAgeSex.R"))
 info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
-
-#set option back to zero
-#options(scipen = 0)
 
 #running tableone characterisation
 info(logger, 'RUNNING TABLE ONE ANALYSIS')
@@ -770,32 +779,6 @@ zip::zip(
 zipfile = here::here(output.folder, paste0("Results_", cdmName(cdm), ".zip")),
 files = list.files(output.folder),
 root = output.folder)
-
-# for saving in rds format for dashboard
-survival_study_results <- list(survivalResults ,
-                               riskTableResults,
-                               medianResults ,
-                               hazOverTimeResults,
-                               GOFResults,
-                               ExtrpolationParameters,
-                               AnalysisRunSummary,
-                               tableone_final,
-                               snapshotcdm,
-                               attritioncdm)
-
-names(survival_study_results) <- c(paste0("survival_estimates"),
-                                   paste0("risk_table_results"),
-                                   paste0("median_survival_results"),
-                                   paste0("hazard_overtime_results"),
-                                   paste0("goodness_of_fit_results"),
-                                   paste0("extrapolation_parameters"),
-                                   paste0("analyses_run_summary"),
-                                   paste0("tableone_summary"),
-                                   paste0("cdm_snapshot"),
-                                   paste0("cohort_attrition"))
-
-
-saveRDS(survival_study_results, file = paste0(here::here("shiny", "data"), "/Results.rds"))
 
 print("Study done!")
 print(paste0("Study took: ",
