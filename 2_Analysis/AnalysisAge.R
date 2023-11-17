@@ -35,7 +35,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 18 to 39
     if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 4000){
       observedkm_1839 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) > 2000 &
                nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",]) < 4000){
       observedkm_1839 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "18 to 39",] %>%
@@ -51,7 +51,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 40 to 49
     if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 4000){
       observedkm_4049 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) > 2000 &
                nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",]) < 4000){
       observedkm_4049 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "40 to 49",] %>%
@@ -68,7 +68,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 50 to 59
     if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 4000){
       observedkm_5059 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) > 2000 &
                nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",]) < 4000){
       observedkm_5059 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "50 to 59",] %>%
@@ -84,7 +84,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 60 to 69
     if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 4000){
       observedkm_6069 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) > 2000 &
                nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",]) < 4000){
       observedkm_6069 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "60 to 69",] %>%
@@ -100,7 +100,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 70 to 79
     if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 4000){
       observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) > 2000 &
                nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",]) < 4000){
       observedkm_7079 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "70 to 79",] %>%
@@ -116,7 +116,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 80+
     if(nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 4000){
       observedkm_80 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) > 2000 &
                nrow(observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",]) < 4000){
       observedkm_80 <- observedkm_age[[j]][observedkm_age[[j]]$Age == "80 +",] %>%
@@ -464,7 +464,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 18 to 39
     if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 4000){
       observedhazotkm_1839 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) > 2000 &
                nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",]) < 4000){
       observedhazotkm_1839 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "18 to 39",] %>%
@@ -481,7 +481,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 40 to 49
     if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 4000){
       observedhazotkm_4049 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) > 2000 &
                nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",]) < 4000){
       observedhazotkm_4049 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "40 to 49",] %>%
@@ -498,7 +498,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 50 to 59
     if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 4000){
       observedhazotkm_5059 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) > 2000 &
                nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",]) < 4000){
       observedhazotkm_5059 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "50 to 59",] %>%
@@ -514,7 +514,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 60 to 69
     if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 4000){
       observedhazotkm_6069 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) > 2000 &
                nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",]) < 4000){
       observedhazotkm_6069 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "60 to 69",] %>%
@@ -530,7 +530,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 70 to 79
     if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 4000){
       observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) > 2000 &
                nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",]) < 4000){
       observedhazotkm_7079 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "70 to 79",] %>%
@@ -546,7 +546,7 @@ for(j in 1:nrow(outcome_cohorts)) {
     # 80+
     if(nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 4000){
       observedhazotkm_80 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",] %>%
-        dplyr::filter(row_number() %% 4 == 1)
+        dplyr::filter(row_number() %% 5 == 1)
     } else if (nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) > 2000 &
                nrow(observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",]) < 4000){
       observedhazotkm_80 <- observedhazotKM_age[[j]][observedhazotKM_age[[j]]$Age == "80 +",] %>%
