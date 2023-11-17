@@ -18,4 +18,4 @@ This study is focussing on determining the usefulness of real world data to dete
 3) Open and work though the <i>CodeToRun.R</i> file which should be the only file that you need to interact with. Run the lines in the file, adding your database specific information and so on (see comments within the file for instructions). The last line of this file will run the study <i>(source(here("RunStudy.R"))</i>.     
 4) After running you should then have a zip folder with results to share in your output folder.
 
-Link to the shiny app for the papers: https://dpa-pde-oxford.shinyapps.io/CancerSurvivalExtrapolationStudy/ 
+Link to the shiny app for the papers: https://dpa-pde-oxford.shinyapps.io/EHDENCancerSurvivalStudyShiny/
