@@ -255,13 +255,6 @@ for(tableonecancer in 1:length(unique(tableone$group_level))) {
 }
 tableone_sex <- dplyr::bind_rows(tableone_clean_temp) 
 
-tabledata <- tableone %>%
-  dplyr::filter(group_level == unique(tableone$group_level)[tableonecancer]) %>% 
-  dplyr::filter(strata_name == "sex") %>% 
-  dplyr::filter(group_level == "Prostatecancer") %>% 
-  reformat_table_one()
-
-
 # by age
 tableone_clean_temp <- list()
 for(tableonecancer in 1:length(unique(tableone$group_level))) {
