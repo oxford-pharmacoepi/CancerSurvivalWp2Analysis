@@ -300,7 +300,6 @@ tableone_age <- dplyr::bind_rows(tableone_clean_temp)
 
 # by age and sex
 tableone_clean_temp <- list()
-
 for(tableonecancer in 1:length(unique(tableone$group_level))) {
   
   tabledata <- tableone %>%
@@ -344,9 +343,7 @@ for(tableonecancer in 1:length(unique(tableone$group_level))) {
   
   rm(tb1_temp_age_sex)
 }
-
 tableone_age_sex <- dplyr::bind_rows(tableone_clean_temp) 
-
 
 # combine all tableone outputs
 tableone_final <- dplyr::bind_rows(tableone_overall, tableone_sex, tableone_age, tableone_age_sex)
