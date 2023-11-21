@@ -192,7 +192,7 @@ cdm$outcome <- cdm$outcome %>%
            time_days,
            time_years,
            sex_age_gp,
-           .groups = "keep") %>%
+           .groups = "drop") %>%
   summarise(count = max(1)) %>%
   filter(count == 1) %>%
   ungroup() %>% 
