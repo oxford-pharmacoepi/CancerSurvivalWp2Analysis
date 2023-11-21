@@ -209,7 +209,7 @@ extrapolations <- c("gompertz", "weibullph" , "exp", "llogis", "lnorm", "gengamm
 extrapolations_formatted <- c("Gompertz", "WeibullPH" ,"Exponential", "Log-logistic", "Log-normal", "Generalised Gamma", "Spline (1 knot)", "Spline (3 knots)")
 
 # setting up time for extrapolation ----
-t <- seq(0, timeinyrs*365.25, by=60) # can make smaller
+t <- seq(0, timeinyrs*365.25, by=60)
 
 #Run analysis ----
 
