@@ -474,7 +474,7 @@ snapshotcdm <- CDMConnector::snapshot(cdm) %>%
   mutate(Database = CDMConnector::cdm_name(cdm))
 
 #get attrition for the cohorts and add cohort identification
-attritioncdm <- CDMConnector::cohort_attrition(cdm$analysis) %>% 
+attritioncdm <- CDMConnector::cohort_attrition(cdm$outcome) %>% 
   dplyr::left_join(outcome_cohorts, 
             by = join_by(cohort_definition_id),
             relationship = "many-to-many",
