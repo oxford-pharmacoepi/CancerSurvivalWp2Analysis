@@ -592,7 +592,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       observedhazotKM_age_sex[[j]] <- modelhot 
       
       #print out progress               
-      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age * sex strat completed")) 
+      print(paste0("Hazard over time results ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " age*sex strat completed")) 
       
     } else {
       
