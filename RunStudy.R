@@ -290,7 +290,7 @@ cdm$analysis <- CDMConnector::recordCohortAttrition(cohort = cdm$analysis,
 
 # remove those with date of death and cancer diagnosis on same date
 cdm$analysis <- cdm$analysis %>% 
-  dplyr::filter(time_days != 0)
+  dplyr::filter(time_days > 0)
 
 cdm$analysis <- CDMConnector::recordCohortAttrition(cohort = cdm$analysis,
                                        reason="Exclude patients with death date same as cancer diagnosis date" )
