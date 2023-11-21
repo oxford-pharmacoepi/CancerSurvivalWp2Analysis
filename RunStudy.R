@@ -364,6 +364,21 @@ reformat_table_one <- function(table_one_summary){
     )
   }
   
+  # sex group variables
+  sex_var <- table_one_summary %>%
+    dplyr::filter(variable == "Sex") %>%
+    dplyr::select(variable_level) %>%
+    dplyr::distinct() %>%
+    dplyr::pull()
+  
+  for (i in (1:length(sex_var))){
+    reformatted_table1 <- dplyr::bind_rows(reformatted_table1, data.frame(x = paste0("Sex: ", sex_var[[i]], " n (%)"),
+                                                                          y = paste0(table_one_summary %>% dplyr::filter(variable_level == sex_var[[i]]) %>% dplyr::filter(estimate_type == "count") %>% dplyr::pull(estimate),
+                                                                                     " (",
+                                                                                     round(as.numeric(table_one_summary %>% dplyr::filter(variable_level == sex_var[[i]]) %>% dplyr::filter(estimate_type == "percentage") %>% dplyr::pull(estimate)), digits = 1),
+                                                                                     ")")) )
+  }
+  
   # age group variables
   age_var <- table_one_summary %>%
     dplyr::filter(variable == "Age group") %>%
