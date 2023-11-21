@@ -2,7 +2,7 @@
 
 # subset the CDM for analysis table to make code run quicker
 info(logger, "SUBSETTING CDM")
-cdm <- CDMConnector::cdmSubsetCohort(cdm, "analysis")
+cdm <- CDMConnector::cdmSubsetCohort(cdm, "outcome")
 info(logger, "SUBSETTED CDM")
 
 
@@ -52,7 +52,7 @@ info(logger, "INSTANTIATED OBESITY")
 info(logger, "CREATE TABLE ONE SUMMARY")
 
 suppressWarnings(
-tableone <- cdm$analysis %>%
+tableone <- cdm$outcome %>%
   PatientProfiles::summariseCharacteristics(
     strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
@@ -78,7 +78,7 @@ tableone <- cdm$analysis %>%
 )
 
 suppressWarnings(
-  tableone_all_cancers <- cdm$analysis %>% 
+  tableone_all_cancers <- cdm$outcome %>% 
     dplyr::mutate(cohort_definition_id = 10) %>% 
     PatientProfiles::summariseCharacteristics(
       strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
@@ -116,7 +116,7 @@ info(logger, "CREATE TABLE ONE SUMMARY")
 
 suppressWarnings(
   
-tableone <- cdm$analysis %>%
+tableone <- cdm$outcome %>%
   PatientProfiles::summariseCharacteristics(
     strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
@@ -132,7 +132,7 @@ cohortIntersect = list(
 
 suppressWarnings(
   
-tableone_all_cancers <- cdm$analysis %>% 
+tableone_all_cancers <- cdm$outcome %>% 
           dplyr::mutate(cohort_definition_id = 10) %>% 
   PatientProfiles::summariseCharacteristics(
             strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
