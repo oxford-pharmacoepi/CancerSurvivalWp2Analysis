@@ -191,9 +191,8 @@ cdm$outcome <- cdm$outcome %>%
            status,                          
            time_days,
            time_years,
-           sex_age_gp,
-           .groups = "drop") %>%
-  summarise(count = max(1)) %>%
+           sex_age_gp) %>%
+  summarise(count = max(1), .groups = "drop") %>%
   filter(count == 1) %>%
   ungroup() %>% 
   select(!c(count))
