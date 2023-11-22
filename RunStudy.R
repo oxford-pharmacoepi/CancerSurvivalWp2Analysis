@@ -125,15 +125,15 @@ cdm$outcome <- cdm$outcome %>%
   dplyr::filter(cohort_start_date <= '2019-12-31') %>%
   dplyr::mutate(observation_period_end_date_2019 = ifelse(observation_period_end_date >= '2019-12-31', '2019-12-31', NA)) %>%
   dplyr::mutate(observation_period_end_date_2019 = as.Date(observation_period_end_date_2019) ) %>%
-  dplyr::mutate(observation_period_end_date_2019 = dplyr::coalesce(observation_period_end_date_2019, observation_period_end_date)) %>%
+  dplyr::mutate(observation_period_end_date_2019 = ifelse(is.na(observation_period_end_date_2019), observation_period_end_date, observation_period_end_date_2019 )) %>%
   dplyr::mutate(status = death_date) %>%
   dplyr::mutate(status = ifelse(death_date > '2019-12-31', NA, status)) %>%
   dplyr::mutate(status = ifelse(death_date > observation_period_end_date_2019, NA, status)) %>%
   dplyr::mutate(status = ifelse(is.na(status), 1, 2 )) %>%
   dplyr::mutate(time_days = observation_period_end_date_2019 - cohort_start_date ) %>%
-  dplyr::mutate(time_years=time_days/365) %>%
+  dplyr::mutate(time_years = time_days / 365) %>%
   dplyr::filter(age_gr != "None") %>%
-  dplyr::mutate(sex_age_gp = str_c(age_gr, sex, sep = "_"),
+  dplyr::mutate(sex_age_gp = str_c(age_gr, sex, sep = "_" ),
                 future_observation = time_days) %>%
   dplyr::rename(anymalignancy = flag_anymalignancy_minf_to_m1 ) %>%
   CDMConnector::computeQuery()
