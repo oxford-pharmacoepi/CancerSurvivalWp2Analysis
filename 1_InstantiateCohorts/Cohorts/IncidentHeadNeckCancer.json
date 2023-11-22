@@ -2,7 +2,7 @@
   "ConceptSets": [
     {
       "id": 0,
-      "name": "HNCancer",
+      "name": "Head_and_neck",
       "expression": {
         "items": [
           {

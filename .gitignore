@@ -2,11 +2,7 @@ CodeToRunLocal.R
 .Rhistory
 .Rprofile
 .Rproj.user/*
-3_QCPlots/*
 Results/*
 .Rproj.user
-Analysis.R
-troubleshooting.R
-old code/*
-shiny/data/Results.rds
-shiny*
+.RData
+

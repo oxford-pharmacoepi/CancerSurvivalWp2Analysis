@@ -2,7 +2,7 @@
   "ConceptSets": [
     {
       "id": 0,
-      "name": "LungCancer",
+      "name": "Lung",
       "expression": {
         "items": [
           {

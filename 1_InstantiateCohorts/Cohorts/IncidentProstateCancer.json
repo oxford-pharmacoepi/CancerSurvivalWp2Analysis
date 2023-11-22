@@ -2,7 +2,7 @@
   "ConceptSets": [
     {
       "id": 0,
-      "name": "ProstateCancer",
+      "name": "Prostate",
       "expression": {
         "items": [
           {

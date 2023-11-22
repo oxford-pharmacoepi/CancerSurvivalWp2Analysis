@@ -2,7 +2,7 @@
   "ConceptSets": [
     {
       "id": 0,
-      "name": "BreastCancer",
+      "name": "Breast",
       "expression": {
         "items": [
           {

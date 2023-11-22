@@ -2,7 +2,7 @@
   "ConceptSets": [
     {
       "id": 0,
-      "name": "PancreaticCancer",
+      "name": "Pancreatic",
       "expression": {
         "items": [
           {

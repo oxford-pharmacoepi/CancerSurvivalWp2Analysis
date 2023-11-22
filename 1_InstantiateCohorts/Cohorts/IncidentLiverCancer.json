@@ -2,7 +2,7 @@
   "ConceptSets": [
     {
       "id": 0,
-      "name": "LiverCancer",
+      "name": "Liver",
       "expression": {
         "items": [
           {

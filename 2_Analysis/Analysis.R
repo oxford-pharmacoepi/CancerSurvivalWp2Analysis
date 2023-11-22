@@ -14,17 +14,17 @@ observedhazotKM <- list()
 observedrisktableKM <- list()
 
 # loop to carry out for each cancer
-for(j in 1:nrow(outcome_cohorts)) {
+for(j in 1:nrow(cancer_cohorts)) {
 
 #subset the data by cancer type
 data <- Pop %>%
-  dplyr::filter(cohort_definition_id == j)
+  dplyr::filter(cohort_definition_id == cancer_cohorts$cohort_definition_id[j])
 
 #carry out km estimate ---
 #take every other row from results
 observedkm[[j]] <- survival::survfit(Surv(time_years, status) ~ 1, data=data) %>%
   tidy() %>%
-  dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both")
+  dplyr::mutate(Method = "Kaplan-Meier", Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both")
 
 # reduce the size of KM for plotting
 if(nrow(observedkm[[j]]) > 6000){
@@ -45,12 +45,12 @@ if(nrow(observedkm[[j]]) > 6000){
 }
 
 
-print(paste0("KM for observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
+print(paste0("KM for observed data ", Sys.time()," for ",cancer_cohorts$cohort_name[j], " completed"))
 
 # get risk table for specific times ---
 grid <- seq(0,floor(max(data$time_years)),by=0.5) #get the number of years every half year
-grid <-  grid[(str_detect(grid, "[1-9]\\.5", negate = TRUE )) & (str_detect(grid, "10.5", negate = TRUE )) &
-                (str_detect(grid, "20.5", negate = TRUE )) & (str_detect(grid, "30.5", negate = TRUE ))] # remove all the half years apart from the first half year
+grid <-  grid[(stringr::str_detect(grid, "[1-9]\\.5", negate = TRUE )) & (stringr::str_detect(grid, "10.5", negate = TRUE )) &
+                (stringr::str_detect(grid, "20.5", negate = TRUE )) & (stringr::str_detect(grid, "30.5", negate = TRUE ))] # remove all the half years apart from the first half year
   
 sprob <- survival::survfit(Surv(time_years, status) ~ 1, data=data) %>% 
   summary(times = grid, extend = TRUE)
@@ -62,13 +62,13 @@ observedrisktableKM[[j]] <- do.call(data.frame, cols) %>%
   as_tibble() %>% 
   `colnames<-`(grid) %>% 
   dplyr::mutate(Method = "Kaplan-Meier", 
-         Cancer = outcome_cohorts$cohort_name[j],
+         Cancer = cancer_cohorts$cohort_name[j],
          Sex = "Both" ,
          Age = "All",
          details = c("n.risk", "n.event", "n.censor")) %>% 
   dplyr::relocate(details)
 
-print(paste0("Extract risk table ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
+print(paste0("Extract risk table ", Sys.time()," for ",cancer_cohorts$cohort_name[j], " completed"))
 
 
 # get surv probs for specific times ---
@@ -139,19 +139,19 @@ rmean10 <- survival:::survmean(model_rm, rmean=c(10))$matrix %>%
 observedmedianKM[[j]] <- dplyr::bind_cols(medianKM, rmean10, surprobsKM)
 observedmedianKM[[j]] <- observedmedianKM[[j]] %>% 
   dplyr::mutate(Method = "Kaplan-Meier", 
-         Cancer = outcome_cohorts$cohort_name[j] ,
+         Cancer = cancer_cohorts$cohort_name[j] ,
          Age = "All", 
          Sex = "Both" )
   
 rm(surprobsKM,medianKM,rmean10,model_rm,modelKM)
 
-print(paste0("Median survival from KM from observed data ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
+print(paste0("Median survival from KM from observed data ", Sys.time()," for ", cancer_cohorts$cohort_name[j] , " completed"))
 
 # hazard function over time ----
 # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
 
 observedhazotKM[[j]] <- as.data.frame.bshazard(bshazard(Surv(time_years, status) ~ 1, data=data, verbose=FALSE)) %>%
-  dplyr::mutate(Method = "Kaplan-Meier", Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both") 
+  dplyr::mutate(Method = "Kaplan-Meier", Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both") 
 
 # reduce the size of haz over time for plotting
 if(nrow(observedhazotKM[[j]]) > 6000){
@@ -171,7 +171,7 @@ if(nrow(observedhazotKM[[j]]) > 6000){
     dplyr::filter(row_number() %% 2 == 1)
 }
 
-print(paste0("Hazard over time results for KM ", Sys.time()," for ",outcome_cohorts$cohort_name[j], " completed"))
+print(paste0("Hazard over time results for KM ", Sys.time()," for ",cancer_cohorts$cohort_name[j], " completed"))
 
 }
 
@@ -214,7 +214,7 @@ parameters_all <- list() # parameters from each model
 pred_median_mean_all <- list() # extract the predicted median and RMST, surv prob 1,5,10 from extrapolation methods
 
 # Running analysis for each cancer
-for(j in 1:nrow(outcome_cohorts)) {
+for(j in 1:nrow(cancer_cohorts)) {
   
   # create empty lists for temp results for each cancer
   extrap_results_temp <- list() 
@@ -225,7 +225,7 @@ for(j in 1:nrow(outcome_cohorts)) {
 
   #subset the data by cancer type
   data <- Pop %>%
-    dplyr::filter(cohort_definition_id == j) 
+    dplyr::filter(cohort_definition_id == cancer_cohorts$cohort_definition_id[j])
   
   #carry out extrapolation for each cancer
   for(i in 1:length(extrapolations)) {   # Head of for-loop
@@ -236,29 +236,29 @@ for(j in 1:nrow(outcome_cohorts)) {
      tryCatch(
         model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard"),
         error = function(e){
-          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
-          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
         warning = function(w){
-          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
-          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " warning problem with model \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
      )
 
       if (exists("model") == TRUE) {
       #extrapolation
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         broom::glance() %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #grab the parameters and knots from the model
       coefs.p <- model[["coefficients"]] %>%
         tibble::enframe() %>%
         tidyr::pivot_wider(names_from = name, values_from = value) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       knots.p <- model[["knots"]] %>%
         stats::setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
@@ -270,7 +270,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
       pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
@@ -328,7 +328,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         dplyr::mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j], 
+               Cancer = cancer_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
       
@@ -336,7 +336,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10 )
       
       #print out progress               
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
       }
       
       
@@ -346,11 +346,11 @@ for(j in 1:nrow(outcome_cohorts)) {
       tryCatch(
         model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 2, scale = "hazard"),
         error = function(e){
-          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
-          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
         warning = function(w){
-          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
-          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " warning problem with model \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
       
       if (exists("model") == TRUE) {
@@ -359,19 +359,19 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         broom::glance() %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #extract parameters
       #grab the parameters and knots from the model
       coefs.p <- model[["coefficients"]] %>%
         tibble::enframe() %>%
         tidyr::pivot_wider(names_from = name, values_from = value) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       knots.p <- model[["knots"]] %>%
         stats::setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
@@ -382,7 +382,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
       pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
@@ -441,24 +441,24 @@ for(j in 1:nrow(outcome_cohorts)) {
       pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         dplyr::mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j], 
+               Cancer = cancer_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
       
       
       rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10 )
       
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
       
         }, 
       
       error = function(e) {
-        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for overall model", "\n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " model not carried out for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
       
       warning = function(w) {
-        cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for overall model", "\n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " potential problem with model for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       
         )
         
@@ -469,8 +469,8 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       tryCatch(
         model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1)~1, data=data, k = 3, scale = "hazard"),
-        error = function(e){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
-        warning = function(w){info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        error = function(e){info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+        warning = function(w){info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
       
       if (exists("model") == TRUE) {
@@ -479,19 +479,19 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
 
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         broom::glance() %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #extract parameters
       #grab the parameters and knots from the model
       coefs.p <- model[["coefficients"]] %>%
         tibble::enframe() %>%
         tidyr::pivot_wider(names_from = name, values_from = value) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       knots.p <- model[["knots"]] %>%
         stats::setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
@@ -503,7 +503,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
       pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
@@ -562,7 +562,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         dplyr::mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j], 
+               Cancer = cancer_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
       
@@ -570,17 +570,17 @@ for(j in 1:nrow(outcome_cohorts)) {
       rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10 )
       
       #print out progress               
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
       
         }, 
       
       error = function(e) {
-        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for overall model", "\n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " model not carried out for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
       
       warning = function(w) {
-        cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for overall model", "\n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " potential problem with model for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       
         )
         
@@ -592,11 +592,11 @@ for(j in 1:nrow(outcome_cohorts)) {
       tryCatch(
         model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1)~1, data=data, k = 5, scale = "hazard"),
         error = function(e){
-          cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
-          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
         warning = function(w){
-          cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
-          info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " warning problem with model \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
       
       if (exists("model") == TRUE) {
@@ -605,17 +605,17 @@ for(j in 1:nrow(outcome_cohorts)) {
       
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         broom::glance() %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       coefs.p <- model[["coefficients"]] %>%
         tibble::enframe() %>%
         tidyr::pivot_wider(names_from = name, values_from = value) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       knots.p <- model[["knots"]] %>%
         stats::setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
@@ -628,7 +628,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       # hazard over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
       pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
@@ -687,7 +687,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         dplyr::mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j], 
+               Cancer = cancer_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
       
@@ -695,17 +695,17 @@ for(j in 1:nrow(outcome_cohorts)) {
       rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10 )
       
       #print out progress               
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
       
         }, 
       
       error = function(e) {
-        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for overall model", "\n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " model not carried out for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
       
       warning = function(w) {
-        cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for overall model", "\n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " potential problem with model for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       
         )
         
@@ -717,11 +717,11 @@ for(j in 1:nrow(outcome_cohorts)) {
       tryCatch(
       model <- flexsurv::flexsurvreg(Surv(time_years, status)~1, data=data, dist=extrapolations[i]),
       error = function(e){
-        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "error not carried out \n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+        cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
       warning = function(w){
-        cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "warning problem with model \n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " warning problem with model \n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       )
       
       if (exists("model") == TRUE) {
@@ -731,23 +731,23 @@ for(j in 1:nrow(outcome_cohorts)) {
       # extrapolations
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #get the goodness of fit for each model
       gof_results_temp[[i]] <- model %>%
         broom::glance() %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       #grab the parameters from the model
       parameters_results_temp[[i]] <- model[["coefficients"]] %>%
         tibble::enframe() %>%
         tidyr::pivot_wider(names_from = name, values_from = value) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" ) 
       
       #extract the hazard function over time
       hazot_results_temp[[i]] <- model %>%
         summary(t=(t + 1)/365, type = "hazard", tidy = TRUE) %>%
-        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = outcome_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
+        dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All", Sex = "Both" )
       
       # median and mean survival predictions from extrapolation
       pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
@@ -805,7 +805,7 @@ for(j in 1:nrow(outcome_cohorts)) {
       pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         dplyr::mutate(Method = extrapolations_formatted[i], 
-               Cancer = outcome_cohorts$cohort_name[j], 
+               Cancer = cancer_cohorts$cohort_name[j], 
                Age = "All", 
                Sex = "Both" )
       
@@ -813,17 +813,17 @@ for(j in 1:nrow(outcome_cohorts)) {
       rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10) 
       
       #print out progress               
-      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,outcome_cohorts$cohort_name[j], " completed"))
+      print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
       
         }, 
       
       error = function(e) {
-        cat(conditionMessage(e), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "model not carried out for overall model", "\n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " model not carried out for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
       
       warning = function(w) {
-        cat(conditionMessage(w), "for", outcome_cohorts$cohort_name[j] , ":", extrapolations[i], "potential problem with model for overall model", "\n")
-        info(logger, paste0(outcome_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " potential problem with model for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
       
         )
       
@@ -846,7 +846,7 @@ for(j in 1:nrow(outcome_cohorts)) {
   pred_median_mean_all[[j]] <- medcombined
 
   #print out progress               
-  print(paste0(outcome_cohorts$cohort_name[j]," Extrapolation Analysis Completed ", Sys.time()))
+  print(paste0(cancer_cohorts$cohort_name[j]," Extrapolation Analysis Completed ", Sys.time()))
 
 }
 
