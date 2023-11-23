@@ -226,30 +226,42 @@ t <- seq(0, timeinyrs*365.25, by=60)
 source(here::here("2_Analysis","Functions.R"))
 
 #whole population
+print(paste0("1 of 5: RUNNING ANALYSIS FOR WHOLE POPULATION")) 
 info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
 source(here::here("2_Analysis","Analysis.R"))
 info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
+print(paste0("1 of 5: FINISHED ANALYSIS FOR WHOLE POPULATION")) 
 
 #sex analysis
+print(paste0("2 of 5: RUNNING ANALYSIS FOR SEX")) 
 info(logger, 'RUNNING ANALYSIS FOR SEX')
 source(here::here("2_Analysis","AnalysisSex.R"))
 info(logger, 'ANALYSIS RAN FOR SEX')
+print(paste0("2 of 5: ANALYSIS RAN FOR SEX")) 
 
 #age analysis
+print(paste0("3 of 5: RUNNING ANALYSIS FOR AGE")) 
 info(logger, 'RUNNING ANALYSIS FOR AGE')
 source(here::here("2_Analysis","AnalysisAge.R"))
 info(logger, 'ANALYSIS RAN FOR AGE')
+print(paste0("3 of 5: ANALYSIS RAN FOR AGE")) 
 
 # age*sex analysis KM only
+print(paste0("4 of 5: RUNNING ANALYSIS FOR AGE*SEX ONLY KM")) 
 info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
 source(here::here("2_Analysis","AnalysisAgeSex.R"))
-info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
+info(logger, 'ANALYSIS RAN FOR AGE*SEX ONLY KM')
+print(paste0("4 of 5: ANALYSIS RAN FOR AGE*SEX ONLY KM")) 
 
 #running tableone characterisation
-info(logger, 'RUNNING TABLE ONE ANALYSIS')
+print(paste0("5 of 5: RUNNING TABLE ONE CHARACTERISATION")) 
+info(logger, 'RUNNING TABLE ONE CHARACTERISATION')
 source(here::here("2_Analysis","Tableone.R"))
-info(logger, 'TABLE ONE ANALYSIS RAN')
-  
+info(logger, 'TABLE ONE CHARACTERISATION RAN')
+print(paste0("5 of 5: TABLE ONE CHARACTERISATION RAN")) 
+
+
+print(paste0("SAVING RESULTS")) 
 ##################################################################
 # Tidy up results and save ----
 
@@ -469,6 +481,7 @@ info(logger, paste0("Study took: ",
                             x %/% 86400,  x %% 86400 %/% 3600, x %% 3600 %/%
                               60,  x %% 60 %/% 1)))
 
+print(paste0("SAVED RESULTS")) 
 # zip results
 print("Zipping results to output folder")
 
