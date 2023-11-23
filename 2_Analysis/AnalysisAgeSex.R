@@ -996,6 +996,18 @@ for(j in 1:nrow(cancer_cohorts)) {
                                                         paste0(nice.num2(se10yr)), ")"),
                                                  NA)) 
     
+    # Extract rmean at 5 years
+    rmean5 <- survival:::survmean(model_rm, rmean=c(5))$matrix %>% 
+      as.data.frame() %>% 
+      tibble::rownames_to_column() %>%  
+      dplyr::select(rmean, `se(rmean)`, rowname) %>% 
+      dplyr::rename(rmean5yr = rmean, se5yr =`se(rmean)`, agesex = rowname) %>% 
+      dplyr::mutate(agesex = stringr::str_replace(agesex, "sex_age_gp=", "") ,
+                    "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
+                                                        paste0(paste0(nice.num2(rmean5yr)), " (",
+                                                               paste0(nice.num2(se5yr)), ")"),
+                                                        NA)) 
+    
     print(paste0("Median survival from KM from observed data ", Sys.time()," for ",cancer_cohorts$cohort_name[j], " completed"))
     
     # survival probabilities ----
@@ -1018,8 +1030,9 @@ for(j in 1:nrow(cancer_cohorts)) {
                   names_prefix = " year ",
                   names_sep = "")
     
-    observedmedianKM_age_sex[[j]] <- dplyr::inner_join(medianKM, rmean10, by = "agesex") %>% 
-      dplyr::inner_join(surprobsKM, by = "agesex")
+    observedmedianKM_age_sex[[j]] <- dplyr::inner_join(medianKM, rmean5, by = "agesex") %>% 
+      dplyr::inner_join(rmean10, by = "agesex") %>% 
+    dplyr::inner_join(surprobsKM, by = "agesex")
 
     observedmedianKM_age_sex[[j]] <- observedmedianKM_age_sex[[j]] %>% 
       dplyr::mutate(Method = "Kaplan-Meier", 
