@@ -26,6 +26,8 @@ library(RPostgres)
 library(purrr)
 library(PatientProfiles)
 library(CodelistGenerator)
+library(SqlRender)
+library(DrugUtilisation)
 
 # Set the short name/acronym for your database (to be used in the titles of reports, etc) -----
 # Please do not use omop, cdm for db.name

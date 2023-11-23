@@ -99,6 +99,30 @@
       ],
       "Hash": "b2866e62bab9378c3cc9476a1954226b"
     },
+    "DrugUtilisation": {
+      "Package": "DrugUtilisation",
+      "Version": "0.4.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "CDMConnector",
+        "DBI",
+        "PatientProfiles",
+        "R",
+        "RJSONIO",
+        "checkmate",
+        "cli",
+        "dbplyr",
+        "dplyr",
+        "glue",
+        "lubridate",
+        "magrittr",
+        "purrr",
+        "rlang",
+        "tidyr"
+      ],
+      "Hash": "7083d0a424a9d7b5aca1a4031821e3b8"
+    },
     "Epi": {
       "Package": "Epi",
       "Version": "2.47.1",

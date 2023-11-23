@@ -15,10 +15,9 @@ if(priorhistory == TRUE){
 info(logger, "INSTANTIATE MEDICATIONS")
 codelistMedications <- CodelistGenerator::codesFromConceptSet(here("1_InstantiateCohorts", "Medications"), cdm)
 
-cdm <- CDMConnector::generateConceptCohortSet(cdm = cdm, 
+cdm <- DrugUtilisation::generateDrugUtilisationCohortSet(cdm = cdm, 
                                 conceptSet = codelistMedications, 
-                                name = "medications",
-                                overwrite = TRUE)
+                                name = "medications")
 
 info(logger, "INSTANTIATED MEDICATIONS")
 
