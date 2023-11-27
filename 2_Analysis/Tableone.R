@@ -1,5 +1,7 @@
 #creating table one for characterization of cancers
 
+print(paste0("Starting table one characterisations ", Sys.time()))
+
 # subset the CDM for analysis table to make code run quicker
 info(logger, "SUBSETTING CDM")
 cdm <- CDMConnector::cdmSubsetCohort(cdm, "outcome")
@@ -154,3 +156,6 @@ info(logger, "CREATED TABLE ONE SUMMARY")
 tableone_final <- dplyr::bind_rows(tableone, tableone_all_cancers)
 
 }
+
+
+print(paste0("Completed table one characterisations ", Sys.time()))
