@@ -153,7 +153,8 @@ observedmedianKM[[j]] <- observedmedianKM[[j]] %>%
   dplyr::mutate(Method = "Kaplan-Meier", 
                 Cancer = cancer_cohorts$cohort_name[j] ,
                 Age = "All", 
-                Sex = "Both" )
+                Sex = "Both",
+                study_period = as.numeric(max(data$cohort_start_date) - min(data$cohort_start_date)) / 365.25)
   
 rm(surprobsKM,medianKM,rmean5,rmean10,model_rm,modelKM)
 
@@ -578,7 +579,9 @@ for(j in 1:nrow(cancer_cohorts)) {
                                                                 paste0(nice.num2(se)), ")"),
                                                          NA)) %>%
         dplyr::rename(se5yr = se) %>% 
-        dplyr::select(-c(lcl, ucl, time))
+        dplyr::select(-c(lcl, ucl, time)) 
+      
+      
       
       pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
         dplyr::rename(rmean10yr = est) %>% 
@@ -614,10 +617,10 @@ for(j in 1:nrow(cancer_cohorts)) {
         dplyr::mutate(Method = extrapolations_formatted[i], 
                Cancer = cancer_cohorts$cohort_name[j], 
                Age = "All", 
-               Sex = "Both" )
+               Sex = "Both")
       
       
-      rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10, pr_mean5 )
+      rm(model,pr_survival_prob, pr_mean, pr_median, pr_mean10, pr_mean5)
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))

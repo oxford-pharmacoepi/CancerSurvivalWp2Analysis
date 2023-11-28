@@ -264,7 +264,14 @@ for(j in 1:nrow(cancer_cohorts)) {
                                                                paste0(nice.num2(se5yr)), ")"),
                                                         NA))
     
+    study_period <- data %>%
+      group_by(age_gr) %>%
+      summarise(study_period = as.numeric(max(cohort_start_date) - min(cohort_start_date)) / 365.25) %>% 
+      rename(Age = age_gr)
+    
+    
     observedmedianKM_age[[j]] <- dplyr::inner_join(medianKM, rmean5, by = "Age") %>% 
+    dplyr::inner_join(study_period, by = "Age") %>%      
     dplyr::inner_join(rmean10, by = "Age") %>% 
     dplyr::inner_join(surprobsKM, by = "Age")
     
@@ -273,7 +280,7 @@ for(j in 1:nrow(cancer_cohorts)) {
                     Cancer = cancer_cohorts$cohort_name[j] ,
                     Sex = "Both" )
     
-    rm(surprobsKM,medianKM,rmean10, rmean5,model_rm,modelKM)
+    rm(surprobsKM,medianKM,rmean10, rmean5,model_rm,modelKM, study_period)
     
     print(paste0("Survival for 1, 5 and 10 years from observed data ", Sys.time()," for ", cancer_cohorts$cohort_name[j] , " completed"))
     

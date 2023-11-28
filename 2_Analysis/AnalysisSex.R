@@ -211,7 +211,13 @@ for(j in 1:nrow(cancer_cohorts)) {
                                                                  paste0(nice.num2(se10yr)), ")"),
                                                           NA))
       
+      study_period <- data %>%
+        group_by(sex) %>%
+        summarise(study_period = as.numeric(max(cohort_start_date) - min(cohort_start_date)) / 365.25) %>% 
+        rename(Sex = sex)
+      
       observedmedianKM_sex[[j]] <- dplyr::inner_join(medianKM, rmean5, by = "Sex") %>% 
+        dplyr::inner_join(study_period, by = "Sex") %>%        
         dplyr::inner_join(rmean10, by = "Sex") %>% 
         dplyr::inner_join(surprobsKM, by = "Sex")
       
@@ -220,7 +226,7 @@ for(j in 1:nrow(cancer_cohorts)) {
                       Cancer = cancer_cohorts$cohort_name[j] ,
                       Age = "All")
       
-      rm(surprobsKM,medianKM,rmean10,rmean5, model_rm,modelKM)
+      rm(surprobsKM,medianKM,rmean10,rmean5, model_rm,modelKM, study_period)
       
       print(paste0("Median and rmean survival from KM from observed data ", Sys.time()," for ",cancer_cohorts$cohort_name[j], " completed"))
   
@@ -503,7 +509,7 @@ for(j in 1:nrow(cancer_cohorts)) {
                  Age = "All" ) %>% 
           dplyr::rename(Sex = sex)
         
-        rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob)
+        rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob, study_period)
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))

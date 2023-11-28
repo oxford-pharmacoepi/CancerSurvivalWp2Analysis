@@ -1030,7 +1030,16 @@ for(j in 1:nrow(cancer_cohorts)) {
                   names_prefix = " year ",
                   names_sep = "")
     
+    
+    
+    study_period <- data %>%
+      group_by(sex_age_gp) %>%
+      summarise(study_period = as.numeric(max(cohort_start_date) - min(cohort_start_date)) / 365.25) %>% 
+      rename(agesex = sex_age_gp)
+    
+    
     observedmedianKM_age_sex[[j]] <- dplyr::inner_join(medianKM, rmean5, by = "agesex") %>% 
+      dplyr::inner_join(study_period, by = "agesex") %>% 
       dplyr::inner_join(rmean10, by = "agesex") %>% 
     dplyr::inner_join(surprobsKM, by = "agesex")
 
