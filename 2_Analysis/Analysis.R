@@ -253,7 +253,7 @@ for(j in 1:nrow(cancer_cohorts)) {
       
       # 1knotspline
      tryCatch(
-        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard"),
+        model <- flexsurv::flexsurvspline (formula=Surv(time_years,status-1)~1,data=data,k = 1, scale = "hazard"),
         error = function(e){
           cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
           info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
@@ -616,7 +616,7 @@ for(j in 1:nrow(cancer_cohorts)) {
                     names_prefix = " year ",
                     names_sep = "")
       
-      pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean, pre_mean5, pr_mean10, pr_median, pr_survival_prob )
+      pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean, pr_mean5, pr_mean10, pr_median, pr_survival_prob )
       pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
         dplyr::mutate(Method = extrapolations_formatted[i], 
                Cancer = cancer_cohorts$cohort_name[j], 
