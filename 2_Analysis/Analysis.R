@@ -136,13 +136,6 @@ rmean10 <- survival:::survmean(model_rm, rmean=c(10))$matrix %>%
                                          paste0(nice.num2(se10yr)), ")"),
                                   NA))
 
-observedmedianKM[[j]] <- dplyr::bind_cols(medianKM, rmean10, surprobsKM)
-observedmedianKM[[j]] <- observedmedianKM[[j]] %>% 
-  dplyr::mutate(Method = "Kaplan-Meier", 
-         Cancer = cancer_cohorts$cohort_name[j] ,
-         Age = "All", 
-         Sex = "Both" )
-
 rmean5 <- survival:::survmean(model_rm, rmean=c(5))$matrix %>% 
   as.data.frame() %>% 
   tibble::rownames_to_column() %>%  
