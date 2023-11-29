@@ -509,7 +509,7 @@ for(j in 1:nrow(cancer_cohorts)) {
                  Age = "All" ) %>% 
           dplyr::rename(Sex = sex)
         
-        rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob, study_period)
+        rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob)
         
         #print out progress               
         print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
