@@ -445,7 +445,8 @@ AnalysisRunSummary <-
 
 # snapshot the cdm
 snapshotcdm <- CDMConnector::snapshot(cdm) %>% 
-  mutate(Database = CDMConnector::cdm_name(cdm))
+  mutate(Database = CDMConnector::cdm_name(cdm)) %>% 
+  mutate(StudyPeriodStartDate = startdate)
 
 #get attrition for the cohorts and add cohort identification
 attritioncdm <- CDMConnector::cohort_attrition(cdm$outcome) %>% 
