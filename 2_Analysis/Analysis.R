@@ -567,7 +567,7 @@ for(j in 1:nrow(cancer_cohorts)) {
                                              paste0(paste0(nice.num2(rmean)), " (",
                                                     paste0(nice.num2(se)), ")"),
                                              NA)) %>% 
-        dplyr::select(-c(lcl, ucl, se, time))
+        dplyr::select(-c(lcl, ucl, time))
       
       pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>%
         dplyr::rename(rmean5yr = est) %>%
