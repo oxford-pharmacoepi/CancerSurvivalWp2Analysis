@@ -305,7 +305,9 @@ medianResults <- dplyr::bind_rows(
   medkmcombined_ageA ,
   medkmcombined_age_sex,
   predmedmeanfinal,
+  predmedmeanfinalsex,
   predmedmeanfinalsexS,
+  predmedmeanfinalage,
   predmedmeanfinalageS) %>%
   dplyr::mutate(Database = db.name) %>% 
   dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) 
