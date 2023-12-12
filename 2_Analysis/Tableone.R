@@ -3,9 +3,9 @@
 print(paste0("Starting table one characterisations ", Sys.time()))
 
 # subset the CDM for analysis table to make code run quicker
-info(logger, "SUBSETTING CDM")
+info(logger, "SUBSETTING CDM FOR CHARACTERISATION")
 cdm <- CDMConnector::cdmSubsetCohort(cdm, "outcome")
-info(logger, "SUBSETTED CDM")
+info(logger, "SUBSETTED FOR CHARACTERISATION")
 
 
 # depending on database type run different parts of the code for cancer registries
