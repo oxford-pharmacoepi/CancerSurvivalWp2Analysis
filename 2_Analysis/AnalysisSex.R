@@ -233,12 +233,13 @@ for(j in 1:nrow(cancer_cohorts)) {
     
     # hazard over time ---
     # paper https://arxiv.org/pdf/1509.03253.pdf states bshazard good package
+      tryCatch({
     observedhazotKM_sex[[j]] <- dplyr::group_by(data,sex) %>% 
       do(as.data.frame(bshazard(Surv(time_years, status)~1, data=., verbose=FALSE))) %>% 
       ungroup %>%
       dplyr::mutate(Method = "Kaplan-Meier", Cancer = cancer_cohorts$cohort_name[j], Age = "All") %>% 
       dplyr::rename(Sex = sex) 
-    
+
     # reduce the size of haz over time for plotting
     if(nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]) > 6000){
       observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",] %>%
@@ -261,8 +262,8 @@ for(j in 1:nrow(cancer_cohorts)) {
         dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedhazotKM_female <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Female",]
-    }
-    
+    } 
+      
     if(nrow(observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]) > 6000){
       observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",] %>%
         dplyr::filter(row_number() %% 10 == 1)
@@ -284,13 +285,20 @@ for(j in 1:nrow(cancer_cohorts)) {
         dplyr::filter(row_number() %% 2 == 1)
     } else {
       observedhazotKM_male <- observedhazotKM_sex[[j]][observedhazotKM_sex[[j]]$Sex == "Male",]
-    }
+    } 
     
     observedhazotKM_sex[[j]] <- bind_rows(observedhazotKM_female, observedhazotKM_male)
     
+    } ,
+    error = function(e){
+      cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ": error not carried out \n")
+      info(logger, paste0(cancer_cohorts$cohort_name[j], " : not carried out ", e)) } ,
+    warning = function(w){
+      cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ": warning problem with model \n")
+      info(logger, paste0(cancer_cohorts$cohort_name[j], " : potential problem with model ", w))}
+      )
     
     print(paste0("Hazard over time results ", Sys.time()," for ",cancer_cohorts$cohort_name[j], " sex strat completed"))
-    
     
   } else {
     
