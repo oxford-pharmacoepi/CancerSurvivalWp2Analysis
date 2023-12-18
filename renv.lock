@@ -181,7 +181,7 @@
     },
     "PatientProfiles": {
       "Package": "PatientProfiles",
-      "Version": "0.4.0",
+      "Version": "0.5.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -199,7 +199,7 @@
         "stringr",
         "tidyr"
       ],
-      "Hash": "84b6b1c18891e63a4ba9b3d1c5981b72"
+      "Hash": "ae26fd704a21c6ea047f19cb60a8d025"
     },
     "R6": {
       "Package": "R6",
