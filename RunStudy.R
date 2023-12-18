@@ -62,7 +62,8 @@ info(logger, "INSTANTIATE EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CA
 
 codelistExclusion <- CodelistGenerator::codesFromConceptSet(here::here("1_InstantiateCohorts", "Exclusion"), cdm)
 # add cancer concepts to exclusion concepts to make sure we capture all exclusions
-codelistExclusion <- list(Reduce(union_all, c(cancer_concepts, codelistExclusion)))
+codelistExclusion <- list(unique(Reduce(union_all, c(cancer_concepts, codelistExclusion))))
+
 #rename list of concepts
 names(codelistExclusion) <- "anymalignancy"
 
