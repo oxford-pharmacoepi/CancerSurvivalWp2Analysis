@@ -137,7 +137,7 @@ tableone_all_cancers <- cdm$outcome %>%
           dplyr::mutate(cohort_definition_id = 10) %>% 
   PatientProfiles::summariseCharacteristics(
             strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
-            minCellCount = 5,
+            minCellCount = 10,
             ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 150)),
             cohortIntersect = list(
               "outcome" = list(
