@@ -257,6 +257,9 @@ for(j in 1:nrow(cancer_cohorts)) {
      )
 
       if (exists("model") == TRUE) {
+        
+        tryCatch({
+          
       #extrapolation
       extrap_results_temp[[i]] <- model %>%
         summary(t=t/365, tidy = TRUE) %>%
@@ -364,6 +367,18 @@ for(j in 1:nrow(cancer_cohorts)) {
       
       #print out progress               
       print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
+        }, 
+      
+      error = function(e) {
+        cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " model not carried out for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+      
+      warning = function(w) {
+        cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " potential problem with model for overall model", "\n")
+        info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+      
+        )
+        
       }
       
       
