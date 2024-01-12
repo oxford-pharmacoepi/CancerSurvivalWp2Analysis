@@ -1,4 +1,4 @@
-Natural History and Survival extrapolation of different cancers
+Natural History and Survival Extrapolation of Different Cancers
 ========================================================================================================================================================
 
 ## Introduction
