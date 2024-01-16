@@ -3575,38 +3575,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 44501719,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36566743,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 44500410,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -3688,22 +3656,6 @@
           {
             "concept": {
               "CONCEPT_ID": 36529078,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36554803,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -4151,38 +4103,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36537001,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36566924,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 44502946,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -4279,22 +4199,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36539570,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 44501639,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -4360,38 +4264,6 @@
           {
             "concept": {
               "CONCEPT_ID": 44500596,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36557109,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36535019,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -4584,22 +4456,6 @@
           {
             "concept": {
               "CONCEPT_ID": 44500198,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44502099,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -5687,22 +5543,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36542536,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36542114,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -5783,22 +5623,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 1553233,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 42512838,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -5832,22 +5656,6 @@
           {
             "concept": {
               "CONCEPT_ID": 42512803,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36523668,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -5928,22 +5736,6 @@
           {
             "concept": {
               "CONCEPT_ID": 1553487,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44501340,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -6055,22 +5847,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36564190,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 44501075,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -6120,38 +5896,6 @@
           {
             "concept": {
               "CONCEPT_ID": 44500927,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44501899,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36542513,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -6439,103 +6183,7 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 44500128,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44502814,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36529110,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44500126,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44499632,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 44501400,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36520418,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -7479,22 +7127,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36544651,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 44504400,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -7591,22 +7223,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36530327,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36548322,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -7688,22 +7304,6 @@
           {
             "concept": {
               "CONCEPT_ID": 36557668,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36549567,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -8823,55 +8423,7 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36533076,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36567108,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36543940,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36530465,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -9959,38 +9511,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 44500203,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36541021,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36545379,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -10007,103 +9527,7 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36533204,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36553363,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36518718,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36542547,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36562102,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36564390,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36537008,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -10423,22 +9847,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36549045,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 44504397,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -10535,55 +9943,7 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36565390,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36546661,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36549436,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36537517,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -10824,22 +10184,6 @@
           {
             "concept": {
               "CONCEPT_ID": 44500120,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44500844,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -11687,22 +11031,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 44501351,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36533326,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -11975,38 +11303,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36550993,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36551804,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36537912,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -12215,22 +11511,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36551588,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36532842,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -12423,38 +11703,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 44503199,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44501309,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36537994,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -12551,22 +11799,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36536349,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36552920,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -12632,38 +11864,6 @@
           {
             "concept": {
               "CONCEPT_ID": 36551710,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44501778,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44501842,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -12775,22 +11975,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36541830,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36543425,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -12856,38 +12040,6 @@
           {
             "concept": {
               "CONCEPT_ID": 36540801,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36545280,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36533040,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -13095,38 +12247,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 44499487,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44502451,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36549227,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -13143,39 +12263,7 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36554045,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 44502264,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36544554,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
@@ -13575,22 +12663,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 36563072,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36546863,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -13863,38 +12935,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 44501473,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 44499424,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36520999,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
@@ -13960,22 +13000,6 @@
           {
             "concept": {
               "CONCEPT_ID": 36530672,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
-              "CONCEPT_ID": 36548624,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
               "STANDARD_CONCEPT_CAPTION": "",
