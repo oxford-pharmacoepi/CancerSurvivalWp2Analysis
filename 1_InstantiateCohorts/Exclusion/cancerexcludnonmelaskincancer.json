@@ -38,6 +38,38 @@
       "includeDescendants": true,
       "includeMapped": false
     },
+
+         {
+            "concept": {
+              "CONCEPT_CLASS_ID": "Context-dependent",
+              "CONCEPT_CODE": "266987004",
+              "CONCEPT_ID": 4144289,
+              "CONCEPT_NAME": "H/O: malignant neoplasm",
+              "DOMAIN_ID": "Observation",
+              "INVALID_REASON": "V",
+              "INVALID_REASON_CAPTION": "Valid",
+              "STANDARD_CONCEPT": "S",
+              "STANDARD_CONCEPT_CAPTION": "Standard",
+              "VOCABULARY_ID": "SNOMED"
+            },
+            "includeDescendants": true
+          },
+          {
+            "concept": {
+              "CONCEPT_CLASS_ID": "Context-dependent",
+              "CONCEPT_CODE": "429050006",
+              "CONCEPT_ID": 4179242,
+              "CONCEPT_NAME": "History of malignant neoplasm of skin",
+              "DOMAIN_ID": "Observation",
+              "INVALID_REASON": "V",
+              "INVALID_REASON_CAPTION": "Valid",
+              "STANDARD_CONCEPT": "S",
+              "STANDARD_CONCEPT_CAPTION": "Standard",
+              "VOCABULARY_ID": "SNOMED"
+            },
+            "isExcluded": true,
+            "includeDescendants": true           },
+
     {
       "concept": {
         "CONCEPT_CLASS_ID": "Clinical Finding",
