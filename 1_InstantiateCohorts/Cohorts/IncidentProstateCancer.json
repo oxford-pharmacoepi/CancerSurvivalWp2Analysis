@@ -583,22 +583,6 @@
           },
           {
             "concept": {
-              "CONCEPT_ID": 2146483593,
-              "CONCEPT_NAME": "",
-              "STANDARD_CONCEPT": "",
-              "STANDARD_CONCEPT_CAPTION": "",
-              "INVALID_REASON": "",
-              "INVALID_REASON_CAPTION": "",
-              "CONCEPT_CODE": "",
-              "DOMAIN_ID": "",
-              "VOCABULARY_ID": "",
-              "CONCEPT_CLASS_ID": ""
-            },
-            "isExcluded": false,
-            "includeDescendants": false
-          },
-          {
-            "concept": {
               "CONCEPT_ID": 36517801,
               "CONCEPT_NAME": "",
               "STANDARD_CONCEPT": "",
