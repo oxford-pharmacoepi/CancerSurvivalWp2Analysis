@@ -68,7 +68,8 @@
               "VOCABULARY_ID": "SNOMED"
             },
             "isExcluded": true,
-            "includeDescendants": true           },
+            "includeDescendants": true        
+            },
 
     {
       "concept": {
