@@ -119,19 +119,24 @@ suppressWarnings(
   
 tableone <- cdm$outcome %>%
   PatientProfiles::summariseCharacteristics(
-    
     strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     demographics = FALSE ,
     minCellCount = 10,
     ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 150)),
-    otherVariables = c("sex", "age", "age_gr", "cohort_start_date", "cohort_end_date", "future_observation") ,
-cohortIntersect = list("outcome" = list( targetCohortTable = "outcome", value = "flag", window = c(0, 0)))
-
+    otherVariables = c("sex", "age", "age_gr", "cohort_start_date", "cohort_end_date", "future_observation")
+    ,
+    cohortIntersect = list(
+      "outcome" = list(
+        targetCohortTable = "outcome", value = "flag", window = c(0, 0)
+      )
+    )
+    
   ) %>% 
   
   dplyr::mutate(variable = ifelse(variable == "Age gr", "Age group", variable)) 
 
-)
+) 
+
 
 suppressWarnings(
   
@@ -163,5 +168,6 @@ tableone_final <- dplyr::bind_rows(tableone, tableone_all_cancers)
 
 }
 
+#}
 
 print(paste0("Completed table one characterisations ", Sys.time()))
