@@ -1,17 +1,16 @@
 #creating table one for characterization of cancers
+info(logger, "CREATING TABLE ONE SUMMARY")
 
 print(paste0("Starting table one characterisations ", Sys.time()))
+
+# runs for those with prior history as TRUE comorbidities and medication use is captured
+if(priorhistory == TRUE){  
 
 # subset the CDM for analysis table to make code run quicker
 info(logger, "SUBSETTING CDM FOR CHARACTERISATION")
 cdm <- CDMConnector::cdmSubsetCohort(cdm, "outcome")
 info(logger, "SUBSETTED FOR CHARACTERISATION")
 
-
-# depending on database type run different parts of the code for cancer registries
-# we probably wont have access past conditions and medication history unless they are linked
-
-if(priorhistory == TRUE){
 
 # instantiate medications
 info(logger, "INSTANTIATE MEDICATIONS")
@@ -50,7 +49,7 @@ cdm <- CDMConnector::generateCohortSet(cdm = cdm,
 
 info(logger, "INSTANTIATED OBESITY")
 
-info(logger, "CREATE TABLE ONE SUMMARY")
+info(logger, "CREATING TABLE ONE SUMMARY")
 
 suppressWarnings(
   
@@ -58,34 +57,33 @@ tableone <- cdm$outcome %>%
   PatientProfiles::summariseCharacteristics(
     strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
-    ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 150)),
     tableIntersect = list(
       "Visits" = list(
-        tableName = "visit_occurrence", value = "count", window = c(-365, 0)
-      )
-    ),
+        tableName = "visit_occurrence", value = "count", window = c(-365, 0))),
     cohortIntersect = list(
       "Medications" = list(
-        targetCohortTable = "medications", value = "flag", window = c(-365, 0)
-      ),
+        targetCohortTable = "medications", value = "flag", window = c(-365, 0)),
       "Conditions" = list(
-        targetCohortTable = "conditions", value = "flag", window = c(-Inf, 0)
-      ),
+        targetCohortTable = "conditions", value = "flag", window = c(-Inf, 0)),
       "Obesity" = list(
-        targetCohortTable = "obesity", value = "flag", window = c(-Inf, 0)
-      )
+        targetCohortTable = "obesity", value = "flag", window = c(-Inf, 0))
   
     )
   )
+
 )
 
+tableone <- tableone %>% 
+  select(-c(result_type))
+
+
 suppressWarnings(
+  
   tableone_all_cancers <- cdm$outcome %>% 
     dplyr::mutate(cohort_definition_id = 10) %>% 
     PatientProfiles::summariseCharacteristics(
       strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
       minCellCount = 10,
-      ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 150)),
       tableIntersect = list(
         "Visits" = list(
           tableName = "visit_occurrence", value = "count", window = c(-365, 0))),
@@ -102,7 +100,10 @@ suppressWarnings(
       )
       
     ) %>% 
-    dplyr::mutate(group_level = "All Cancers")
+    
+    dplyr::mutate(group_level = "cohort_name", 
+                  group_name = "Overall") %>% 
+    select(-c(result_type))
   
 )
 
@@ -113,61 +114,41 @@ info(logger, "CREATED TABLE ONE SUMMARY")
 
 } else {
   
-info(logger, "CREATE TABLE ONE SUMMARY")
-
-suppressWarnings(
+info(logger, "CREATING TABLE ONE SUMMARY")
   
-tableone <- cdm$outcome %>%
-  PatientProfiles::summariseCharacteristics(
-    strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
-    demographics = FALSE ,
-    minCellCount = 10,
-    ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 150)),
-    otherVariables = c("sex", "age", "age_gr", "cohort_start_date", "cohort_end_date", "future_observation")
-    ,
-    cohortIntersect = list(
-      "outcome" = list(
-        targetCohortTable = "outcome", value = "flag", window = c(0, 0)
+  tableone_final <- cdm$outcome %>%
+    PatientProfiles::addCohortName() %>%
+    dplyr::collect() %>%
+    PatientProfiles::summariseResult(
+      group = list("cohort_name"), 
+      includeOverallGroup = TRUE,
+      minCellCount = 10,
+      strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )), 
+      includeOverallStrata = TRUE,
+      variables = list(
+        "categorical" = c("sex", "age_gr", "cohort_name"),
+        "dates" = c("cohort_start_date", "cohort_end_date"),
+        "numeric" = c("age", "future_observation")
+      ),
+      functions = list(
+        "categorical" = c("count", "percentage"),
+        "dates" = c("min", "q25", "median", "q75", "max"),
+        "numeric" = c("min", "q25", "median", "q75", "max")
       )
-    )
-    
-  ) %>% 
+    ) %>%
+    dplyr::mutate(variable = ifelse(variable == "Age gr", "Age group", variable))
   
-  dplyr::mutate(variable = ifelse(variable == "Age gr", "Age group", variable)) 
-
-) 
-
-
-suppressWarnings(
+  tableone_final <- tableone_final %>% 
+    dplyr::mutate(variable = ifelse(variable == "cohort_name", "outcome", variable),
+                  cdm_name = db.name) %>% 
+    relocate(cdm_name)
   
-tableone_all_cancers <- cdm$outcome %>% 
-          dplyr::mutate(cohort_definition_id = 10) %>% 
-  PatientProfiles::summariseCharacteristics(
-            strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
-            demographics = FALSE ,
-            minCellCount = 10,
-            ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69), c(70, 79), c(80, 150)),
-            otherVariables = c("sex", "age", "age_gr", "cohort_start_date", "cohort_end_date", "future_observation") ,
-            cohortIntersect = list(
-              "outcome" = list(
-                targetCohortTable = "outcome", value = "flag", window = c(0, 0)  
-              )
-            )
-            
-          ) %>% 
   
-          dplyr::mutate(group_level = "All Cancers") %>% 
-  dplyr::mutate(variable = ifelse(variable == "Age gr", "Age group", variable)) 
-        
-      )
-      
-
-info(logger, "CREATED TABLE ONE SUMMARY")
-
-tableone_final <- dplyr::bind_rows(tableone, tableone_all_cancers)
+  print(paste0("Tableone ", Sys.time()," completed"))
+  
+  info(logger, "CREATED TABLE ONE SUMMARY")
 
 }
 
-#}
 
 print(paste0("Completed table one characterisations ", Sys.time()))

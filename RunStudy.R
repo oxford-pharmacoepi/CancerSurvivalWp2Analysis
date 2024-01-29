@@ -1,6 +1,6 @@
 # calculating the number of years of extrapolation for your database ----
 # amount of followup in your database plus 10 years
-timeinyrs <- as.numeric(floor(((lubridate::as_date("2019-12-31") - lubridate::as_date(startdate)) / 365))) + 10
+timeinyrs <- 20
 
 #Create folder for the results
 if (!file.exists(output.folder)){
@@ -23,7 +23,6 @@ cancer_concepts <- CodelistGenerator::codesFromCohort(
   cdm = cdm,
   withConceptDetails = FALSE)
 
-
 # instantiate the cohorts with no prior history 
 cdm <- CDMConnector::generateConceptCohortSet(
   cdm,
@@ -33,7 +32,6 @@ cdm <- CDMConnector::generateConceptCohortSet(
   requiredObservation = c(0, 0),
   end = "observation_period_end_date",
   overwrite = TRUE )
-
 
 
 if(priorhistory == TRUE){
@@ -58,6 +56,21 @@ cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
 info(logger, "SUBSETTING CDM")
 cdm <- CDMConnector::cdmSubsetCohort(cdm, "outcome")
 info(logger, "SUBSETTED CDM")
+
+# this step adds in a filter which only includes patients who are present in IMASIS's tumour registry
+if(db.name == "IMASIS"){
+  
+  cdm$outcome <- cdm$outcome %>% 
+    dplyr::left_join(cdm$condition_occurrence %>%
+                       select("person_id",  "condition_type_concept_id") %>%
+                       distinct(),
+                     by = c("subject_id"= "person_id")) %>% 
+    dplyr::filter(condition_type_concept_id == 32879 )
+
+  cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
+                                                     reason="Removing patients in registry" )
+}
+
 
 # instantiate exclusion any prior history of malignancy
 info(logger, "INSTANTIATE EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CANCER)")
@@ -214,44 +227,52 @@ cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
                                                    reason="Removing cancer cohorts from analysis with less than 200 patients" )
 
 
+# add bespoke code for ECI (Edinburgh cancer registry) to remove males from breast cancer cohort due to ethical approval
+if(db.name == "ECI"){
+  
+breastID <- CDMConnector::cohortSet(cdm$outcome) %>%
+  dplyr::filter(cohort_name == "Breast") %>%
+  dplyr::pull("cohort_definition_id") %>%
+  as.numeric()
+
+# remove males from breast cancer cohort
+cdm$outcome <- cdm$outcome %>% 
+  dplyr::filter(sex == "Female" & cohort_definition_id == breastID)
+
+
+cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
+                                                   reason="Removing male breast cancer patients" )
+}
+
 # collect to use for analysis
-Pop <- cdm$outcome %>% dplyr::collect() 
+Pop <- cdm$outcome %>% dplyr::collect()
 
 # Setting up information for extrapolation methods to be used ---
-extrapolations <- c("gompertz", "weibullph" , "exp", "llogis", "lnorm", "gengamma",
-                    "spline1", 
-                    "spline3")
+extrapolations <- c("gompertz", 
+                    "weibullph" ,
+                    "exp", 
+                    "llogis", 
+                    "lnorm",
+                    "gengamma",
+                    "spline1",
+                    "spline3",
+                    "spline1o",
+                    "spline3o",
+                    "spline1n",
+                    "spline3n")
 
-extrapolations_formatted <- c("Gompertz", 
-                              "WeibullPH" ,
-                              "Exponential", 
+extrapolations_formatted <- c("Gompertz",
+                              "Weibull" ,
+                              "Exponential",
                               "Log-logistic",
                               "Log-normal",
-                              "Generalised Gamma", 
-                              "Spline (1 knot)",
-                              "Spline (3 knots)")
-
-# Setting up information for extrapolation methods to be used ---
-# extrapolations <- c("gompertz", "weibullph" , "exp", "llogis", "lnorm", "gengamma",
-#                     "spline1", 
-#                     "spline3",
-#                     "spline1o", 
-#                     "spline3o",
-#                     "spline1n", 
-#                     "spline3n")
-# 
-# extrapolations_formatted <- c("Gompertz", 
-#                               "WeibullPH" ,
-#                               "Exponential", 
-#                               "Log-logistic",
-#                               "Log-normal",
-#                               "Generalised Gamma", 
-#                               "Spline Hazard (1 knot)",
-#                               "Spline Hazard (3 knots)" ,
-#                               "Spline Odds (1 knot)",
-#                               "Spline Odds (3 knots)" ,
-#                               "Spline Normal (1 knot)",
-#                               "Spline Normal (3 knots)")
+                              "Generalised Gamma",
+                              "Spline Hazard (1 knot)",
+                              "Spline Hazard (3 knots)" ,
+                              "Spline Odds (1 knot)",
+                              "Spline Odds (3 knots)" ,
+                              "Spline Normal (1 knot)",
+                              "Spline Normal (3 knots)")
 
 # setting up time for extrapolation ----
 t <- seq(0, timeinyrs*365.25, by=40)
@@ -261,60 +282,111 @@ t <- seq(0, timeinyrs*365.25, by=40)
 #pick up functions
 source(here::here("2_Analysis","Functions.R"))
 
+if(PerformTruncatedAnalysis == TRUE){
 #whole population
-print(paste0("1 of 5: RUNNING ANALYSIS FOR WHOLE POPULATION")) 
+print(paste0("1 of 6: RUNNING ANALYSIS FOR WHOLE POPULATION")) 
 info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
 source(here::here("2_Analysis","Analysis.R"))
 info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
-print(paste0("1 of 5: FINISHED ANALYSIS FOR WHOLE POPULATION")) 
+print(paste0("1 of 6: FINISHED ANALYSIS FOR WHOLE POPULATION")) 
 
 #sex analysis
-print(paste0("2 of 5: RUNNING ANALYSIS FOR SEX")) 
+print(paste0("2 of 6: RUNNING ANALYSIS FOR SEX")) 
 info(logger, 'RUNNING ANALYSIS FOR SEX')
 source(here::here("2_Analysis","AnalysisSex.R"))
 info(logger, 'ANALYSIS RAN FOR SEX')
-print(paste0("2 of 5: ANALYSIS RAN FOR SEX")) 
+print(paste0("2 of 6: ANALYSIS RAN FOR SEX")) 
 
 #age analysis
-print(paste0("3 of 5: RUNNING ANALYSIS FOR AGE")) 
+print(paste0("3 of 6: RUNNING ANALYSIS FOR AGE")) 
 info(logger, 'RUNNING ANALYSIS FOR AGE')
 source(here::here("2_Analysis","AnalysisAge.R"))
 info(logger, 'ANALYSIS RAN FOR AGE')
-print(paste0("3 of 5: ANALYSIS RAN FOR AGE")) 
+print(paste0("3 of 6: ANALYSIS RAN FOR AGE")) 
 
 # age*sex analysis KM only
-print(paste0("4 of 5: RUNNING ANALYSIS FOR AGE*SEX ONLY KM")) 
+print(paste0("4 of 6: RUNNING ANALYSIS FOR AGE*SEX ONLY KM")) 
 info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
 source(here::here("2_Analysis","AnalysisAgeSex.R"))
 info(logger, 'ANALYSIS RAN FOR AGE*SEX ONLY KM')
-print(paste0("4 of 5: ANALYSIS RAN FOR AGE*SEX ONLY KM")) 
+print(paste0("4 of 6: ANALYSIS RAN FOR AGE*SEX ONLY KM")) 
+
+#truncation analysis
+print(paste0("5 of 6: RUNNING ANALYSIS FOR TRUNCATED FOLLOW UP")) 
+info(logger, 'RUNNING ANALYSIS FOR TRUNCATED FOLLOW UP')
+source(here::here("2_Analysis","Truncation_follow_up.R"))
+info(logger, 'ANALYSIS RAN FOR FOR TRUNCATED FOLLOW UP')
+print(paste0("5 of 6: ANALYSIS RAN FOR FOR TRUNCATED FOLLOW UP")) 
 
 #running tableone characterisation
-print(paste0("5 of 5: RUNNING TABLE ONE CHARACTERISATION")) 
+print(paste0("6 of 6: RUNNING TABLE ONE CHARACTERISATION")) 
 info(logger, 'RUNNING TABLE ONE CHARACTERISATION')
 source(here::here("2_Analysis","Tableone.R"))
 info(logger, 'TABLE ONE CHARACTERISATION RAN')
-print(paste0("5 of 5: TABLE ONE CHARACTERISATION RAN")) 
+print(paste0("6 of 6: TABLE ONE CHARACTERISATION RAN")) 
+
+} else {
+  
+  #whole population
+  print(paste0("1 of 5: RUNNING ANALYSIS FOR WHOLE POPULATION")) 
+  info(logger, 'RUNNING ANALYSIS FOR WHOLE POPULATION')
+  source(here::here("2_Analysis","Analysis.R"))
+  info(logger, 'ANALYSIS RAN FOR WHOLE POPULATION')
+  print(paste0("1 of 5: FINISHED ANALYSIS FOR WHOLE POPULATION")) 
+  
+  #sex analysis
+  print(paste0("2 of 5: RUNNING ANALYSIS FOR SEX")) 
+  info(logger, 'RUNNING ANALYSIS FOR SEX')
+  source(here::here("2_Analysis","AnalysisSex.R"))
+  info(logger, 'ANALYSIS RAN FOR SEX')
+  print(paste0("2 of 5: ANALYSIS RAN FOR SEX")) 
+  
+  #age analysis
+  print(paste0("3 of 5: RUNNING ANALYSIS FOR AGE")) 
+  info(logger, 'RUNNING ANALYSIS FOR AGE')
+  source(here::here("2_Analysis","AnalysisAge.R"))
+  info(logger, 'ANALYSIS RAN FOR AGE')
+  print(paste0("3 of 5: ANALYSIS RAN FOR AGE")) 
+  
+  # age*sex analysis KM only
+  print(paste0("4 of 5: RUNNING ANALYSIS FOR AGE*SEX ONLY KM")) 
+  info(logger, 'RUNNING ANALYSIS FOR AGE*SEX ONLY KM')
+  source(here::here("2_Analysis","AnalysisAgeSex.R"))
+  info(logger, 'ANALYSIS RAN FOR AGE*SEX ONLY KM')
+  print(paste0("4 of 5: ANALYSIS RAN FOR AGE*SEX ONLY KM")) 
+  
+  #running tableone characterisation
+  print(paste0("5 of 5: RUNNING TABLE ONE CHARACTERISATION")) 
+  info(logger, 'RUNNING TABLE ONE CHARACTERISATION')
+  source(here::here("2_Analysis","Tableone.R"))
+  info(logger, 'TABLE ONE CHARACTERISATION RAN')
+  print(paste0("5 of 5: TABLE ONE CHARACTERISATION RAN"))   
+  
+}
+
 
 
 print(paste0("SAVING RESULTS")) 
 ##################################################################
 # Tidy up results and save ----
 
+if(PerformTruncatedAnalysis == TRUE){
 # survival KM and extrapolated data -----
 survivalResults <- dplyr::bind_rows(
   observedkmcombined ,  
   observedkmcombined_sex , 
-  observedkmcombined_sexA , 
   observedkmcombined_age , 
-  observedkmcombined_ageA , 
   observedkmcombined_age_sex,
   extrapolatedfinal,
   extrapolatedfinalsex,
   extrapolatedfinalsexS,
   extrapolatedfinalage,
-  extrapolatedfinalageS
-) %>%
+  extrapolatedfinalageS,
+  extrapolatedfinalt,
+  extrapolatedfinalsext,
+  extrapolatedfinalsexSt,
+  extrapolatedfinalaget,
+  extrapolatedfinalageSt) %>%
   dplyr::mutate(Database = db.name) %>% 
   dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
   dplyr::select(!c(n.risk, n.event, n.censor, std.error)) %>% 
@@ -324,27 +396,28 @@ survivalResults <- dplyr::bind_rows(
 riskTableResults <- dplyr::bind_rows(
   risktableskm , 
   risktableskm_sex , 
-  risktableskm_sexA , 
   risktableskm_age ,
-  risktableskm_ageA,
   risktableskm_age_sex
   ) %>%
   dplyr::mutate(Database = db.name) %>% 
   dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))
 
-# KM median results, survival probabilites and predicted from extrapolations ----
+# KM median results, survival probabilities and predicted from extrapolations ----
 medianResults <- dplyr::bind_rows( 
   medkmcombined ,
   medkmcombined_sex , 
-  medkmcombined_sexA , 
   medkmcombined_age ,
-  medkmcombined_ageA ,
   medkmcombined_age_sex,
   predmedmeanfinal,
   predmedmeanfinalsex,
   predmedmeanfinalsexS,
   predmedmeanfinalage,
-  predmedmeanfinalageS) %>%
+  predmedmeanfinalageS,
+  predmedmeanfinalt,
+  predmedmeanfinalsext,
+  predmedmeanfinalsexSt,
+  predmedmeanfinalaget,
+  predmedmeanfinalageSt) %>%
   dplyr::mutate(Database = db.name) %>% 
   dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) 
 
@@ -352,16 +425,18 @@ medianResults <- dplyr::bind_rows(
 hazOverTimeResults <- dplyr::bind_rows( 
   hotkmcombined , 
   hotkmcombined_sex, 
-  hotkmcombined_sexA, 
   hotkmcombined_age, 
-  hotkmcombined_ageA,
   hotkmcombined_age_sex,
   hazardotfinal, 
   hazardotfinalsex, 
   hazardotfinalsexS,
   hazardotfinalage,
-  hazardotfinalageS
-) %>%
+  hazardotfinalageS,
+  hazardotfinalt, 
+  hazardotfinalsext, 
+  hazardotfinalsexSt,
+  hazardotfinalaget,
+  hazardotfinalageSt) %>%
   dplyr::mutate(Database = db.name) %>% 
   dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex,  "Male"))
 
@@ -372,7 +447,12 @@ GOFResults <- dplyr::bind_rows(
   goffinalsex, 
   goffinalsexS,
   goffinalage,
-  goffinalageS
+  goffinalageS,
+  goffinalt,
+  goffinalsext, 
+  goffinalsexSt,
+  goffinalaget,
+  goffinalageSt
 ) %>%
   dplyr::mutate(Database = db.name) %>% 
   dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
@@ -384,16 +464,104 @@ ExtrpolationParameters <- dplyr::bind_rows(
   parametersfinalsex,
   parametersfinalsexS,
   parametersfinalage,
-  parametersfinalageS
+  parametersfinalageS,
+  parametersfinalt ,
+  parametersfinalsext,
+  parametersfinalsexSt,
+  parametersfinalaget,
+  parametersfinalageSt
 ) %>%
   dplyr::mutate(Database = db.name) %>%
   dplyr::relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
   dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))
 
 
+} else {
+  
+  survivalResults <- dplyr::bind_rows(
+    observedkmcombined ,  
+    observedkmcombined_sex , 
+    observedkmcombined_age , 
+    observedkmcombined_age_sex,
+    extrapolatedfinal,
+    extrapolatedfinalsex,
+    extrapolatedfinalsexS,
+    extrapolatedfinalage,
+    extrapolatedfinalageS) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+    dplyr::select(!c(n.risk, n.event, n.censor, std.error)) %>% 
+    dplyr::filter(time != 0)
+  
+  #risk table ----
+  riskTableResults <- dplyr::bind_rows(
+    risktableskm , 
+    risktableskm_sex , 
+    risktableskm_age ,
+    risktableskm_age_sex
+  ) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))
+  
+  # KM median results, survival probabilites and predicted from extrapolations ----
+  medianResults <- dplyr::bind_rows( 
+    medkmcombined ,
+    medkmcombined_sex , 
+    medkmcombined_age ,
+    medkmcombined_age_sex,
+    predmedmeanfinal,
+    predmedmeanfinalsex,
+    predmedmeanfinalsexS,
+    predmedmeanfinalage,
+    predmedmeanfinalageS) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) 
+  
+  # hazard over time results -----
+  hazOverTimeResults <- dplyr::bind_rows( 
+    hotkmcombined , 
+    hotkmcombined_sex, 
+    hotkmcombined_age, 
+    hotkmcombined_age_sex,
+    hazardotfinal, 
+    hazardotfinalsex, 
+    hazardotfinalsexS,
+    hazardotfinalage,
+    hazardotfinalageS) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex,  "Male"))
+  
+  
+  # GOF results for extrapolated results (adjusted and stratified)
+  GOFResults <- dplyr::bind_rows( 
+    goffinal,
+    goffinalsex, 
+    goffinalsexS,
+    goffinalage,
+    goffinalageS
+  ) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+    dplyr::select(!c(N, events, censored)) 
+  
+  # parameters of the extrapolated models
+  ExtrpolationParameters <- dplyr::bind_rows(
+    parametersfinal ,
+    parametersfinalsex,
+    parametersfinalsexS,
+    parametersfinalage,
+    parametersfinalageS
+  ) %>%
+    dplyr::mutate(Database = db.name) %>%
+    dplyr::relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))  
+  
+}
+
+
 # add a render file for the shiny app for filtering ----
 CancerStudied <- c("Breast" , "Colorectal"  , 
-                   "Head and Neck"  , "Liver" ,
+                   "Head_and_neck"  , "Liver" ,
                    "Lung", "Pancreatic"  ,
                    "Prostate", "Stomach" )
 Method <- c("Kaplan-Meier", extrapolations_formatted)

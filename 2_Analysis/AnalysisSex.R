@@ -139,15 +139,9 @@ for(j in 1:nrow(cancer_cohorts)) {
              Sex = stringr::str_replace(Sex,"sex=Female", "Female")) %>% 
       dplyr::mutate(surv = round((surv*100),4),
              lower = round((lower*100),4),
-             upper = round((upper*100),4),
-             "Survival Rate % (95% CI)"= ifelse(!is.na(surv),
-                                                paste0(paste0(nice.num1(surv)), " (",
-                                                       paste0(nice.num1(lower)),"-",
-                                                       paste0(nice.num1(upper)), ")"),
-                                                NA)) %>% 
-      dplyr::select(-c(lower, upper)) %>% 
+             upper = round((upper*100),4)) %>% 
       tidyr::pivot_wider(names_from = time, 
-                  values_from = c(`Survival Rate % (95% CI)`, surv),
+                         values_from = c(surv, lower, upper),
                   names_prefix = " year ",
                   names_sep = "")
     
@@ -164,17 +158,10 @@ for(j in 1:nrow(cancer_cohorts)) {
                Sex = stringr::str_replace(Sex, "sex=Male", "Male"), 
                Sex = stringr::str_replace(Sex,"sex=Female", "Female"),
                `0.95LCL` = round(`0.95LCL`, 4),
-               `0.95UCL` = round(`0.95UCL`, 4),
-               "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                             paste0(paste0(nice.num2(rmean)), " (",
-                                                    paste0(nice.num2(se)), ")"),
-                                             NA),
-               "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                           paste0(paste0(nice.num2(median)), " (",
-                                                                  paste0(nice.num2(`0.95LCL`)),"-",
-                                                                  paste0(nice.num2(`0.95UCL`)), ")"),
-                                                           NA)) %>% 
-        dplyr::select(-c(`0.95LCL`,`0.95UCL`, n.max, n.start)) %>% 
+               `0.95UCL` = round(`0.95UCL`, 4)) %>% 
+        dplyr::select(-c(n.max, n.start)) %>% 
+        dplyr::rename(lower_median = `0.95LCL`,
+                      upper_median = `0.95UCL`) %>%
         dplyr::mutate(n  = replace(n, n ==  0 , NA),
                events = replace(events, events ==  0 , NA)) %>%
         dplyr::mutate(n  = replace(n, n <=  10 , "<10"),
@@ -192,11 +179,7 @@ for(j in 1:nrow(cancer_cohorts)) {
         dplyr::select(rmean, `se(rmean)`, rowname) %>% 
         dplyr::rename(rmean5yr = rmean, se5yr =`se(rmean)`, Sex = rowname) %>% 
         dplyr::mutate(Sex = stringr::str_replace(Sex, "sex=Male", "Male"), 
-                      Sex = stringr::str_replace(Sex,"sex=Female", "Female"),
-                      "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                          paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                 paste0(nice.num2(se5yr)), ")"),
-                                                          NA))
+                      Sex = stringr::str_replace(Sex,"sex=Female", "Female"))
       
       # Extract rmean at 10 years
       rmean10 <- survival:::survmean(model_rm, rmean=c(10))$matrix %>% 
@@ -205,11 +188,7 @@ for(j in 1:nrow(cancer_cohorts)) {
         dplyr::select(rmean, `se(rmean)`, rowname) %>% 
         dplyr::rename(rmean10yr = rmean, se10yr =`se(rmean)`, Sex = rowname) %>% 
         dplyr::mutate(Sex = stringr::str_replace(Sex, "sex=Male", "Male"), 
-                      Sex = stringr::str_replace(Sex,"sex=Female", "Female"),
-                      "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                          paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                                 paste0(nice.num2(se10yr)), ")"),
-                                                          NA))
+                      Sex = stringr::str_replace(Sex,"sex=Female", "Female"))
       
       study_period <- data %>%
         group_by(sex) %>%
@@ -311,47 +290,23 @@ for(j in 1:nrow(cancer_cohorts)) {
 # take the results from a list (one element for each cancer) and put into dataframe for KM survival
 observedkmcombined_sex <- dplyr::bind_rows(observedkm_sex) %>%
   dplyr::rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%
-  dplyr::mutate(Stratification = "Sex", Adjustment = "None")
+  dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "No")
 
 medkmcombined_sex <- dplyr::bind_rows(observedmedianKM_sex) %>%
-  dplyr::mutate(Stratification = "Sex", Adjustment = "None")
+  dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "No")
 
 hotkmcombined_sex <- dplyr::bind_rows(observedhazotKM_sex) %>%
   dplyr::rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
-  dplyr::mutate(Stratification = "Sex", Adjustment = "None")
+  dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "No")
 
 #generate the risk table and remove entries < 10 patients
 risktableskm_sex <- dplyr::bind_rows(observedrisktableKM_sex) %>% 
-  dplyr::filter(details != "n.censor") %>% 
-  dplyr::mutate(Stratification = "Sex", Adjustment = "None") %>% 
+  #dplyr::filter(details != "n.censor") %>% 
+  dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "No") %>% 
   dplyr::mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
   dplyr::mutate(across(everything(), ~replace(., .<=  10 , "<10"))) %>% 
   dplyr::mutate(across(everything(), as.character)) %>%
   replace(is.na(.), "0")
-
-###################################################################
-# duplicate the results above so can be filtered in the dashboard ---
-observedkmcombined_sexA <- dplyr::bind_rows(observedkm_sex) %>%
-  dplyr::rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%
-  dplyr::mutate(Stratification = "None", Adjustment = "Sex")
-
-medkmcombined_sexA <- dplyr::bind_rows(observedmedianKM_sex) %>%
-  dplyr::mutate(Stratification = "None", Adjustment = "Sex")
-
-hotkmcombined_sexA <- dplyr::bind_rows(observedhazotKM_sex) %>%
-  dplyr::rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
-  dplyr::mutate(Stratification = "None", Adjustment = "Sex")
-
-#generate the risk table and remove entries < 10 patients
-risktableskm_sexA <- dplyr::bind_rows(observedrisktableKM_sex) %>% 
-  dplyr::filter(details != "n.censor") %>% 
-  dplyr::mutate(Stratification = "None", Adjustment = "Sex") %>% 
-  dplyr::mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
-  dplyr::mutate(across(everything(), ~replace(., .<=  10 , "<10"))) %>% 
-  dplyr::mutate(across(everything(), as.character)) %>%
-  replace(is.na(.), "0")
-
-toc(func.toc=toc_min)
 
 info(logger, 'KM analysis for sex stratification COMPLETE')
   
@@ -447,34 +402,21 @@ for(j in 1:nrow(cancer_cohorts)) {
           dplyr::rename(median = est) %>% 
           dplyr::mutate(median = round(median, 4),
                  lcl = round(lcl, 4),
-                 ucl = round(ucl, 4),
-                 "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                             paste0(paste0(nice.num2(median)), " (",
-                                                                    paste0(nice.num2(lcl)),"-",
-                                                                    paste0(nice.num2(ucl)), ")"),
-                                                             NA)) %>% 
-          dplyr::select(-c(lcl, ucl))
+                 ucl = round(ucl, 4)) %>% 
+          dplyr::rename(lower_median = lcl, upper_median = ucl)
         
         pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
           dplyr::rename(rmean = est) %>% 
           dplyr::mutate(rmean = round(rmean, 4),
                  se = round(se, 4),
-                 time = round(time,4) ,
-                 "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                               paste0(paste0(nice.num2(rmean)), " (",
-                                                      paste0(nice.num2(se)), ")"),
-                                               NA)) %>% 
+                 time = round(time,4)) %>% 
           dplyr::select(-c(lcl, ucl, time))
         
         pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
           dplyr::rename(rmean10yr = est) %>%
           dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                  se = round(se, 4),
-                 time = round(time,4) ,
-                 "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                     paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                            paste0(nice.num2(se)), ")"),
-                                                     NA)) %>%
+                 time = round(time,4)) %>%
           dplyr::rename(se10yr = se) %>% 
           dplyr::select(-c(lcl, ucl, time))
         
@@ -482,27 +424,19 @@ for(j in 1:nrow(cancer_cohorts)) {
           dplyr::rename(rmean5yr = est) %>%
           dplyr::mutate(rmean5yr = round(rmean5yr, 4),
                         se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                            paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                   paste0(nice.num2(se)), ")"),
-                                                            NA)) %>%
+                        time = round(time,4)) %>%
           dplyr::rename(se5yr = se) %>% 
           dplyr::select(-c(lcl, ucl, time))
         
         pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
           dplyr::mutate(est = round((est*100),4),
                  lcl = round((lcl*100),4),
-                 ucl = round((ucl*100),4),
-                 "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                    paste0(paste0(nice.num1(est)), " (",
-                                                           paste0(nice.num1(lcl)),"-",
-                                                           paste0(nice.num1(ucl)), ")"),
-                                                    NA)) %>% 
-          dplyr::rename("surv" = est) %>% 
-          dplyr::select(-c(lcl, ucl)) %>% 
+                 ucl = round((ucl*100),4)) %>% 
+          dplyr::rename("surv" = est,
+                        "lower" = lcl,
+                        "upper" = ucl) %>% 
           tidyr::pivot_wider(names_from = time, 
-                      values_from = c(`Survival Rate % (95% CI)`, surv),
+                             values_from = c(surv, lower, upper),
                       names_prefix = " year ",
                       names_sep = "")
         
@@ -536,11 +470,12 @@ for(j in 1:nrow(cancer_cohorts)) {
       
       }
       
-    } else if(extrapolations[i] == "spline2") {
-      # 2knotspline
+   
+    } else if(extrapolations[i] == "spline1o") {
+      # 1knotspline odds
       
       tryCatch(
-        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ sex , data=data , k = 2, scale = "hazard"),
+        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ sex , data=data , k = 1, scale = "odds"),
         error = function(e){
           cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
           info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
@@ -552,125 +487,233 @@ for(j in 1:nrow(cancer_cohorts)) {
       if (exists("model") == TRUE) {
         
         tryCatch({
+          
+          extrap_results_temp[[i]] <- model %>%
+            summary(t=t/365, tidy = TRUE) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i],
+                          Cancer = cancer_cohorts$cohort_name[j], 
+                          Age = "All")%>% 
+            dplyr::rename(Sex = sex)
+          
+          #get the goodness of fit for each model
+          gof_results_temp[[i]] <- model %>%
+            glance() %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], 
+                          Cancer = cancer_cohorts$cohort_name[j],
+                          Age = "All" ) %>% 
+            dplyr::slice(rep(1:n(), each = 2)) %>% 
+            dplyr::mutate(Sex = levels(as.factor(data$sex)))
+          
+          #extract parameters
+          #grab the parameters and knots from the model
+          coefs.p <- model[["coefficients"]] %>%
+            tibble::enframe() %>%
+            tidyr::pivot_wider(names_from = name, values_from = value) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") 
+          
+          knots.p <- model[["knots"]] %>%
+            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
+            tibble::enframe() %>%
+            tidyr::pivot_wider(names_from = name, values_from = value)
+          
+          parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
+            dplyr::slice(rep(1:n(), each = 2)) %>% 
+            dplyr::mutate(Sex = levels(as.factor(data$sex)))
+          
+          # hazard over time
+          hazot_results_temp[[i]] <- model %>%
+            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") %>% 
+            dplyr::rename(Sex = sex)
+          
+          # median and mean predicted survival
+          pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+            dplyr::rename(median = est) %>% 
+            dplyr::mutate(median = round(median, 4),
+                          lcl = round(lcl, 4),
+                          ucl = round(ucl, 4)) %>% 
+            dplyr::rename(lower_median = lcl, upper_median = ucl)
+          
+          pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+            dplyr::rename(rmean = est) %>% 
+            dplyr::mutate(rmean = round(rmean, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+            dplyr::rename(rmean10yr = est) %>%
+            dplyr::mutate(rmean10yr = round(rmean10yr, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>%
+            dplyr::rename(se10yr = se) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>%
+            dplyr::rename(rmean5yr = est) %>%
+            dplyr::mutate(rmean5yr = round(rmean5yr, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>%
+            dplyr::rename(se5yr = se) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+            dplyr::mutate(est = round((est*100),4),
+                          lcl = round((lcl*100),4),
+                          ucl = round((ucl*100),4)) %>% 
+            dplyr::rename("surv" = est,
+                          "lower" = lcl,
+                          "upper" = ucl) %>% 
+            tidyr::pivot_wider(names_from = time, 
+                               values_from = c(surv, lower, upper),
+                               names_prefix = " year ",
+                               names_sep = "")
+          
+          pred_median_mean_results_temp[[i]] <- dplyr::inner_join(pr_mean, pr_mean5, by = "sex" ) %>% 
+            dplyr::inner_join(pr_mean10, by = "sex" ) %>% 
+            dplyr::inner_join(pr_median, by = "sex" ) %>% 
+            dplyr::inner_join(pr_survival_prob, by = "sex")
+          
+          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+            dplyr::mutate(Method = extrapolations_formatted[i], 
+                          Cancer = cancer_cohorts$cohort_name[j], 
+                          Age = "All" ) %>% 
+            dplyr::rename(Sex = sex)
+          
+          rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob)
+          
+          #print out progress               
+          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
+          
+        }, 
         
-        extrap_results_temp[[i]] <- model %>%
-          summary(t=t/365, tidy = TRUE) %>%
-          dplyr::mutate(Method = extrapolations_formatted[i],
-                 Cancer = cancer_cohorts$cohort_name[j], 
-                 Age = "All")%>% 
-          dplyr::rename(Sex = sex)
+        error = function(e) {
+          cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " model not carried out for sex model", "\n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
         
-        #get the goodness of fit for each model
-        gof_results_temp[[i]] <- model %>%
-          glance() %>%
-          dplyr::mutate(Method = extrapolations_formatted[i], 
-                 Cancer = cancer_cohorts$cohort_name[j],
-                 Age = "All" ) %>% 
-          dplyr::slice(rep(1:n(), each = 2)) %>% 
-          dplyr::mutate(Sex = levels(as.factor(data$sex)))
+        warning = function(w) {
+          cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " potential problem with model for sex model", "\n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
         
-        #extract parameters
-        #grab the parameters and knots from the model
-        coefs.p <- model[["coefficients"]] %>%
-          tibble::enframe() %>%
-          tidyr::pivot_wider(names_from = name, values_from = value) %>%
-          dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") 
+        )
         
-        knots.p <- model[["knots"]] %>%
-          setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
-          tibble::enframe() %>%
-          tidyr::pivot_wider(names_from = name, values_from = value)
+      }
+      
+      
+    } else if(extrapolations[i] == "spline1n") {
+      # 1knotspline odds
+      
+      tryCatch(
+        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ sex , data=data , k = 1, scale = "normal"),
+        error = function(e){
+          cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+        warning = function(w){
+          cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " warning problem with model \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+      )
+      
+      if (exists("model") == TRUE) {
         
-        parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
-          dplyr::slice(rep(1:n(), each = 2)) %>% 
-          dplyr::mutate(Sex = levels(as.factor(data$sex)))
-        
-        # hazard over time
-        hazot_results_temp[[i]] <- model %>%
-          summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-          dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") %>% 
-          dplyr::rename(Sex = sex)
-        
-        # median and mean predicted survival
-        pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-          dplyr::rename(median = est) %>% 
-          dplyr::mutate(median = round(median, 4),
-                 lcl = round(lcl, 4),
-                 ucl = round(ucl, 4),
-                 "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                             paste0(paste0(nice.num2(median)), " (",
-                                                                    paste0(nice.num2(lcl)),"-",
-                                                                    paste0(nice.num2(ucl)), ")"),
-                                                             NA)) %>% 
-          dplyr::select(-c(lcl, ucl))
-        
-        pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-          dplyr::rename(rmean = est) %>% 
-          dplyr::mutate(rmean = round(rmean, 4),
-                        se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                      paste0(paste0(nice.num2(rmean)), " (",
-                                                             paste0(nice.num2(se)), ")"),
-                                                      NA)) %>% 
-          dplyr::select(-c(lcl, ucl, time))
-        
-        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-          dplyr::rename(rmean10yr = est) %>%
-          dplyr::mutate(rmean10yr = round(rmean10yr, 4),
-                        se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                            paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                                   paste0(nice.num2(se)), ")"),
-                                                            NA)) %>%
-          dplyr::rename(se10yr = se) %>% 
-          dplyr::select(-c(lcl, ucl, time))
-        
-        pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>%
-          dplyr::rename(rmean5yr = est) %>%
-          dplyr::mutate(rmean5yr = round(rmean5yr, 4),
-                        se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                           paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                  paste0(nice.num2(se)), ")"),
-                                                           NA)) %>%
-          dplyr::rename(se5yr = se) %>% 
-          dplyr::select(-c(lcl, ucl, time))
-        
-        pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-          dplyr::mutate(est = round((est*100),4),
-                        lcl = round((lcl*100),4),
-                        ucl = round((ucl*100),4),
-                        "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                           paste0(paste0(nice.num1(est)), " (",
-                                                                  paste0(nice.num1(lcl)),"-",
-                                                                  paste0(nice.num1(ucl)), ")"),
-                                                           NA)) %>% 
-          dplyr::rename("surv" = est) %>% 
-          dplyr::select(-c(lcl, ucl)) %>% 
-          tidyr::pivot_wider(names_from = time, 
-                             values_from = c(`Survival Rate % (95% CI)`, surv),
-                             names_prefix = " year ",
-                             names_sep = "")
-        
-        pred_median_mean_results_temp[[i]] <- dplyr::inner_join(pr_mean, pr_mean5, by = "sex" ) %>% 
-          dplyr::inner_join(pr_mean10, by = "sex" ) %>% 
-          dplyr::inner_join(pr_median, by = "sex" ) %>% 
-          dplyr::inner_join(pr_survival_prob, by = "sex")
-        
-        pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-          dplyr::mutate(Method = extrapolations_formatted[i], 
-                        Cancer = cancer_cohorts$cohort_name[j], 
-                        Age = "All" ) %>% 
-          dplyr::rename(Sex = sex)
-        
-        rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob)
-        
-        #print out progress               
-        print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
-        
+        tryCatch({
+          
+          extrap_results_temp[[i]] <- model %>%
+            summary(t=t/365, tidy = TRUE) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i],
+                          Cancer = cancer_cohorts$cohort_name[j], 
+                          Age = "All")%>% 
+            dplyr::rename(Sex = sex)
+          
+          #get the goodness of fit for each model
+          gof_results_temp[[i]] <- model %>%
+            glance() %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], 
+                          Cancer = cancer_cohorts$cohort_name[j],
+                          Age = "All" ) %>% 
+            dplyr::slice(rep(1:n(), each = 2)) %>% 
+            dplyr::mutate(Sex = levels(as.factor(data$sex)))
+          
+          #extract parameters
+          #grab the parameters and knots from the model
+          coefs.p <- model[["coefficients"]] %>%
+            tibble::enframe() %>%
+            tidyr::pivot_wider(names_from = name, values_from = value) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") 
+          
+          knots.p <- model[["knots"]] %>%
+            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
+            tibble::enframe() %>%
+            tidyr::pivot_wider(names_from = name, values_from = value)
+          
+          parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
+            dplyr::slice(rep(1:n(), each = 2)) %>% 
+            dplyr::mutate(Sex = levels(as.factor(data$sex)))
+          
+          # hazard over time
+          hazot_results_temp[[i]] <- model %>%
+            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") %>% 
+            dplyr::rename(Sex = sex)
+          
+          # median and mean predicted survival
+          pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+            dplyr::rename(median = est) %>% 
+            dplyr::mutate(median = round(median, 4),
+                          lcl = round(lcl, 4),
+                          ucl = round(ucl, 4)) %>% 
+            dplyr::rename(lower_median = lcl, upper_median = ucl)
+          
+          pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+            dplyr::rename(rmean = est) %>% 
+            dplyr::mutate(rmean = round(rmean, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+            dplyr::rename(rmean10yr = est) %>%
+            dplyr::mutate(rmean10yr = round(rmean10yr, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>%
+            dplyr::rename(se10yr = se) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>%
+            dplyr::rename(rmean5yr = est) %>%
+            dplyr::mutate(rmean5yr = round(rmean5yr, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>%
+            dplyr::rename(se5yr = se) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+            dplyr::mutate(est = round((est*100),4),
+                          lcl = round((lcl*100),4),
+                          ucl = round((ucl*100),4)) %>% 
+            dplyr::rename("surv" = est,
+                          "lower" = lcl,
+                          "upper" = ucl) %>% 
+            tidyr::pivot_wider(names_from = time, 
+                               values_from = c(surv, lower, upper),
+                               names_prefix = " year ",
+                               names_sep = "")
+          
+          pred_median_mean_results_temp[[i]] <- dplyr::inner_join(pr_mean, pr_mean5, by = "sex" ) %>% 
+            dplyr::inner_join(pr_mean10, by = "sex" ) %>% 
+            dplyr::inner_join(pr_median, by = "sex" ) %>% 
+            dplyr::inner_join(pr_survival_prob, by = "sex")
+          
+          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+            dplyr::mutate(Method = extrapolations_formatted[i], 
+                          Cancer = cancer_cohorts$cohort_name[j], 
+                          Age = "All" ) %>% 
+            dplyr::rename(Sex = sex)
+          
+          rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob)
+          
+          #print out progress               
+          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
+          
         }, 
         
         error = function(e) {
@@ -741,34 +784,21 @@ for(j in 1:nrow(cancer_cohorts)) {
           dplyr::rename(median = est) %>% 
           dplyr::mutate(median = round(median, 4),
                  lcl = round(lcl, 4),
-                 ucl = round(ucl, 4),
-                 "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                             paste0(paste0(nice.num2(median)), " (",
-                                                                    paste0(nice.num2(lcl)),"-",
-                                                                    paste0(nice.num2(ucl)), ")"),
-                                                             NA)) %>% 
-          dplyr::select(-c(lcl, ucl))
+                 ucl = round(ucl, 4)) %>% 
+          dplyr::rename(lower_median = lcl, upper_median = ucl)
         
         pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
           dplyr::rename(rmean = est) %>% 
           dplyr::mutate(rmean = round(rmean, 4),
                         se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                      paste0(paste0(nice.num2(rmean)), " (",
-                                                             paste0(nice.num2(se)), ")"),
-                                                      NA)) %>% 
+                        time = round(time,4)) %>% 
           dplyr::select(-c(lcl, ucl, time))
         
         pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
           dplyr::rename(rmean10yr = est) %>%
           dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                         se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                            paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                                   paste0(nice.num2(se)), ")"),
-                                                            NA)) %>%
+                        time = round(time,4)) %>%
           dplyr::rename(se10yr = se) %>% 
           dplyr::select(-c(lcl, ucl, time))
         
@@ -776,27 +806,19 @@ for(j in 1:nrow(cancer_cohorts)) {
           dplyr::rename(rmean5yr = est) %>%
           dplyr::mutate(rmean5yr = round(rmean5yr, 4),
                         se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                           paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                  paste0(nice.num2(se)), ")"),
-                                                           NA)) %>%
+                        time = round(time,4)) %>%
           dplyr::rename(se5yr = se) %>% 
           dplyr::select(-c(lcl, ucl, time))
         
         pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
           dplyr::mutate(est = round((est*100),4),
                         lcl = round((lcl*100),4),
-                        ucl = round((ucl*100),4),
-                        "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                           paste0(paste0(nice.num1(est)), " (",
-                                                                  paste0(nice.num1(lcl)),"-",
-                                                                  paste0(nice.num1(ucl)), ")"),
-                                                           NA)) %>% 
-          dplyr::rename("surv" = est) %>% 
-          dplyr::select(-c(lcl, ucl)) %>% 
+                        ucl = round((ucl*100),4)) %>% 
+          dplyr::rename("surv" = est,
+                        "lower" = lcl,
+                        "upper" = ucl) %>% 
           tidyr::pivot_wider(names_from = time, 
-                             values_from = c(`Survival Rate % (95% CI)`, surv),
+                             values_from = c(surv, lower, upper),
                              names_prefix = " year ",
                              names_sep = "")
         
@@ -830,11 +852,11 @@ for(j in 1:nrow(cancer_cohorts)) {
         
       }
       
-    } else if(extrapolations[i] == "spline5") {
-      # 5knotspline
+    } else if(extrapolations[i] == "spline3o") {
+      # 3knotspline odds
       
       tryCatch(
-        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ sex , data=data, k = 5, scale = "hazard"),
+        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ sex, data=data, k = 3, scale = "odds"),
         error = function(e){
           cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
           info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
@@ -846,120 +868,100 @@ for(j in 1:nrow(cancer_cohorts)) {
       if (exists("model") == TRUE) {
         
         tryCatch({
-        
-        extrap_results_temp[[i]] <- model %>%
-          summary(t=t/365, tidy = TRUE) %>%
-          dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") %>% 
-          dplyr::rename(Sex = sex)
-        
-        #get the goodness of fit for each model
-        gof_results_temp[[i]] <- model %>%
-          glance() %>%
-          dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All" ) %>% 
-          dplyr::slice(rep(1:n(), each = 2)) %>% 
-          dplyr::mutate(Sex = levels(as.factor(data$sex)))
-        
-        coefs.p <- model[["coefficients"]] %>%
-          tibble::enframe() %>%
-          tidyr::pivot_wider(names_from = name, values_from = value) %>%
-          dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") 
-        
-        knots.p <- model[["knots"]] %>%
-          setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
-                        "SplineInternal4" ,"SplineInternal5" , "SplineUpperB")) %>%
-          tibble::enframe() %>%
-          tidyr::pivot_wider(names_from = name, values_from = value)
-        
-        parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
-          dplyr::slice(rep(1:n(), each = 2)) %>% 
-          dplyr::mutate(Sex = levels(as.factor(data$sex)))
-        
-        # hazard over time
-        hazot_results_temp[[i]] <- model %>%
-          summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-          dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") %>% 
-          dplyr::rename(Sex = sex)
-        
-        # median and mean predicted survival
-        pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-          dplyr::rename(median = est) %>% 
-          dplyr::mutate(median = round(median, 4),
-                 lcl = round(lcl, 4),
-                 ucl = round(ucl, 4),
-                 "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                             paste0(paste0(nice.num2(median)), " (",
-                                                                    paste0(nice.num2(lcl)),"-",
-                                                                    paste0(nice.num2(ucl)), ")"),
-                                                             NA)) %>% 
-          dplyr::select(-c(lcl, ucl))
-        
-        pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-          dplyr::rename(rmean = est) %>% 
-          dplyr::mutate(rmean = round(rmean, 4),
-                        se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                      paste0(paste0(nice.num2(rmean)), " (",
-                                                             paste0(nice.num2(se)), ")"),
-                                                      NA)) %>% 
-          dplyr::select(-c(lcl, ucl, time))
-        
-        pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
-          dplyr::rename(rmean10yr = est) %>%
-          dplyr::mutate(rmean10yr = round(rmean10yr, 4),
-                        se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                            paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                                   paste0(nice.num2(se)), ")"),
-                                                            NA)) %>%
-          dplyr::rename(se10yr = se) %>% 
-          dplyr::select(-c(lcl, ucl, time))
-        
-        pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>%
-          dplyr::rename(rmean5yr = est) %>%
-          dplyr::mutate(rmean5yr = round(rmean5yr, 4),
-                        se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                           paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                  paste0(nice.num2(se)), ")"),
-                                                           NA)) %>%
-          dplyr::rename(se5yr = se) %>% 
-          dplyr::select(-c(lcl, ucl, time))
-        
-        pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-          dplyr::mutate(est = round((est*100),4),
-                        lcl = round((lcl*100),4),
-                        ucl = round((ucl*100),4),
-                        "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                           paste0(paste0(nice.num1(est)), " (",
-                                                                  paste0(nice.num1(lcl)),"-",
-                                                                  paste0(nice.num1(ucl)), ")"),
-                                                           NA)) %>% 
-          dplyr::rename("surv" = est) %>% 
-          dplyr::select(-c(lcl, ucl)) %>% 
-          tidyr::pivot_wider(names_from = time, 
-                             values_from = c(`Survival Rate % (95% CI)`, surv),
-                             names_prefix = " year ",
-                             names_sep = "")
-        
-        pred_median_mean_results_temp[[i]] <- dplyr::inner_join(pr_mean, pr_mean5, by = "sex" ) %>% 
-          dplyr::inner_join(pr_mean10, by = "sex" ) %>% 
-          dplyr::inner_join(pr_median, by = "sex" ) %>% 
-          dplyr::inner_join(pr_survival_prob, by = "sex")
-        
-        pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-          dplyr::mutate(Method = extrapolations_formatted[i], 
-                        Cancer = cancer_cohorts$cohort_name[j], 
-                        Age = "All" ) %>% 
-          dplyr::rename(Sex = sex)
-        
-        rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob)
-        
-        #print out progress               
-        print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
-      
+          
+          extrap_results_temp[[i]] <- model %>%
+            summary(t=t/365, tidy = TRUE) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All")%>% 
+            dplyr::rename(Sex = sex)
+          
+          #get the goodness of fit for each model
+          gof_results_temp[[i]] <- model %>%
+            glance() %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All" ) %>% 
+            dplyr::slice(rep(1:n(), each = 2)) %>% 
+            dplyr::mutate(Sex = levels(as.factor(data$sex)))
+          
+          #extract parameters
+          #grab the parameters and knots from the model
+          coefs.p <- model[["coefficients"]] %>%
+            tibble::enframe() %>%
+            tidyr::pivot_wider(names_from = name, values_from = value) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") 
+          
+          knots.p <- model[["knots"]] %>%
+            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
+            tibble::enframe() %>%
+            tidyr::pivot_wider(names_from = name, values_from = value)
+          
+          parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
+            dplyr::slice(rep(1:n(), each = 2)) %>% 
+            dplyr::mutate(Sex = levels(as.factor(data$sex)))
+          
+          # hazard over time
+          hazot_results_temp[[i]] <- model %>%
+            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All" ) %>% 
+            dplyr::rename(Sex = sex)
+          
+          # median and mean predicted survival
+          pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+            dplyr::rename(median = est) %>% 
+            dplyr::mutate(median = round(median, 4),
+                          lcl = round(lcl, 4),
+                          ucl = round(ucl, 4)) %>% 
+            dplyr::rename(lower_median = lcl, upper_median = ucl)
+          
+          pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+            dplyr::rename(rmean = est) %>% 
+            dplyr::mutate(rmean = round(rmean, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+            dplyr::rename(rmean10yr = est) %>%
+            dplyr::mutate(rmean10yr = round(rmean10yr, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>%
+            dplyr::rename(se10yr = se) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>%
+            dplyr::rename(rmean5yr = est) %>%
+            dplyr::mutate(rmean5yr = round(rmean5yr, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>%
+            dplyr::rename(se5yr = se) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+            dplyr::mutate(est = round((est*100),4),
+                          lcl = round((lcl*100),4),
+                          ucl = round((ucl*100),4)) %>% 
+            dplyr::rename("surv" = est,
+                          "lower" = lcl,
+                          "upper" = ucl) %>% 
+            tidyr::pivot_wider(names_from = time, 
+                               values_from = c(surv, lower, upper),
+                               names_prefix = " year ",
+                               names_sep = "")
+          
+          pred_median_mean_results_temp[[i]] <- dplyr::inner_join(pr_mean, pr_mean5, by = "sex" ) %>% 
+            dplyr::inner_join(pr_mean10, by = "sex" ) %>% 
+            dplyr::inner_join(pr_median, by = "sex" ) %>% 
+            dplyr::inner_join(pr_survival_prob, by = "sex")
+          
+          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+            dplyr::mutate(Method = extrapolations_formatted[i], 
+                          Cancer = cancer_cohorts$cohort_name[j], 
+                          Age = "All" ) %>% 
+            dplyr::rename(Sex = sex)
+          
+          rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob)
+          
+          #print out progress               
+          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
+          
         }, 
         
         error = function(e) {
@@ -973,6 +975,132 @@ for(j in 1:nrow(cancer_cohorts)) {
         )
         
       }
+      
+      
+    } else if(extrapolations[i] == "spline3n") {
+      # 3knotspline normal
+      
+      tryCatch(
+        model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ sex, data=data, k = 3, scale = "normal"),
+        error = function(e){
+          cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+        warning = function(w){
+          cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " warning problem with model \n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+      )
+      
+      if (exists("model") == TRUE) {
+        
+        tryCatch({
+          
+          extrap_results_temp[[i]] <- model %>%
+            summary(t=t/365, tidy = TRUE) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All")%>% 
+            dplyr::rename(Sex = sex)
+          
+          #get the goodness of fit for each model
+          gof_results_temp[[i]] <- model %>%
+            glance() %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All" ) %>% 
+            dplyr::slice(rep(1:n(), each = 2)) %>% 
+            dplyr::mutate(Sex = levels(as.factor(data$sex)))
+          
+          #extract parameters
+          #grab the parameters and knots from the model
+          coefs.p <- model[["coefficients"]] %>%
+            tibble::enframe() %>%
+            tidyr::pivot_wider(names_from = name, values_from = value) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All") 
+          
+          knots.p <- model[["knots"]] %>%
+            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
+            tibble::enframe() %>%
+            tidyr::pivot_wider(names_from = name, values_from = value)
+          
+          parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
+            dplyr::slice(rep(1:n(), each = 2)) %>% 
+            dplyr::mutate(Sex = levels(as.factor(data$sex)))
+          
+          # hazard over time
+          hazot_results_temp[[i]] <- model %>%
+            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+            dplyr::mutate(Method = extrapolations_formatted[i], Cancer = cancer_cohorts$cohort_name[j], Age = "All" ) %>% 
+            dplyr::rename(Sex = sex)
+          
+          # median and mean predicted survival
+          pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+            dplyr::rename(median = est) %>% 
+            dplyr::mutate(median = round(median, 4),
+                          lcl = round(lcl, 4),
+                          ucl = round(ucl, 4)) %>% 
+            dplyr::rename(lower_median = lcl, upper_median = ucl)
+          
+          pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+            dplyr::rename(rmean = est) %>% 
+            dplyr::mutate(rmean = round(rmean, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
+            dplyr::rename(rmean10yr = est) %>%
+            dplyr::mutate(rmean10yr = round(rmean10yr, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>%
+            dplyr::rename(se10yr = se) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>%
+            dplyr::rename(rmean5yr = est) %>%
+            dplyr::mutate(rmean5yr = round(rmean5yr, 4),
+                          se = round(se, 4),
+                          time = round(time,4)) %>%
+            dplyr::rename(se5yr = se) %>% 
+            dplyr::select(-c(lcl, ucl, time))
+          
+          pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+            dplyr::mutate(est = round((est*100),4),
+                          lcl = round((lcl*100),4),
+                          ucl = round((ucl*100),4)) %>% 
+            dplyr::rename("surv" = est,
+                          "lower" = lcl,
+                          "upper" = ucl) %>% 
+            tidyr::pivot_wider(names_from = time, 
+                               values_from = c(surv, lower, upper),
+                               names_prefix = " year ",
+                               names_sep = "")
+          
+          pred_median_mean_results_temp[[i]] <- dplyr::inner_join(pr_mean, pr_mean5, by = "sex" ) %>% 
+            dplyr::inner_join(pr_mean10, by = "sex" ) %>% 
+            dplyr::inner_join(pr_median, by = "sex" ) %>% 
+            dplyr::inner_join(pr_survival_prob, by = "sex")
+          
+          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+            dplyr::mutate(Method = extrapolations_formatted[i], 
+                          Cancer = cancer_cohorts$cohort_name[j], 
+                          Age = "All" ) %>% 
+            dplyr::rename(Sex = sex)
+          
+          rm(model, pr_mean, pr_median, pr_mean5, pr_mean10, pr_survival_prob)
+          
+          #print out progress               
+          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
+          
+        }, 
+        
+        error = function(e) {
+          cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " model not carried out for sex model", "\n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+        
+        warning = function(w) {
+          cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " potential problem with model for sex model", "\n")
+          info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        
+        )
+        
+      }
+      
       
     } else {
       
@@ -1030,34 +1158,21 @@ for(j in 1:nrow(cancer_cohorts)) {
           dplyr::rename(median = est) %>% 
           dplyr::mutate(median = round(median, 4),
                  lcl = round(lcl, 4),
-                 ucl = round(ucl, 4),
-                 "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                             paste0(paste0(nice.num2(median)), " (",
-                                                                    paste0(nice.num2(lcl)),"-",
-                                                                    paste0(nice.num2(ucl)), ")"),
-                                                             NA)) %>% 
-          dplyr::select(-c(lcl, ucl))
+                 ucl = round(ucl, 4)) %>% 
+          dplyr::rename(lower_median = lcl, upper_median = ucl)
         
         pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
           dplyr::rename(rmean = est) %>% 
           dplyr::mutate(rmean = round(rmean, 4),
                         se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                      paste0(paste0(nice.num2(rmean)), " (",
-                                                             paste0(nice.num2(se)), ")"),
-                                                      NA)) %>% 
+                        time = round(time,4)) %>% 
           dplyr::select(-c(lcl, ucl, time))
         
         pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>%
           dplyr::rename(rmean10yr = est) %>%
           dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                         se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                            paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                                   paste0(nice.num2(se)), ")"),
-                                                            NA)) %>%
+                        time = round(time,4)) %>%
           dplyr::rename(se10yr = se) %>% 
           dplyr::select(-c(lcl, ucl, time))
         
@@ -1065,27 +1180,19 @@ for(j in 1:nrow(cancer_cohorts)) {
           dplyr::rename(rmean5yr = est) %>%
           dplyr::mutate(rmean5yr = round(rmean5yr, 4),
                         se = round(se, 4),
-                        time = round(time,4) ,
-                        "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                           paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                  paste0(nice.num2(se)), ")"),
-                                                           NA)) %>%
+                        time = round(time,4)) %>%
           dplyr::rename(se5yr = se) %>% 
           dplyr::select(-c(lcl, ucl, time))
         
         pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
           dplyr::mutate(est = round((est*100),4),
                         lcl = round((lcl*100),4),
-                        ucl = round((ucl*100),4),
-                        "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                           paste0(paste0(nice.num1(est)), " (",
-                                                                  paste0(nice.num1(lcl)),"-",
-                                                                  paste0(nice.num1(ucl)), ")"),
-                                                           NA)) %>% 
-          dplyr::rename("surv" = est) %>% 
-          dplyr::select(-c(lcl, ucl)) %>% 
+                        ucl = round((ucl*100),4)) %>% 
+          dplyr::rename("surv" = est,
+                        "lower" = lcl,
+                        "upper" = ucl) %>% 
           tidyr::pivot_wider(names_from = time, 
-                             values_from = c(`Survival Rate % (95% CI)`, surv),
+                             values_from = c(surv, lower, upper),
                              names_prefix = " year ",
                              names_sep = "")
         
@@ -1150,17 +1257,17 @@ for(j in 1:nrow(cancer_cohorts)) {
 
 # Merge results together from each cancer and extrapolation into a dataframe ---
 extrapolatedfinalsex <- dplyr::bind_rows(extrapolations_sex) %>%
-  dplyr::mutate(Stratification = "None", Adjustment = "Sex")
+  dplyr::mutate(Stratification = "None", Adjustment = "Sex", Truncated = "No")
 goffinalsex <- dplyr::bind_rows(gof_haz_sex) %>%
-  dplyr::mutate(Stratification = "None" , Adjustment = "Sex")
+  dplyr::mutate(Stratification = "None" , Adjustment = "Sex", Truncated = "No")
 hazardotfinalsex <- dplyr::bind_rows(hazot_sex) %>%
-  dplyr::mutate(Stratification = "None", Adjustment = "Sex")
+  dplyr::mutate(Stratification = "None", Adjustment = "Sex", Truncated = "No")
 parametersfinalsex <- dplyr::bind_rows(parameters_sex)  %>%
-  dplyr::mutate(Stratification = "None", Adjustment = "Sex") %>% 
+  dplyr::mutate(Stratification = "None", Adjustment = "Sex", Truncated = "No") %>% 
   dplyr::relocate(shape, .after = Sex) %>% 
   dplyr::relocate(rate, .after = Sex) 
 predmedmeanfinalsex <- dplyr::bind_rows(pred_median_mean_sex)  %>%
-  dplyr::mutate(Stratification = "None", Adjustment = "Sex")
+  dplyr::mutate(Stratification = "None", Adjustment = "Sex", Truncated = "No")
 
 toc(func.toc=toc_min)
 
@@ -1282,34 +1389,21 @@ for(j in 1:nrow(cancer_cohorts)) {
             dplyr::rename(median = est) %>% 
             dplyr::mutate(median = round(median, 4),
                    lcl = round(lcl, 4),
-                   ucl = round(ucl, 4),
-                   "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                               paste0(paste0(nice.num2(median)), " (",
-                                                                      paste0(nice.num2(lcl)),"-",
-                                                                      paste0(nice.num2(ucl)), ")"),
-                                                               NA)) %>% 
-            dplyr::select(-c(lcl, ucl))
+                   ucl = round(ucl, 4)) %>% 
+            dplyr::rename(lower_median = lcl, upper_median = ucl)
           
           pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
             dplyr::rename(rmean = est) %>% 
             dplyr::mutate(rmean = round(rmean, 4),
                    se = round(se, 4),
-                   time = round(time,4) ,
-                   "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                 paste0(paste0(nice.num2(rmean)), " (",
-                                                        paste0(nice.num2(se)), ")"),
-                                                 NA)) %>% 
+                   time = round(time,4)) %>% 
             dplyr::select(-c(lcl, ucl, time))
           
           pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>% 
             dplyr::rename(rmean5yr = est) %>% 
             dplyr::mutate(rmean5yr = round(rmean5yr, 4),
                           se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                              paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                     paste0(nice.num2(se)), ")"),
-                                                              NA)) %>% 
+                          time = round(time,4)) %>% 
             dplyr::rename(se5yr = se) %>% 
             dplyr::select(-c(lcl, ucl, time))
           
@@ -1317,27 +1411,19 @@ for(j in 1:nrow(cancer_cohorts)) {
             dplyr::rename(rmean10yr = est) %>% 
             dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                    se = round(se, 4),
-                   time = round(time,4) ,
-                   "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                       paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                              paste0(nice.num2(se)), ")"),
-                                                       NA)) %>% 
+                   time = round(time,4)) %>% 
             dplyr::rename(se10yr = se) %>% 
             dplyr::select(-c(lcl, ucl, time))
           
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             dplyr::mutate(est = round((est*100),4),
                    lcl = round((lcl*100),4),
-                   ucl = round((ucl*100),4),
-                   "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                      paste0(paste0(nice.num1(est)), " (",
-                                                             paste0(nice.num1(lcl)),"-",
-                                                             paste0(nice.num1(ucl)), ")"),
-                                                      NA)) %>% 
-            dplyr::rename("surv" = est) %>% 
-            dplyr::select(-c(lcl, ucl)) %>% 
+                   ucl = round((ucl*100),4)) %>% 
+            dplyr::rename("surv" = est,
+                          "lower" = lcl,
+                          "upper" = ucl) %>% 
             tidyr::pivot_wider(names_from = time, 
-                        values_from = c(`Survival Rate % (95% CI)`, surv),
+                               values_from = c(surv, lower, upper),
                         names_prefix = " year ",
                         names_sep = "")
           
@@ -1367,11 +1453,11 @@ for(j in 1:nrow(cancer_cohorts)) {
         
         }
         
-      } else if(extrapolations[i] == "spline2") {
-        # 2knotspline
+      } else if(extrapolations[i] == "spline1o") {
+        # 1knotspline odds
         
         tryCatch(
-          model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_sex , k = 2, scale = "hazard"),
+          model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_sex , k = 1, scale = "odds"),
           error = function(e){
             cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
             info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
@@ -1383,123 +1469,102 @@ for(j in 1:nrow(cancer_cohorts)) {
         if (exists("model") == TRUE) {
           
           tryCatch({
-          
-          extrap_results_temp[[i]] <- model %>%
-            summary(t=t/365, tidy = TRUE) %>%
-            dplyr::mutate(Method = extrapolations_formatted[i],
-                   Cancer = cancer_cohorts$cohort_name[j],
-                   Age = "All",
-                   Sex = data_sex$sex[sexl])
-          
-          #get the goodness of fit for each model
-          gof_results_temp[[i]] <- model %>%
-            glance() %>%
-            dplyr::mutate(Method = extrapolations_formatted[i],
-                   Cancer = cancer_cohorts$cohort_name[j],
-                   Age = "All" ,
-                   Sex = data_sex$sex[sexl])
-          
-          #extract parameters
-          #grab the parameters and knots from the model
-          coefs.p <- model[["coefficients"]] %>%
-            tibble::enframe() %>%
-            tidyr::pivot_wider(names_from = name, values_from = value) %>%
-            dplyr::mutate(Method = extrapolations_formatted[i],
-                   Cancer = cancer_cohorts$cohort_name[j],
-                   Age = "All") 
-          
-          knots.p <- model[["knots"]] %>%
-            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2" ,"SplineUpperB")) %>%
-            tibble::enframe() %>%
-            tidyr::pivot_wider(names_from = name, values_from = value)
-          
-          parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
-            dplyr::mutate(Sex = data_sex$sex[sexl])
-          
-          # hazard over time
-          hazot_results_temp[[i]] <- model %>%
-            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-            dplyr::mutate(Method = extrapolations_formatted[i], 
-                   Cancer = cancer_cohorts$cohort_name[j],
-                   Age = "All",
-                   Sex = data_sex$sex[sexl])
-          
-          # median and mean predicted survival
-          pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-            dplyr::rename(median = est) %>% 
-            dplyr::mutate(median = round(median, 4),
-                   lcl = round(lcl, 4),
-                   ucl = round(ucl, 4),
-                   "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                               paste0(paste0(nice.num2(median)), " (",
-                                                                      paste0(nice.num2(lcl)),"-",
-                                                                      paste0(nice.num2(ucl)), ")"),
-                                                               NA)) %>% 
-            dplyr::select(-c(lcl, ucl))
-          
-          pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-            dplyr::rename(rmean = est) %>% 
-            dplyr::mutate(rmean = round(rmean, 4),
-                          se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                        paste0(paste0(nice.num2(rmean)), " (",
-                                                               paste0(nice.num2(se)), ")"),
-                                                        NA)) %>% 
-            dplyr::select(-c(lcl, ucl, time))
-          
-          pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>% 
-            dplyr::rename(rmean5yr = est) %>% 
-            dplyr::mutate(rmean5yr = round(rmean5yr, 4),
-                          se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                             paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                    paste0(nice.num2(se)), ")"),
-                                                             NA)) %>% 
-            dplyr::rename(se5yr = se) %>% 
-            dplyr::select(-c(lcl, ucl, time))
-          
-          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
-            dplyr::rename(rmean10yr = est) %>% 
-            dplyr::mutate(rmean10yr = round(rmean10yr, 4),
-                          se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                              paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                                     paste0(nice.num2(se)), ")"),
-                                                              NA)) %>% 
-            dplyr::rename(se10yr = se) %>% 
-            dplyr::select(-c(lcl, ucl, time))
-          
-          pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-            dplyr::mutate(est = round((est*100),4),
-                          lcl = round((lcl*100),4),
-                          ucl = round((ucl*100),4),
-                          "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                             paste0(paste0(nice.num1(est)), " (",
-                                                                    paste0(nice.num1(lcl)),"-",
-                                                                    paste0(nice.num1(ucl)), ")"),
-                                                             NA)) %>% 
-            dplyr::rename("surv" = est) %>% 
-            dplyr::select(-c(lcl, ucl)) %>% 
-            tidyr::pivot_wider(names_from = time, 
-                               values_from = c(`Survival Rate % (95% CI)`, surv),
-                               names_prefix = " year ",
-                               names_sep = "")
-          
-          pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean5, pr_mean10, pr_median, pr_survival_prob )
-          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-            dplyr::mutate(Method = extrapolations_formatted[i], 
-                          Cancer = cancer_cohorts$cohort_name[j], 
-                          Age = "All",
-                          Sex = data_sex$sex[sexl]) 
-          
-          rm(model, pr_mean, pr_median,pr_mean5, pr_mean10, pr_survival_prob)
-          
-          #print out progress               
-          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
-          
+            
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i],
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All",
+                            Sex = data_sex$sex[sexl])
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              dplyr::mutate(Method = extrapolations_formatted[i],
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All" ,
+                            Sex = data_sex$sex[sexl])
+            
+            #extract parameters
+            #grab the parameters and knots from the model
+            coefs.p <- model[["coefficients"]] %>%
+              tibble::enframe() %>%
+              tidyr::pivot_wider(names_from = name, values_from = value) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i],
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All") 
+            
+            knots.p <- model[["knots"]] %>%
+              setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
+              tibble::enframe() %>%
+              tidyr::pivot_wider(names_from = name, values_from = value)
+            
+            parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
+              dplyr::mutate(Sex = data_sex$sex[sexl])
+            
+            # hazard over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All",
+                            Sex = data_sex$sex[sexl])
+            
+            # median and mean predicted survival
+            pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+              dplyr::rename(median = est) %>% 
+              dplyr::mutate(median = round(median, 4),
+                            lcl = round(lcl, 4),
+                            ucl = round(ucl, 4)) %>% 
+              dplyr::rename(lower_median = lcl, upper_median = ucl)
+            
+            pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean = est) %>% 
+              dplyr::mutate(rmean = round(rmean, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean5yr = est) %>% 
+              dplyr::mutate(rmean5yr = round(rmean5yr, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::rename(se5yr = se) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean10yr = est) %>% 
+              dplyr::mutate(rmean10yr = round(rmean10yr, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::rename(se10yr = se) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+              dplyr::mutate(est = round((est*100),4),
+                            lcl = round((lcl*100),4),
+                            ucl = round((ucl*100),4)) %>% 
+              dplyr::rename("surv" = est,
+                            "lower" = lcl,
+                            "upper" = ucl) %>% 
+              tidyr::pivot_wider(names_from = time, 
+                                 values_from = c(surv, lower, upper),
+                                 names_prefix = " year ",
+                                 names_sep = "")
+            
+            pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean5, pr_mean10, pr_median, pr_survival_prob )
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j], 
+                            Age = "All",
+                            Sex = data_sex$sex[sexl]) 
+            
+            rm(model, pr_mean, pr_median,pr_mean5, pr_mean10, pr_survival_prob)
+            
+            #print out progress               
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
+            
           }, 
           
           error = function(e) {
@@ -1513,6 +1578,133 @@ for(j in 1:nrow(cancer_cohorts)) {
           )
           
         }
+      
+      } else if(extrapolations[i] == "spline1n") {
+        # 1knotspline normal
+        
+        tryCatch(
+          model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_sex , k = 1, scale = "normal"),
+          error = function(e){
+            cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
+            info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " warning problem with model \n")
+            info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        )
+        
+        if (exists("model") == TRUE) {
+          
+          tryCatch({
+            
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i],
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All",
+                            Sex = data_sex$sex[sexl])
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              dplyr::mutate(Method = extrapolations_formatted[i],
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All" ,
+                            Sex = data_sex$sex[sexl])
+            
+            #extract parameters
+            #grab the parameters and knots from the model
+            coefs.p <- model[["coefficients"]] %>%
+              tibble::enframe() %>%
+              tidyr::pivot_wider(names_from = name, values_from = value) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i],
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All") 
+            
+            knots.p <- model[["knots"]] %>%
+              setNames(., c("SplineLowerB", "SplineInternal1" , "SplineUpperB")) %>%
+              tibble::enframe() %>%
+              tidyr::pivot_wider(names_from = name, values_from = value)
+            
+            parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
+              dplyr::mutate(Sex = data_sex$sex[sexl])
+            
+            # hazard over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All",
+                            Sex = data_sex$sex[sexl])
+            
+            # median and mean predicted survival
+            pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+              dplyr::rename(median = est) %>% 
+              dplyr::mutate(median = round(median, 4),
+                            lcl = round(lcl, 4),
+                            ucl = round(ucl, 4)) %>% 
+              dplyr::rename(lower_median = lcl, upper_median = ucl)
+            
+            pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean = est) %>% 
+              dplyr::mutate(rmean = round(rmean, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean5yr = est) %>% 
+              dplyr::mutate(rmean5yr = round(rmean5yr, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::rename(se5yr = se) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean10yr = est) %>% 
+              dplyr::mutate(rmean10yr = round(rmean10yr, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::rename(se10yr = se) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+              dplyr::mutate(est = round((est*100),4),
+                            lcl = round((lcl*100),4),
+                            ucl = round((ucl*100),4)) %>% 
+              dplyr::rename("surv" = est,
+                            "lower" = lcl,
+                            "upper" = ucl) %>% 
+              tidyr::pivot_wider(names_from = time, 
+                                 values_from = c(surv, lower, upper),
+                                 names_prefix = " year ",
+                                 names_sep = "")
+            
+            pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean5, pr_mean10, pr_median, pr_survival_prob )
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j], 
+                            Age = "All",
+                            Sex = data_sex$sex[sexl]) 
+            
+            rm(model, pr_mean, pr_median,pr_mean5, pr_mean10, pr_survival_prob)
+            
+            #print out progress               
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
+            
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " model not carried out for sex model", "\n")
+            info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " potential problem with model for sex model", "\n")
+            info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+          
+        }  
+        
         
       } else if(extrapolations[i] == "spline3") {
         # 3knotspline
@@ -1576,34 +1768,21 @@ for(j in 1:nrow(cancer_cohorts)) {
             dplyr::rename(median = est) %>% 
             dplyr::mutate(median = round(median, 4),
                    lcl = round(lcl, 4),
-                   ucl = round(ucl, 4),
-                   "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                               paste0(paste0(nice.num2(median)), " (",
-                                                                      paste0(nice.num2(lcl)),"-",
-                                                                      paste0(nice.num2(ucl)), ")"),
-                                                               NA)) %>% 
-            dplyr::select(-c(lcl, ucl))
+                   ucl = round(ucl, 4)) %>% 
+            dplyr::rename(lower_median = lcl, upper_median = ucl)
           
           pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
             dplyr::rename(rmean = est) %>% 
             dplyr::mutate(rmean = round(rmean, 4),
                           se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                        paste0(paste0(nice.num2(rmean)), " (",
-                                                               paste0(nice.num2(se)), ")"),
-                                                        NA)) %>% 
+                          time = round(time,4)) %>% 
             dplyr::select(-c(lcl, ucl, time))
           
           pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>% 
             dplyr::rename(rmean5yr = est) %>% 
             dplyr::mutate(rmean5yr = round(rmean5yr, 4),
                           se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                             paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                    paste0(nice.num2(se)), ")"),
-                                                             NA)) %>% 
+                          time = round(time,4)) %>% 
             dplyr::rename(se5yr = se) %>% 
             dplyr::select(-c(lcl, ucl, time))
           
@@ -1611,27 +1790,19 @@ for(j in 1:nrow(cancer_cohorts)) {
             dplyr::rename(rmean10yr = est) %>% 
             dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                           se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                              paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                                     paste0(nice.num2(se)), ")"),
-                                                              NA)) %>% 
+                          time = round(time,4)) %>% 
             dplyr::rename(se10yr = se) %>% 
             dplyr::select(-c(lcl, ucl, time))
           
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             dplyr::mutate(est = round((est*100),4),
                           lcl = round((lcl*100),4),
-                          ucl = round((ucl*100),4),
-                          "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                             paste0(paste0(nice.num1(est)), " (",
-                                                                    paste0(nice.num1(lcl)),"-",
-                                                                    paste0(nice.num1(ucl)), ")"),
-                                                             NA)) %>% 
-            dplyr::rename("surv" = est) %>% 
-            dplyr::select(-c(lcl, ucl)) %>% 
+                          ucl = round((ucl*100),4)) %>% 
+            dplyr::rename("surv" = est,
+                          "lower" = lcl,
+                          "upper" = ucl) %>% 
             tidyr::pivot_wider(names_from = time, 
-                               values_from = c(`Survival Rate % (95% CI)`, surv),
+                               values_from = c(surv, lower, upper),
                                names_prefix = " year ",
                                names_sep = "")
           
@@ -1661,11 +1832,12 @@ for(j in 1:nrow(cancer_cohorts)) {
           
         }
         
-      } else if(extrapolations[i] == "spline5") {
-        # 5knotspline
+        
+      } else if(extrapolations[i] == "spline3o") {
+        # 3knotspline odds
         
         tryCatch(
-          model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ 1 , data=data_sex, k = 5, scale = "hazard"),
+          model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ 1, data=data_sex, k = 3, scale = "odds"),
           error = function(e){
             cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
             info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
@@ -1677,122 +1849,102 @@ for(j in 1:nrow(cancer_cohorts)) {
         if (exists("model") == TRUE) {
           
           tryCatch({
-          
-          extrap_results_temp[[i]] <- model %>%
-            summary(t=t/365, tidy = TRUE) %>%
-            dplyr::mutate(Method = extrapolations_formatted[i],
-                   Cancer = cancer_cohorts$cohort_name[j],
-                   Age = "All",
-                   Sex = data_sex$sex[sexl])
-          
-          #get the goodness of fit for each model
-          gof_results_temp[[i]] <- model %>%
-            glance() %>%
-            dplyr::mutate(Method = extrapolations_formatted[i],
-                   Cancer = cancer_cohorts$cohort_name[j],
-                   Age = "All" ,
-                   Sex = data_sex$sex[sexl])
-          
-          coefs.p <- model[["coefficients"]] %>%
-            tibble::enframe() %>%
-            tidyr::pivot_wider(names_from = name, values_from = value) %>%
-            dplyr::mutate(Method = extrapolations_formatted[i], 
-                   Cancer = cancer_cohorts$cohort_name[j],
-                   Age = "All") 
-          
-          knots.p <- model[["knots"]] %>%
-            setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,
-                          "SplineInternal4" ,"SplineInternal5" , "SplineUpperB")) %>%
-            tibble::enframe() %>%
-            tidyr::pivot_wider(names_from = name, values_from = value)
-          
-          parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
-            dplyr::mutate(Sex = data_sex$sex[sexl])
-          
-          # hazard over time
-          hazot_results_temp[[i]] <- model %>%
-            summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
-            dplyr::mutate(Method = extrapolations_formatted[i], 
-                   Cancer = cancer_cohorts$cohort_name[j],
-                   Age = "All",
-                   Sex = data_sex$sex[sexl])
-          
-          # median and mean predicted survival
-          pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
-            dplyr::rename(median = est) %>% 
-            dplyr::mutate(median = round(median, 4),
-                   lcl = round(lcl, 4),
-                   ucl = round(ucl, 4),
-                   "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                               paste0(paste0(nice.num2(median)), " (",
-                                                                      paste0(nice.num2(lcl)),"-",
-                                                                      paste0(nice.num2(ucl)), ")"),
-                                                               NA)) %>% 
-            dplyr::select(-c(lcl, ucl))
-          
-          pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
-            dplyr::rename(rmean = est) %>% 
-            dplyr::mutate(rmean = round(rmean, 4),
-                          se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                        paste0(paste0(nice.num2(rmean)), " (",
-                                                               paste0(nice.num2(se)), ")"),
-                                                        NA)) %>% 
-            dplyr::select(-c(lcl, ucl, time))
-          
-          pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>% 
-            dplyr::rename(rmean5yr = est) %>% 
-            dplyr::mutate(rmean5yr = round(rmean5yr, 4),
-                          se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                             paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                    paste0(nice.num2(se)), ")"),
-                                                             NA)) %>% 
-            dplyr::rename(se5yr = se) %>% 
-            dplyr::select(-c(lcl, ucl, time))
-          
-          pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
-            dplyr::rename(rmean10yr = est) %>% 
-            dplyr::mutate(rmean10yr = round(rmean10yr, 4),
-                          se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                              paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                                     paste0(nice.num2(se)), ")"),
-                                                              NA)) %>% 
-            dplyr::rename(se10yr = se) %>% 
-            dplyr::select(-c(lcl, ucl, time))
-          
-          pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
-            dplyr::mutate(est = round((est*100),4),
-                          lcl = round((lcl*100),4),
-                          ucl = round((ucl*100),4),
-                          "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                             paste0(paste0(nice.num1(est)), " (",
-                                                                    paste0(nice.num1(lcl)),"-",
-                                                                    paste0(nice.num1(ucl)), ")"),
-                                                             NA)) %>% 
-            dplyr::rename("surv" = est) %>% 
-            dplyr::select(-c(lcl, ucl)) %>% 
-            tidyr::pivot_wider(names_from = time, 
-                               values_from = c(`Survival Rate % (95% CI)`, surv),
-                               names_prefix = " year ",
-                               names_sep = "")
-          
-          pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean5, pr_mean10, pr_median, pr_survival_prob )
-          pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
-            dplyr::mutate(Method = extrapolations_formatted[i], 
-                          Cancer = cancer_cohorts$cohort_name[j], 
-                          Age = "All",
-                          Sex = data_sex$sex[sexl]) 
-          
-          rm(model, pr_mean, pr_median,pr_mean5, pr_mean10, pr_survival_prob)
-          
-          #print out progress               
-          print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
-        
+            
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All",
+                            Sex = data_sex$sex[sexl])
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All",
+                            Sex = data_sex$sex[sexl])
+            
+            #extract parameters
+            #grab the parameters and knots from the model
+            coefs.p <- model[["coefficients"]] %>%
+              tibble::enframe() %>%
+              tidyr::pivot_wider(names_from = name, values_from = value) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All") 
+            
+            knots.p <- model[["knots"]] %>%
+              setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
+              tibble::enframe() %>%
+              tidyr::pivot_wider(names_from = name, values_from = value)
+            
+            parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
+              dplyr::mutate(Sex = data_sex$sex[sexl])
+            
+            # hazard over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j], 
+                            Age = "All" ,
+                            Sex = data_sex$sex[sexl])
+            
+            # median and mean predicted survival
+            pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+              dplyr::rename(median = est) %>% 
+              dplyr::mutate(median = round(median, 4),
+                            lcl = round(lcl, 4),
+                            ucl = round(ucl, 4)) %>% 
+              dplyr::rename(lower_median = lcl, upper_median = ucl)
+            
+            pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean = est) %>% 
+              dplyr::mutate(rmean = round(rmean, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean5yr = est) %>% 
+              dplyr::mutate(rmean5yr = round(rmean5yr, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::rename(se5yr = se) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean10yr = est) %>% 
+              dplyr::mutate(rmean10yr = round(rmean10yr, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::rename(se10yr = se) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+              dplyr::mutate(est = round((est*100),4),
+                            lcl = round((lcl*100),4),
+                            ucl = round((ucl*100),4)) %>% 
+              dplyr::rename("surv" = est,
+                            "lower" = lcl,
+                            "upper" = ucl) %>% 
+              tidyr::pivot_wider(names_from = time, 
+                                 values_from = c(surv, lower, upper),
+                                 names_prefix = " year ",
+                                 names_sep = "")
+            
+            pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean5, pr_mean10, pr_median, pr_survival_prob )
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j], 
+                            Age = "All",
+                            Sex = data_sex$sex[sexl]) 
+            
+            rm(model, pr_mean, pr_median,pr_mean5, pr_mean10, pr_survival_prob)
+            
+            #print out progress               
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
+            
           }, 
           
           error = function(e) {
@@ -1806,6 +1958,134 @@ for(j in 1:nrow(cancer_cohorts)) {
           )
           
         }
+        
+        
+      } else if(extrapolations[i] == "spline3n") {
+        # 3knotspline normal
+        
+        tryCatch(
+          model <- flexsurv::flexsurvspline(formula=Surv(time_years,status-1) ~ 1, data=data_sex, k = 3, scale = "normal"),
+          error = function(e){
+            cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " error not carried out \n")
+            info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e)) } ,
+          warning = function(w){
+            cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " warning problem with model \n")
+            info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+        )
+        
+        if (exists("model") == TRUE) {
+          
+          tryCatch({
+            
+            extrap_results_temp[[i]] <- model %>%
+              summary(t=t/365, tidy = TRUE) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All",
+                            Sex = data_sex$sex[sexl])
+            
+            #get the goodness of fit for each model
+            gof_results_temp[[i]] <- model %>%
+              glance() %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All",
+                            Sex = data_sex$sex[sexl])
+            
+            #extract parameters
+            #grab the parameters and knots from the model
+            coefs.p <- model[["coefficients"]] %>%
+              tibble::enframe() %>%
+              tidyr::pivot_wider(names_from = name, values_from = value) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j],
+                            Age = "All") 
+            
+            knots.p <- model[["knots"]] %>%
+              setNames(., c("SplineLowerB", "SplineInternal1" , "SplineInternal2", "SplineInternal3" ,"SplineUpperB")) %>%
+              tibble::enframe() %>%
+              tidyr::pivot_wider(names_from = name, values_from = value)
+            
+            parameters_results_temp[[i]] <- dplyr::bind_cols(coefs.p,  knots.p ) %>% 
+              dplyr::mutate(Sex = data_sex$sex[sexl])
+            
+            # hazard over time
+            hazot_results_temp[[i]] <- model %>%
+              summary(t=(t + 1)/365, type = "hazard" , tidy = TRUE) %>%
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j], 
+                            Age = "All" ,
+                            Sex = data_sex$sex[sexl])
+            
+            # median and mean predicted survival
+            pr_median <- summary(model, type = "median", ci = TRUE, tidy = T) %>% 
+              dplyr::rename(median = est) %>% 
+              dplyr::mutate(median = round(median, 4),
+                            lcl = round(lcl, 4),
+                            ucl = round(ucl, 4)) %>% 
+              dplyr::rename(lower_median = lcl, upper_median = ucl)
+            
+            pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean = est) %>% 
+              dplyr::mutate(rmean = round(rmean, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean5yr = est) %>% 
+              dplyr::mutate(rmean5yr = round(rmean5yr, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::rename(se5yr = se) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_mean10 <- summary(model, type = "rmst", t = 10, se = TRUE, tidy = T) %>% 
+              dplyr::rename(rmean10yr = est) %>% 
+              dplyr::mutate(rmean10yr = round(rmean10yr, 4),
+                            se = round(se, 4),
+                            time = round(time,4)) %>% 
+              dplyr::rename(se10yr = se) %>% 
+              dplyr::select(-c(lcl, ucl, time))
+            
+            pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
+              dplyr::mutate(est = round((est*100),4),
+                            lcl = round((lcl*100),4),
+                            ucl = round((ucl*100),4)) %>% 
+              dplyr::rename("surv" = est,
+                            "lower" = lcl,
+                            "upper" = ucl) %>% 
+              tidyr::pivot_wider(names_from = time, 
+                                 values_from = c(surv, lower, upper),
+                                 names_prefix = " year ",
+                                 names_sep = "")
+            
+            pred_median_mean_results_temp[[i]] <- dplyr::bind_cols(pr_mean,pr_mean5, pr_mean10, pr_median, pr_survival_prob )
+            pred_median_mean_results_temp[[i]] <- pred_median_mean_results_temp[[i]] %>% 
+              dplyr::mutate(Method = extrapolations_formatted[i], 
+                            Cancer = cancer_cohorts$cohort_name[j], 
+                            Age = "All",
+                            Sex = data_sex$sex[sexl]) 
+            
+            rm(model, pr_mean, pr_median,pr_mean5, pr_mean10, pr_survival_prob)
+            
+            #print out progress               
+            print(paste0(extrapolations_formatted[i]," ", Sys.time()," for " ,cancer_cohorts$cohort_name[j], " completed"))
+            
+          }, 
+          
+          error = function(e) {
+            cat(conditionMessage(e), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " model not carried out for sex model", "\n")
+            info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," model not carried out ", e))} ,
+          
+          warning = function(w) {
+            cat(conditionMessage(w), "for", cancer_cohorts$cohort_name[j] , ":", extrapolations[i], " potential problem with model for sex model", "\n")
+            info(logger, paste0(cancer_cohorts$cohort_name[j], " : ", extrapolations[i]," potential problem with model ", w))}
+          
+          )
+          
+        }
+        
         
       } else {
         
@@ -1862,34 +2142,21 @@ for(j in 1:nrow(cancer_cohorts)) {
             dplyr::rename(median = est) %>% 
             dplyr::mutate(median = round(median, 4),
                    lcl = round(lcl, 4),
-                   ucl = round(ucl, 4),
-                   "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                               paste0(paste0(nice.num2(median)), " (",
-                                                                      paste0(nice.num2(lcl)),"-",
-                                                                      paste0(nice.num2(ucl)), ")"),
-                                                               NA)) %>% 
-            dplyr::select(-c(lcl, ucl))
+                   ucl = round(ucl, 4)) %>% 
+            dplyr::rename(lower_median = lcl, upper_median = ucl)
           
           pr_mean <- summary(model, type = "rmst", se = TRUE, tidy = T) %>% 
             dplyr::rename(rmean = est) %>% 
             dplyr::mutate(rmean = round(rmean, 4),
                           se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                                        paste0(paste0(nice.num2(rmean)), " (",
-                                                               paste0(nice.num2(se)), ")"),
-                                                        NA)) %>% 
+                          time = round(time,4)) %>% 
             dplyr::select(-c(lcl, ucl, time))
           
           pr_mean5 <- summary(model, type = "rmst", t = 5, se = TRUE, tidy = T) %>% 
             dplyr::rename(rmean5yr = est) %>% 
             dplyr::mutate(rmean5yr = round(rmean5yr, 4),
                           se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                             paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                                    paste0(nice.num2(se)), ")"),
-                                                             NA)) %>% 
+                          time = round(time,4)) %>% 
             dplyr::rename(se5yr = se) %>% 
             dplyr::select(-c(lcl, ucl, time))
           
@@ -1897,27 +2164,19 @@ for(j in 1:nrow(cancer_cohorts)) {
             dplyr::rename(rmean10yr = est) %>% 
             dplyr::mutate(rmean10yr = round(rmean10yr, 4),
                           se = round(se, 4),
-                          time = round(time,4) ,
-                          "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                              paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                                     paste0(nice.num2(se)), ")"),
-                                                              NA)) %>% 
+                          time = round(time,4)) %>% 
             dplyr::rename(se10yr = se) %>% 
             dplyr::select(-c(lcl, ucl, time))
           
           pr_survival_prob <- summary(model, type = "survival", t = c(1,5,10), ci = TRUE, tidy = T) %>% 
             dplyr::mutate(est = round((est*100),4),
                           lcl = round((lcl*100),4),
-                          ucl = round((ucl*100),4),
-                          "Survival Rate % (95% CI)"= ifelse(!is.na(est),
-                                                             paste0(paste0(nice.num1(est)), " (",
-                                                                    paste0(nice.num1(lcl)),"-",
-                                                                    paste0(nice.num1(ucl)), ")"),
-                                                             NA)) %>% 
-            dplyr::rename("surv" = est) %>% 
-            dplyr::select(-c(lcl, ucl)) %>% 
+                          ucl = round((ucl*100),4)) %>% 
+            dplyr::rename("surv" = est,
+                          "lower" = lcl,
+                          "upper" = ucl) %>% 
             tidyr::pivot_wider(names_from = time, 
-                               values_from = c(`Survival Rate % (95% CI)`, surv),
+                               values_from = c(surv, lower, upper),
                                names_prefix = " year ",
                                names_sep = "")
           
@@ -1996,19 +2255,19 @@ for(j in 1:nrow(cancer_cohorts)) {
 
 # Merge results together from each cancer and extrapolation into a dataframe ---
 extrapolatedfinalsexS <- dplyr::bind_rows(extrapolations_sexS) %>%
-  dplyr::mutate(Stratification = "Sex", Adjustment = "None")
+  dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "No")
 goffinalsexS <- dplyr::bind_rows(gof_haz_sexS) %>%
-  dplyr::mutate(Stratification = "Sex" , Adjustment = "None")
+  dplyr::mutate(Stratification = "Sex" , Adjustment = "None", Truncated = "No")
 hazardotfinalsexS <- dplyr::bind_rows(hazot_sexS) %>%
-  dplyr::mutate(Stratification = "Sex", Adjustment = "None")
+  dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "No")
 parametersfinalsexS <- dplyr::bind_rows(parameters_sexS)  %>%
-  dplyr::mutate(Stratification = "Sex", Adjustment = "None") %>% 
+  dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "No") %>% 
   dplyr::relocate(shape, .after = Sex) %>% 
   dplyr::relocate(rate, .after = Sex) %>% 
   dplyr::mutate(rate = coalesce(rate, `1`)) %>% 
   dplyr::select(!c(`1`))
 predmedmeanfinalsexS <- dplyr::bind_rows(pred_median_mean_sexS)  %>%
-  dplyr::mutate(Stratification = "Sex", Adjustment = "None")
+  dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "No")
 
 toc(func.toc=toc_min)
 

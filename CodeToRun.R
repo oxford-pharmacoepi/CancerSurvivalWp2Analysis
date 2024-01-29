@@ -97,6 +97,11 @@ startdate <- "2000-01-01"
 # set as TRUE.
 priorhistory <- TRUE
 
+# Truncated time analysis ------
+# By setting this to TRUE this will perform an additional analysis where extrapolation methods will extrapolate on the observed data truncated at 2 years NOT on the full observed data. 
+# If FALSE this additional analysis will not be run.
+PerformTruncatedAnalysis <- TRUE
+
 # Run the study ------
 source(here::here("RunStudy.R"))
 # after the study is run you should have a zip folder in your output folder to share

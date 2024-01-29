@@ -140,7 +140,6 @@ for(j in 1:nrow(cancer_cohorts)) {
     }
     
     
-    
     # 60 to 69 female
     if(nrow(observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",]) > 4000){
       observedkm_6069f <- observedkm_age_sex[[j]][observedkm_age_sex[[j]]$sex_age_gp == "60 to 69_Female",] %>%
@@ -962,17 +961,10 @@ for(j in 1:nrow(cancer_cohorts)) {
              median = round(median, 4),
              `0.95LCL` = round(`0.95LCL`, 4),
              `0.95UCL` = round(`0.95UCL`, 4),
-             agesex = stringr::str_replace(agesex, "sex_age_gp=", ""),
-             "rmean in years (SE)"= ifelse(!is.na(rmean),
-                                           paste0(paste0(nice.num2(rmean)), " (",
-                                                  paste0(nice.num2(se)), ")"),
-                                           NA),
-             "Median Survival in Years (95% CI)"= ifelse(!is.na(median),
-                                                         paste0(paste0(nice.num2(median)), " (",
-                                                                paste0(nice.num2(`0.95LCL`)),"-",
-                                                                paste0(nice.num2(`0.95UCL`)), ")"),
-                                                         NA)) %>% 
-      dplyr::select(-c(`0.95LCL`,`0.95UCL`, n.max, n.start)) %>% 
+             agesex = stringr::str_replace(agesex, "sex_age_gp=", "")) %>% 
+      dplyr::select(-c(n.max, n.start)) %>% 
+      dplyr::rename(lower_median = `0.95LCL`,
+                    upper_median = `0.95UCL`) %>%
       dplyr::mutate(n  = replace(n, n ==  0 , NA),
              events = replace(events, events ==  0 , NA)) %>%
       dplyr::mutate(n  = replace(n, n <=  10 , "<10"),
@@ -990,11 +982,7 @@ for(j in 1:nrow(cancer_cohorts)) {
       tibble::rownames_to_column() %>%  
       dplyr::select(rmean, `se(rmean)`, rowname) %>% 
       dplyr::rename(rmean10yr = rmean, se10yr =`se(rmean)`, agesex = rowname) %>% 
-      dplyr::mutate(agesex = stringr::str_replace(agesex, "sex_age_gp=", "") ,
-             "rmean 10yrs in years (SE)"= ifelse(!is.na(rmean10yr),
-                                                 paste0(paste0(nice.num2(rmean10yr)), " (",
-                                                        paste0(nice.num2(se10yr)), ")"),
-                                                 NA)) 
+      dplyr::mutate(agesex = stringr::str_replace(agesex, "sex_age_gp=", "")) 
     
     # Extract rmean at 5 years
     rmean5 <- survival:::survmean(model_rm, rmean=c(5))$matrix %>% 
@@ -1002,11 +990,7 @@ for(j in 1:nrow(cancer_cohorts)) {
       tibble::rownames_to_column() %>%  
       dplyr::select(rmean, `se(rmean)`, rowname) %>% 
       dplyr::rename(rmean5yr = rmean, se5yr =`se(rmean)`, agesex = rowname) %>% 
-      dplyr::mutate(agesex = stringr::str_replace(agesex, "sex_age_gp=", "") ,
-                    "rmean 5yrs in years (SE)"= ifelse(!is.na(rmean5yr),
-                                                        paste0(paste0(nice.num2(rmean5yr)), " (",
-                                                               paste0(nice.num2(se5yr)), ")"),
-                                                        NA)) 
+      dplyr::mutate(agesex = stringr::str_replace(agesex, "sex_age_gp=", "")) 
     
     print(paste0("Median survival from KM from observed data ", Sys.time()," for ",cancer_cohorts$cohort_name[j], " completed"))
     
@@ -1017,16 +1001,10 @@ for(j in 1:nrow(cancer_cohorts)) {
       dplyr::mutate(surv = round((surv*100),4),
              lower = round((lower*100),4),
              upper = round((upper*100),4),
-             strata = stringr::str_replace(strata, "sex_age_gp=", ""),
-             "Survival Rate % (95% CI)"= ifelse(!is.na(surv),
-                                                paste0(paste0(nice.num1(surv)), " (",
-                                                       paste0(nice.num1(lower)),"-",
-                                                       paste0(nice.num1(upper)), ")"),
-                                                NA)) %>% 
-      dplyr::select(-c(lower, upper)) %>% 
+             strata = stringr::str_replace(strata, "sex_age_gp=", "")) %>% 
       dplyr::rename(agesex = strata) %>% 
       tidyr::pivot_wider(names_from = time, 
-                  values_from = c(`Survival Rate % (95% CI)`, surv),
+                         values_from = c(surv, lower, upper),
                   names_prefix = " year ",
                   names_sep = "")
     
@@ -1066,19 +1044,19 @@ print(paste0("age*sex stratification KM analysis not carried out for ", cancer_c
 # take the results from a list (one element for each cancer) and put into dataframe ----
 observedkmcombined_age_sex <- dplyr::bind_rows(observedkm_age_sex) %>%
   dplyr::rename(est = estimate ,ucl = conf.high, lcl = conf.low ) %>%
-  dplyr::mutate(Stratification = "agesex", Adjustment = "None")
+  dplyr::mutate(Stratification = "agesex", Adjustment = "None", Truncated = "No")
 
 medkmcombined_age_sex <- dplyr::bind_rows(observedmedianKM_age_sex) %>%
-  dplyr::mutate(Stratification = "agesex", Adjustment = "None")
+  dplyr::mutate(Stratification = "agesex", Adjustment = "None", Truncated = "No")
 
 hotkmcombined_age_sex <- dplyr::bind_rows(observedhazotKM_age_sex) %>%
   dplyr::rename(est = hazard, ucl = upper.ci, lcl = lower.ci ) %>%
-  dplyr::mutate(Stratification = "agesex", Adjustment = "None")
+  dplyr::mutate(Stratification = "agesex", Adjustment = "None", Truncated = "No")
 
 #generate the risk table 
 risktableskm_age_sex <- dplyr::bind_rows(observedrisktableKM_age_sex) %>%
-dplyr::filter(details != "n.censor") %>% 
-  dplyr::mutate(Stratification = "agesex", Adjustment = "None") %>% 
+#dplyr::filter(details != "n.censor") %>% 
+  dplyr::mutate(Stratification = "agesex", Adjustment = "None", Truncated = "No") %>% 
   dplyr::mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
   dplyr::mutate(across(where(is.numeric), ~replace(., .<  10 , "<10"))) %>% 
   dplyr::mutate(across(everything(), as.character)) %>%
