@@ -24,6 +24,7 @@ This study is focussing on determining the usefulness of real world data to dete
 
 Link to the shiny app for the papers: 
 1) Survival results https://dpa-pde-oxford.shinyapps.io/EHDENCancerSurvivalStudyShiny/
-2) Extrapolation results https://dpa-pde-oxford.shinyapps.io/EHDENCancerExtrapStudyShiny/
+2) Long term Modelling results https://dpa-pde-oxford.shinyapps.io/EHDENCancerExtrapStudyShiny/
+3) Extrapolation from truncated follow up results: TBC
 
 Any problems with the repo or shiny apps contact danielle.newby@ndorms.ox.ac.uk
