@@ -1041,6 +1041,7 @@ print(paste0("age*sex stratification KM analysis not carried out for ", cancer_c
   
 }
 
+if(db.name != "ECI"){ 
 # take the results from a list (one element for each cancer) and put into dataframe ----
 observedkmcombined_age_sex <- dplyr::bind_rows(observedkm_age_sex) %>%
   dplyr::rename(est = estimate ,ucl = conf.high, lcl = conf.low ) %>%
@@ -1065,3 +1066,5 @@ risktableskm_age_sex <- dplyr::bind_rows(observedrisktableKM_age_sex) %>%
 toc(func.toc=toc_min)
 
 info(logger, 'KM analysis for AGE*SEX COMPLETE')
+
+}

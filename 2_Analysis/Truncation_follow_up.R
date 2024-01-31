@@ -187,6 +187,22 @@ cdm$outcome_trunc <- cdm$outcome_trunc %>% filter(cohort_definition_id %in% id)
 cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_trunc,
                                                    reason="Removing cancer cohorts from analysis with less than 200 patients" )
 
+# add bespoke code for ECI (Edinburgh cancer registry) to remove males from breast cancer cohort due to ethical approval
+if(db.name == "ECI"){
+  
+  breastID <- CDMConnector::cohortSet(cdm$outcome) %>%
+    dplyr::filter(cohort_name == "Breast") %>%
+    dplyr::pull("cohort_definition_id") %>%
+    as.numeric()
+  
+  # remove males from breast cancer cohort
+  cdm$outcome <- cdm$outcome %>% 
+    dplyr::filter(sex == "Female" & cohort_definition_id == breastID)
+  
+  
+  cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
+                                                     reason="Removing male breast cancer patients" )
+}
 
 # collect to use for analysis
 Pop_truncated <- cdm$outcome_trunc %>% dplyr::collect() 
@@ -2011,6 +2027,7 @@ for(j in 1:nrow(cancer_cohorts)) {
   
 }
 
+if(db.name != "ECI"){ 
 # Merge results together from each cancer and extrapolation into a dataframe ---
 extrapolatedfinalsext <- dplyr::bind_rows(extrapolations_sex) %>%
   dplyr::mutate(Stratification = "None", Adjustment = "Sex", Truncated = "Yes")
@@ -2028,7 +2045,7 @@ predmedmeanfinalsext <- dplyr::bind_rows(pred_median_mean_sex)  %>%
 toc(func.toc=toc_min)
 
 info(logger, 'Extrapolation analysis for sex adjustment COMPLETE')
-
+}
 
 ########################################
 # SEX STRATIFICATION EXTRAPOLATION
@@ -3008,7 +3025,7 @@ for(j in 1:nrow(cancer_cohorts)) {
   
 }
 
-
+if(db.name != "ECI"){ 
 # Merge results together from each cancer and extrapolation into a dataframe ---
 extrapolatedfinalsexSt <- dplyr::bind_rows(extrapolations_sexS) %>%
   dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "Yes")
@@ -3028,6 +3045,7 @@ predmedmeanfinalsexSt <- dplyr::bind_rows(pred_median_mean_sexS)  %>%
 toc(func.toc=toc_min)
 
 info(logger, 'Extrapolation analysis for sex stratification COMPLETE')
+}
 
 ####################################################################################################
 #################################################

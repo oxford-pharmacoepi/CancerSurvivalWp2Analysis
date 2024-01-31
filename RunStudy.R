@@ -371,6 +371,8 @@ print(paste0("SAVING RESULTS"))
 # Tidy up results and save ----
 
 if(PerformTruncatedAnalysis == TRUE){
+  
+if(db.name != "ECI"){ 
 # survival KM and extrapolated data -----
 survivalResults <- dplyr::bind_rows(
   observedkmcombined ,  
@@ -389,8 +391,7 @@ survivalResults <- dplyr::bind_rows(
   extrapolatedfinalageSt) %>%
   dplyr::mutate(Database = db.name) %>% 
   dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
-  dplyr::select(!c(n.risk, n.event, n.censor, std.error)) %>% 
-  dplyr::filter(time != 0)
+  dplyr::select(!c(n.risk, n.event, n.censor, std.error)) 
 
 #risk table ----
 riskTableResults <- dplyr::bind_rows(
@@ -478,6 +479,87 @@ ExtrpolationParameters <- dplyr::bind_rows(
 
 } else {
   
+  # survival KM and extrapolated data -----
+  survivalResults <- dplyr::bind_rows(
+    observedkmcombined ,  
+    observedkmcombined_age , 
+    extrapolatedfinal,
+    extrapolatedfinalage,
+    extrapolatedfinalageS,
+    extrapolatedfinalt,
+    extrapolatedfinalaget,
+    extrapolatedfinalageSt) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+    dplyr::select(!c(n.risk, n.event, n.censor, std.error)) 
+  
+  #risk table ----
+  riskTableResults <- dplyr::bind_rows(
+    risktableskm , 
+    risktableskm_age 
+  ) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))
+  
+  # KM median results, survival probabilities and predicted from extrapolations ----
+  medianResults <- dplyr::bind_rows( 
+    medkmcombined ,
+    medkmcombined_age ,
+    predmedmeanfinal,
+    predmedmeanfinalage,
+    predmedmeanfinalageS,
+    predmedmeanfinalt,
+    predmedmeanfinalaget,
+    predmedmeanfinalageSt) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) 
+  
+  # hazard over time results -----
+  hazOverTimeResults <- dplyr::bind_rows( 
+    hotkmcombined , 
+    hotkmcombined_age, 
+    hazardotfinal, 
+    hazardotfinalage,
+    hazardotfinalageS,
+    hazardotfinalt, 
+    hazardotfinalaget,
+    hazardotfinalageSt) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex,  "Male"))
+  
+  
+  # GOF results for extrapolated results (adjusted and stratified)
+  GOFResults <- dplyr::bind_rows( 
+    goffinal,
+    goffinalage,
+    goffinalageS,
+    goffinalt,
+    goffinalaget,
+    goffinalageSt
+  ) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+    dplyr::select(!c(N, events, censored)) 
+  
+  # parameters of the extrapolated models
+  ExtrpolationParameters <- dplyr::bind_rows(
+    parametersfinal ,
+    parametersfinalage,
+    parametersfinalageS,
+    parametersfinalt ,
+    parametersfinalaget,
+    parametersfinalageSt
+  ) %>%
+    dplyr::mutate(Database = db.name) %>%
+    dplyr::relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))
+  
+  
+}
+
+} else {
+  
+  if(db.name != "ECI"){ 
   survivalResults <- dplyr::bind_rows(
     observedkmcombined ,  
     observedkmcombined_sex , 
@@ -555,7 +637,72 @@ ExtrpolationParameters <- dplyr::bind_rows(
     dplyr::mutate(Database = db.name) %>%
     dplyr::relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
     dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))  
+
+  } else {
+    
+    survivalResults <- dplyr::bind_rows(
+      observedkmcombined ,  
+      observedkmcombined_age , 
+      extrapolatedfinal,
+      extrapolatedfinalage,
+      extrapolatedfinalageS) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+      dplyr::select(!c(n.risk, n.event, n.censor, std.error))
+    
+    #risk table ----
+    riskTableResults <- dplyr::bind_rows(
+      risktableskm , 
+      risktableskm_age 
+    ) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))
+    
+    # KM median results, survival probabilites and predicted from extrapolations ----
+    medianResults <- dplyr::bind_rows( 
+      medkmcombined ,
+      medkmcombined_age ,
+      predmedmeanfinal,
+      predmedmeanfinalage,
+      predmedmeanfinalageS) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) 
+    
+    # hazard over time results -----
+    hazOverTimeResults <- dplyr::bind_rows( 
+      hotkmcombined , 
+      hotkmcombined_age, 
+      hazardotfinal, 
+      hazardotfinalage,
+      hazardotfinalageS) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex,  "Male"))
+    
+    
+    # GOF results for extrapolated results (adjusted and stratified)
+    GOFResults <- dplyr::bind_rows( 
+      goffinal,
+      goffinalage,
+      goffinalageS
+    ) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+      dplyr::select(!c(N, events, censored)) 
+    
+    # parameters of the extrapolated models
+    ExtrpolationParameters <- dplyr::bind_rows(
+      parametersfinal ,
+      parametersfinalage,
+      parametersfinalageS
+    ) %>%
+      dplyr::mutate(Database = db.name) %>%
+      dplyr::relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))  
+    
+    
+  }
   
+    
 }
 
 
