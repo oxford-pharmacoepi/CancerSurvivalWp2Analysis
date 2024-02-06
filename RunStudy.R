@@ -365,7 +365,7 @@ print(paste0("6 of 6: TABLE ONE CHARACTERISATION RAN"))
 }
 
 
-
+info(logger, 'SAVING RESULTS')
 print(paste0("SAVING RESULTS")) 
 ##################################################################
 # Tidy up results and save ----
@@ -795,12 +795,16 @@ AnalysisRunSummary <-
   dplyr::mutate(Database = cdm_name(cdm),
          Run = ifelse(is.na(Run), "No", Run))
 
+info(logger, 'SNAPSHOT CDM')
+print(paste0("SNAPSHOT CDM")) 
 
 # snapshot the cdm
 snapshotcdm <- CDMConnector::snapshot(cdm) %>% 
   mutate(Database = CDMConnector::cdm_name(cdm)) %>% 
   mutate(StudyPeriodStartDate = startdate)
 
+info(logger, 'GETTING COHORT ATTRITION')
+print(paste0("GETTING COHORT ATTRITION")) 
 #get attrition for the cohorts and add cohort identification
 attritioncdm <- CDMConnector::cohort_attrition(cdm$outcome) %>% 
   dplyr::left_join(
@@ -813,7 +817,11 @@ attritioncdm <- CDMConnector::cohort_attrition(cdm$outcome) %>%
   dplyr::mutate(Database = cdm_name(cdm)) %>% 
   dplyr::rename(Cancer = cohort_name)
 
+info(logger, 'GOT COHORT ATTRITION')
+print(paste0("GOT COHORT ATTRITION")) 
+
 # save results as csv for data partner can review
+print(paste0("SAVING RESULTS"))
 info(logger, "SAVING RESULTS")
 readr::write_csv(survivalResults, paste0(here::here(output.folder),"/", cdm_name(cdm), "_survival_estimates.csv"))
 readr::write_csv(riskTableResults, paste0(here::here(output.folder),"/", cdm_name(cdm), "_risk_table.csv"))
@@ -825,7 +833,6 @@ readr::write_csv(AnalysisRunSummary, paste0(here::here(output.folder),"/", cdm_n
 readr::write_csv(tableone_final, paste0(here::here(output.folder),"/", cdm_name(cdm), "_tableone_summary.csv"))
 readr::write_csv(snapshotcdm, paste0(here::here(output.folder),"/", cdm_name(cdm), "_cdm_snapshot.csv"))
 readr::write_csv(attritioncdm, paste0(here::here(output.folder),"/", cdm_name(cdm), "_cohort_attrition.csv"))
-info(logger, "SAVED RESULTS")
 
 # # Time taken
 x <- abs(as.numeric(Sys.time()-start, units="secs"))
@@ -836,6 +843,7 @@ info(logger, paste0("Study took: ",
                               60,  x %% 60 %/% 1)))
 
 print(paste0("SAVED RESULTS")) 
+info(logger, "SAVED RESULTS")
 # zip results
 print("Zipping results to output folder")
 
