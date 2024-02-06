@@ -807,6 +807,7 @@ snapshotcdm <- CDMConnector::snapshot(cdm) %>%
 } else {
   
   print(paste0("SNAPSHOT CDM for CRN")) 
+  
   npersons <- cdm$person %>% 
     dplyr::tally() %>% 
     dplyr::collect()
