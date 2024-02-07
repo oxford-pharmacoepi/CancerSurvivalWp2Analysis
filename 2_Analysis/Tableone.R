@@ -58,7 +58,12 @@ tableone <- cdm$outcome %>%
   PatientProfiles::summariseCharacteristics(
     strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
-    ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69),c(70, 79), c(80, 150)),
+    ageGroup = list( "18 to 39" = c(18, 39),
+                              "40 to 49" = c(40, 49),
+                              "50 to 59" = c(50, 59),
+                              "60 to 69" = c(60, 69),
+                              "70 to 79" = c(70, 79),
+                              "80 +" = c(80, 150)),
     tableIntersect = list(
       "Visits" = list(
         tableName = "visit_occurrence", value = "count", window = c(-365, 0))),
@@ -85,7 +90,12 @@ suppressWarnings(
     dplyr::mutate(cohort_definition_id = 10) %>% 
     PatientProfiles::summariseCharacteristics(
       strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
-      ageGroup = list(c(18, 39), c(40, 49), c(50, 59), c(60, 69),c(70, 79), c(80, 150)),
+      ageGroup = list("18 to 39" = c(18, 39),
+                                "40 to 49" = c(40, 49),
+                                "50 to 59" = c(50, 59),
+                                "60 to 69" = c(60, 69),
+                                "70 to 79" = c(70, 79),
+                                "80 +" = c(80, 150)),
       minCellCount = 10,
       tableIntersect = list(
         "Visits" = list(
