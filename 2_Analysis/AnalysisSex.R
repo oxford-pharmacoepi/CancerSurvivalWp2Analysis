@@ -286,7 +286,8 @@ for(j in 1:nrow(cancer_cohorts)) {
   }
   
 } # this closes the loop on the analysis containing both sexes 
-  
+
+if(db.name != "ECI"){  
 # take the results from a list (one element for each cancer) and put into dataframe for KM survival
 observedkmcombined_sex <- dplyr::bind_rows(observedkm_sex) %>%
   dplyr::rename(est = estimate ,ucl = conf.high, lcl = conf.low )  %>%
@@ -306,9 +307,11 @@ risktableskm_sex <- dplyr::bind_rows(observedrisktableKM_sex) %>%
   dplyr::mutate(across(everything(), ~replace(., .==  0 , NA))) %>%
   dplyr::mutate(across(everything(), ~replace(., .<=  10 , "<10"))) %>% 
   dplyr::mutate(across(everything(), as.character)) %>%
-  replace(is.na(.), "0")
+  replace(is.na(.), "0") 
 
 info(logger, 'KM analysis for sex stratification COMPLETE')
+
+}
   
 #########################################################
 # Extrapolation analysis for sex adjustment ------
@@ -1255,6 +1258,7 @@ for(j in 1:nrow(cancer_cohorts)) {
   
 }
 
+if(db.name != "ECI"){  
 # Merge results together from each cancer and extrapolation into a dataframe ---
 extrapolatedfinalsex <- dplyr::bind_rows(extrapolations_sex) %>%
   dplyr::mutate(Stratification = "None", Adjustment = "Sex", Truncated = "No")
@@ -1271,7 +1275,9 @@ predmedmeanfinalsex <- dplyr::bind_rows(pred_median_mean_sex)  %>%
 
 toc(func.toc=toc_min)
 
-info(logger, 'Extrapolation analysis for sex adjustment COMPLETE')
+info(logger, 'Extrapolation analysis for sex adjustment COMPLETE') 
+
+}
 
 
 ########################################
@@ -2252,7 +2258,7 @@ for(j in 1:nrow(cancer_cohorts)) {
   
 }
 
-
+if(db.name != "ECI"){ 
 # Merge results together from each cancer and extrapolation into a dataframe ---
 extrapolatedfinalsexS <- dplyr::bind_rows(extrapolations_sexS) %>%
   dplyr::mutate(Stratification = "Sex", Adjustment = "None", Truncated = "No")
@@ -2272,3 +2278,5 @@ predmedmeanfinalsexS <- dplyr::bind_rows(pred_median_mean_sexS)  %>%
 toc(func.toc=toc_min)
 
 info(logger, 'Extrapolation analysis for sex stratification COMPLETE')
+
+}

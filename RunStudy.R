@@ -369,12 +369,14 @@ print(paste0("6 of 6: TABLE ONE CHARACTERISATION RAN"))
 }
 
 
-
+info(logger, 'SAVING RESULTS')
 print(paste0("SAVING RESULTS")) 
 ##################################################################
 # Tidy up results and save ----
 
 if(PerformTruncatedAnalysis == TRUE){
+  
+if(db.name != "ECI"){ 
 # survival KM and extrapolated data -----
 survivalResults <- dplyr::bind_rows(
   observedkmcombined ,  
@@ -393,8 +395,7 @@ survivalResults <- dplyr::bind_rows(
   extrapolatedfinalageSt) %>%
   dplyr::mutate(Database = db.name) %>% 
   dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
-  dplyr::select(!c(n.risk, n.event, n.censor, std.error)) %>% 
-  dplyr::filter(time != 0)
+  dplyr::select(!c(n.risk, n.event, n.censor, std.error)) 
 
 #risk table ----
 riskTableResults <- dplyr::bind_rows(
@@ -482,6 +483,87 @@ ExtrpolationParameters <- dplyr::bind_rows(
 
 } else {
   
+  # survival KM and extrapolated data -----
+  survivalResults <- dplyr::bind_rows(
+    observedkmcombined ,  
+    observedkmcombined_age , 
+    extrapolatedfinal,
+    extrapolatedfinalage,
+    extrapolatedfinalageS,
+    extrapolatedfinalt,
+    extrapolatedfinalaget,
+    extrapolatedfinalageSt) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+    dplyr::select(!c(n.risk, n.event, n.censor, std.error)) 
+  
+  #risk table ----
+  riskTableResults <- dplyr::bind_rows(
+    risktableskm , 
+    risktableskm_age 
+  ) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))
+  
+  # KM median results, survival probabilities and predicted from extrapolations ----
+  medianResults <- dplyr::bind_rows( 
+    medkmcombined ,
+    medkmcombined_age ,
+    predmedmeanfinal,
+    predmedmeanfinalage,
+    predmedmeanfinalageS,
+    predmedmeanfinalt,
+    predmedmeanfinalaget,
+    predmedmeanfinalageSt) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) 
+  
+  # hazard over time results -----
+  hazOverTimeResults <- dplyr::bind_rows( 
+    hotkmcombined , 
+    hotkmcombined_age, 
+    hazardotfinal, 
+    hazardotfinalage,
+    hazardotfinalageS,
+    hazardotfinalt, 
+    hazardotfinalaget,
+    hazardotfinalageSt) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex,  "Male"))
+  
+  
+  # GOF results for extrapolated results (adjusted and stratified)
+  GOFResults <- dplyr::bind_rows( 
+    goffinal,
+    goffinalage,
+    goffinalageS,
+    goffinalt,
+    goffinalaget,
+    goffinalageSt
+  ) %>%
+    dplyr::mutate(Database = db.name) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+    dplyr::select(!c(N, events, censored)) 
+  
+  # parameters of the extrapolated models
+  ExtrpolationParameters <- dplyr::bind_rows(
+    parametersfinal ,
+    parametersfinalage,
+    parametersfinalageS,
+    parametersfinalt ,
+    parametersfinalaget,
+    parametersfinalageSt
+  ) %>%
+    dplyr::mutate(Database = db.name) %>%
+    dplyr::relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
+    dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))
+  
+  
+}
+
+} else {
+  
+  if(db.name != "ECI"){ 
   survivalResults <- dplyr::bind_rows(
     observedkmcombined ,  
     observedkmcombined_sex , 
@@ -559,7 +641,72 @@ ExtrpolationParameters <- dplyr::bind_rows(
     dplyr::mutate(Database = db.name) %>%
     dplyr::relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
     dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))  
+
+  } else {
+    
+    survivalResults <- dplyr::bind_rows(
+      observedkmcombined ,  
+      observedkmcombined_age , 
+      extrapolatedfinal,
+      extrapolatedfinalage,
+      extrapolatedfinalageS) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+      dplyr::select(!c(n.risk, n.event, n.censor, std.error))
+    
+    #risk table ----
+    riskTableResults <- dplyr::bind_rows(
+      risktableskm , 
+      risktableskm_age 
+    ) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))
+    
+    # KM median results, survival probabilites and predicted from extrapolations ----
+    medianResults <- dplyr::bind_rows( 
+      medkmcombined ,
+      medkmcombined_age ,
+      predmedmeanfinal,
+      predmedmeanfinalage,
+      predmedmeanfinalageS) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) 
+    
+    # hazard over time results -----
+    hazOverTimeResults <- dplyr::bind_rows( 
+      hotkmcombined , 
+      hotkmcombined_age, 
+      hazardotfinal, 
+      hazardotfinalage,
+      hazardotfinalageS) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex,  "Male"))
+    
+    
+    # GOF results for extrapolated results (adjusted and stratified)
+    GOFResults <- dplyr::bind_rows( 
+      goffinal,
+      goffinalage,
+      goffinalageS
+    ) %>%
+      dplyr::mutate(Database = db.name) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male")) %>% 
+      dplyr::select(!c(N, events, censored)) 
+    
+    # parameters of the extrapolated models
+    ExtrpolationParameters <- dplyr::bind_rows(
+      parametersfinal ,
+      parametersfinalage,
+      parametersfinalageS
+    ) %>%
+      dplyr::mutate(Database = db.name) %>%
+      dplyr::relocate(Cancer, Method, Stratification, Adjustment, Sex, Age, Database) %>% 
+      dplyr::mutate(Sex = if_else(!(grepl("Prostate", Cancer, fixed = TRUE)), Sex, "Male"))  
+    
+    
+  }
   
+    
 }
 
 
@@ -652,12 +799,57 @@ AnalysisRunSummary <-
   dplyr::mutate(Database = cdm_name(cdm),
          Run = ifelse(is.na(Run), "No", Run))
 
+info(logger, 'SNAPSHOT CDM')
+print(paste0("SNAPSHOT CDM")) 
 
 # snapshot the cdm
+if(db.name != "CRN"){ 
 snapshotcdm <- CDMConnector::snapshot(cdm) %>% 
   mutate(Database = CDMConnector::cdm_name(cdm)) %>% 
   mutate(StudyPeriodStartDate = startdate)
 
+} else {
+  
+  print(paste0("SNAPSHOT CDM for CRN")) 
+  
+  npersons <- cdm$person %>% 
+    dplyr::tally() %>% 
+    dplyr::collect()
+  
+  early_obs <- cdm$observation_period %>%
+    summarise(earliest_start_date = min(observation_period_start_date, na.rm = TRUE)) %>%
+    collect()
+  
+  latest_obs <- cdm$observation_period %>%
+    summarise(latest_start_date = max(observation_period_end_date, na.rm = TRUE)) %>%
+    collect()
+                           
+  observation_per_count <- cdm$observation_period %>% 
+    count() %>% collect()
+  
+  snapshotcdm1 <- cdm$cdm_source %>%  dplyr::collect()
+  snapshotcdm1 <- snapshotcdm1 %>% 
+    mutate(cdm_name = db.name,
+           Database = db.name,
+           person_count = npersons,
+           StudyPeriodStartDate = startdate,
+           snapshot_date = Sys.Date(),
+           earliest_observation_period_start_date = early_obs,
+           latest_observation_period_end_date = latest_obs ,
+           observation_period_count = observation_per_count
+           ) %>% 
+    select(-c(cdm_source_abbreviation,
+              cdm_etl_reference,
+              source_release_date )) %>% 
+    rename(cdm_description = source_description,
+           cdm_documentation_reference = source_documentation_reference
+           )
+            
+  
+}
+
+info(logger, 'GETTING COHORT ATTRITION')
+print(paste0("GETTING COHORT ATTRITION")) 
 #get attrition for the cohorts and add cohort identification
 attritioncdm <- CDMConnector::cohort_attrition(cdm$outcome) %>% 
   dplyr::left_join(
@@ -670,7 +862,11 @@ attritioncdm <- CDMConnector::cohort_attrition(cdm$outcome) %>%
   dplyr::mutate(Database = cdm_name(cdm)) %>% 
   dplyr::rename(Cancer = cohort_name)
 
+info(logger, 'GOT COHORT ATTRITION')
+print(paste0("GOT COHORT ATTRITION")) 
+
 # save results as csv for data partner can review
+print(paste0("SAVING RESULTS"))
 info(logger, "SAVING RESULTS")
 readr::write_csv(survivalResults, paste0(here::here(output.folder),"/", cdm_name(cdm), "_survival_estimates.csv"))
 readr::write_csv(riskTableResults, paste0(here::here(output.folder),"/", cdm_name(cdm), "_risk_table.csv"))
@@ -682,7 +878,6 @@ readr::write_csv(AnalysisRunSummary, paste0(here::here(output.folder),"/", cdm_n
 readr::write_csv(tableone_final, paste0(here::here(output.folder),"/", cdm_name(cdm), "_tableone_summary.csv"))
 readr::write_csv(snapshotcdm, paste0(here::here(output.folder),"/", cdm_name(cdm), "_cdm_snapshot.csv"))
 readr::write_csv(attritioncdm, paste0(here::here(output.folder),"/", cdm_name(cdm), "_cohort_attrition.csv"))
-info(logger, "SAVED RESULTS")
 
 # # Time taken
 x <- abs(as.numeric(Sys.time()-start, units="secs"))
@@ -693,6 +888,7 @@ info(logger, paste0("Study took: ",
                               60,  x %% 60 %/% 1)))
 
 print(paste0("SAVED RESULTS")) 
+info(logger, "SAVED RESULTS")
 # zip results
 print("Zipping results to output folder")
 

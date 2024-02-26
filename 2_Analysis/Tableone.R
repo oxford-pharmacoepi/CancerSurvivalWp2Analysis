@@ -54,9 +54,16 @@ info(logger, "CREATING TABLE ONE SUMMARY")
 suppressWarnings(
   
 tableone <- cdm$outcome %>%
+  computeQuery() %>% 
   PatientProfiles::summariseCharacteristics(
     strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
     minCellCount = 10,
+    ageGroup = list( "18 to 39" = c(18, 39),
+                              "40 to 49" = c(40, 49),
+                              "50 to 59" = c(50, 59),
+                              "60 to 69" = c(60, 69),
+                              "70 to 79" = c(70, 79),
+                              "80 +" = c(80, 150)),
     tableIntersect = list(
       "Visits" = list(
         tableName = "visit_occurrence", value = "count", window = c(-365, 0))),
@@ -83,6 +90,12 @@ suppressWarnings(
     dplyr::mutate(cohort_definition_id = 10) %>% 
     PatientProfiles::summariseCharacteristics(
       strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
+      ageGroup = list("18 to 39" = c(18, 39),
+                                "40 to 49" = c(40, 49),
+                                "50 to 59" = c(50, 59),
+                                "60 to 69" = c(60, 69),
+                                "70 to 79" = c(70, 79),
+                                "80 +" = c(80, 150)),
       minCellCount = 10,
       tableIntersect = list(
         "Visits" = list(
@@ -116,6 +129,8 @@ info(logger, "CREATED TABLE ONE SUMMARY")
   
 info(logger, "CREATING TABLE ONE SUMMARY")
   
+  if(db.name != "CRN"){ 
+  
   tableone_final <- cdm$outcome %>%
     PatientProfiles::addCohortName() %>%
     dplyr::collect() %>%
@@ -147,6 +162,56 @@ info(logger, "CREATING TABLE ONE SUMMARY")
   print(paste0("Tableone ", Sys.time()," completed"))
   
   info(logger, "CREATED TABLE ONE SUMMARY")
+  
+  } else {
+    
+    print(paste0("Tableone ", Sys.time()," for CRN started"))
+    
+      Pop <- Pop %>% 
+        dplyr::left_join(
+          cancer_cohorts %>% select(c("cohort_definition_id", "cohort_name")),
+          by = join_by(cohort_definition_id),
+          relationship = "many-to-many",
+          keep = FALSE
+        )
+      
+      tableone_final <- Pop %>% 
+        PatientProfiles::summariseResult(
+          group = list("cohort_name"),
+          includeOverallGroup = TRUE,
+          minCellCount = 10,
+          strata = list(c("sex"),c("age_gr"), c("sex", "age_gr" )),
+          includeOverallStrata = TRUE,
+          variables = list(
+            "categorical" = c("sex", "age_gr", "cohort_name"),
+            "dates" = c("cohort_start_date", "cohort_end_date"),
+            "numeric" = c("age", "future_observation")
+          ),
+          functions = list(
+            "categorical" = c("count", "percentage"),
+            "dates" = c("min", "q25", "median", "q75", "max"),
+            "numeric" = c("min", "q25", "median", "q75", "max")
+          )
+        )
+      
+      Pop <- Pop %>% 
+        select(-c("cohort_name"))
+      
+      tableone_final <- tableone_final %>%
+        dplyr::mutate(variable = ifelse(variable == "Age gr", "Age group", variable))
+      
+      tableone_final <- tableone_final %>% 
+        dplyr::mutate(variable = ifelse(variable == "cohort_name", "outcome", variable),
+                      cdm_name = db.name) %>% 
+        relocate(cdm_name)
+      
+    
+    print(paste0("Tableone", Sys.time(), "completed for CRN"))
+    
+    info(logger, "CREATED TABLE ONE SUMMARY")
+    
+    
+  }
 
 }
 
