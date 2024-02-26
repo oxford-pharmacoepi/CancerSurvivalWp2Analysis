@@ -169,6 +169,10 @@ if( "Prostate" %in% names(cancer_concepts) == TRUE){
     dplyr::filter(!(sex == "Female" & cohort_definition_id == prostateID))
 }
 
+#update the attrition after those outside the study period are removed
+cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
+                                                   reason="Exclude patients outside study period" )
+
 # remove those with any a prior malignancy (apart from skin cancer in prior history)
 cdm$outcome <- cdm$outcome %>%
   dplyr::filter(anymalignancy != 1)
