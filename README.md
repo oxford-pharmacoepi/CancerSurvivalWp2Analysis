@@ -20,7 +20,7 @@ This study is focussing on determining the usefulness of real world data to dete
 
 ## Important information!
 1) Minimum cell counts for this study is 10 all counts less than this are obscured.
-2) You need to set your study start date in the CodeToRun.R if you only have useable data from 2000. So some examples.. your database starts in 1973 then you leave the start date as "2000-01-01". Your database started in 2006 so you would put "2006.01.01".
+2) You need to set your study start date in the CodeToRun.R if you only have useable data from 2000. So some examples.. your database starts in 1973 then you leave the start date as "2000-01-01". Your database started in 2006 so you would put "2007.01.01" to allow for 1 year of prior observation.
 
 Link to the shiny app for the papers: 
 1) Survival results https://dpa-pde-oxford.shinyapps.io/EHDENCancerSurvivalStudyShiny/
