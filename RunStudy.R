@@ -71,7 +71,6 @@ if(db.name == "IMASIS"){
                                                      reason="Removing patients in registry" )
 }
 
-
 # instantiate exclusion any prior history of malignancy
 info(logger, "INSTANTIATE EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CANCER)")
 
@@ -246,6 +245,72 @@ cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
 
 # collect to use for analysis
 Pop <- cdm$outcome %>% dplyr::collect()
+
+info(logger, 'SNAPSHOT CDM')
+print(paste0("SNAPSHOT CDM")) 
+
+# snapshot the cdm
+if(db.name != "CRN"){ 
+  snapshotcdm <- CDMConnector::snapshot(cdm) %>% 
+    mutate(Database = CDMConnector::cdm_name(cdm)) %>% 
+    mutate(StudyPeriodStartDate = startdate)
+  
+} else {
+  
+  print(paste0("SNAPSHOT CDM for CRN")) 
+  
+  npersons <- cdm$person %>% 
+    dplyr::tally() %>% 
+    dplyr::collect()
+  
+  early_obs <- cdm$observation_period %>%
+    summarise(earliest_start_date = min(observation_period_start_date, na.rm = TRUE)) %>%
+    collect()
+  
+  latest_obs <- cdm$observation_period %>%
+    summarise(latest_start_date = max(observation_period_end_date, na.rm = TRUE)) %>%
+    collect()
+  
+  observation_per_count <- cdm$observation_period %>% 
+    count() %>% collect()
+  
+  snapshotcdm1 <- cdm$cdm_source %>%  dplyr::collect()
+  snapshotcdm1 <- snapshotcdm1 %>% 
+    mutate(cdm_name = db.name,
+           Database = db.name,
+           person_count = npersons,
+           StudyPeriodStartDate = startdate,
+           snapshot_date = Sys.Date(),
+           earliest_observation_period_start_date = early_obs,
+           latest_observation_period_end_date = latest_obs ,
+           observation_period_count = observation_per_count
+    ) %>% 
+    select(-c(cdm_source_abbreviation,
+              cdm_etl_reference,
+              source_release_date )) %>% 
+    rename(cdm_description = source_description,
+           cdm_documentation_reference = source_documentation_reference
+    )
+  
+  
+}
+
+info(logger, 'GETTING COHORT ATTRITION')
+print(paste0("GETTING COHORT ATTRITION")) 
+#get attrition for the cohorts and add cohort identification
+attritioncdm <- CDMConnector::cohort_attrition(cdm$outcome) %>% 
+  dplyr::left_join(
+    cohortSet(cdm$outcome) %>% select(c("cohort_definition_id", "cohort_name")),
+    by = join_by(cohort_definition_id),
+    relationship = "many-to-many",
+    keep = FALSE
+  ) %>% 
+  dplyr::relocate(cohort_name) %>% 
+  dplyr::mutate(Database = cdm_name(cdm)) %>% 
+  dplyr::rename(Cancer = cohort_name)
+
+info(logger, 'GOT COHORT ATTRITION')
+print(paste0("GOT COHORT ATTRITION")) 
 
 # Setting up information for extrapolation methods to be used ---
 extrapolations <- c("gompertz", 
@@ -794,72 +859,6 @@ AnalysisRunSummary <-
   dplyr::select(!c(ID)) %>% 
   dplyr::mutate(Database = cdm_name(cdm),
          Run = ifelse(is.na(Run), "No", Run))
-
-info(logger, 'SNAPSHOT CDM')
-print(paste0("SNAPSHOT CDM")) 
-
-# snapshot the cdm
-if(db.name != "CRN"){ 
-snapshotcdm <- CDMConnector::snapshot(cdm) %>% 
-  mutate(Database = CDMConnector::cdm_name(cdm)) %>% 
-  mutate(StudyPeriodStartDate = startdate)
-
-} else {
-  
-  print(paste0("SNAPSHOT CDM for CRN")) 
-  
-  npersons <- cdm$person %>% 
-    dplyr::tally() %>% 
-    dplyr::collect()
-  
-  early_obs <- cdm$observation_period %>%
-    summarise(earliest_start_date = min(observation_period_start_date, na.rm = TRUE)) %>%
-    collect()
-  
-  latest_obs <- cdm$observation_period %>%
-    summarise(latest_start_date = max(observation_period_end_date, na.rm = TRUE)) %>%
-    collect()
-                           
-  observation_per_count <- cdm$observation_period %>% 
-    count() %>% collect()
-  
-  snapshotcdm1 <- cdm$cdm_source %>%  dplyr::collect()
-  snapshotcdm1 <- snapshotcdm1 %>% 
-    mutate(cdm_name = db.name,
-           Database = db.name,
-           person_count = npersons,
-           StudyPeriodStartDate = startdate,
-           snapshot_date = Sys.Date(),
-           earliest_observation_period_start_date = early_obs,
-           latest_observation_period_end_date = latest_obs ,
-           observation_period_count = observation_per_count
-           ) %>% 
-    select(-c(cdm_source_abbreviation,
-              cdm_etl_reference,
-              source_release_date )) %>% 
-    rename(cdm_description = source_description,
-           cdm_documentation_reference = source_documentation_reference
-           )
-            
-  
-}
-
-info(logger, 'GETTING COHORT ATTRITION')
-print(paste0("GETTING COHORT ATTRITION")) 
-#get attrition for the cohorts and add cohort identification
-attritioncdm <- CDMConnector::cohort_attrition(cdm$outcome) %>% 
-  dplyr::left_join(
-    cohortSet(cdm$outcome) %>% select(c("cohort_definition_id", "cohort_name")),
-    by = join_by(cohort_definition_id),
-    relationship = "many-to-many",
-    keep = FALSE
-  ) %>% 
-  dplyr::relocate(cohort_name) %>% 
-  dplyr::mutate(Database = cdm_name(cdm)) %>% 
-  dplyr::rename(Cancer = cohort_name)
-
-info(logger, 'GOT COHORT ATTRITION')
-print(paste0("GOT COHORT ATTRITION")) 
 
 # save results as csv for data partner can review
 print(paste0("SAVING RESULTS"))
