@@ -1,3 +1,20 @@
+if(db.name == "CRN"){ 
+  
+  db <- DBI::dbConnect(dbms,
+                       dbname = server_dbi,
+                       port = port,
+                       host = host, 
+                       user = user, 
+                       password = password)
+  
+  cdm <- CDMConnector::cdm_from_con(con = db, 
+                                    cdm_schema = cdm_database_schema,
+                                    write_schema = c("schema" = results_database_schema, 
+                                                     "prefix" = table_stem),
+                                    cdm_name = db.name)
+  
+  
+}
 
 # instantiate the cohorts with no prior history 
 cdm <- CDMConnector::generateConceptCohortSet(
@@ -29,6 +46,19 @@ if(priorhistory == TRUE){
 cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_trunc,
                                                    reason="Excluded patients with less than 365 prior history" )
 
+# this step adds in a filter which only includes patients who are present in IMASIS's tumour registry
+if(db.name == "IMASIS"){
+  
+  cdm$outcome_trunc <- cdm$outcome_trunc %>% 
+    dplyr::left_join(cdm$condition_occurrence %>%
+                       select("person_id",  "condition_type_concept_id") %>%
+                       distinct(),
+                     by = c("subject_id"= "person_id")) %>% 
+    dplyr::filter(condition_type_concept_id == 32879 )
+  
+  cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_trunc,
+                                                     reason="Removing patients in registry" )
+}
 
 info(logger, "SUBSETTING CDM")
 cdm <- CDMConnector::cdmSubsetCohort(cdm, "outcome_trunc")
@@ -40,6 +70,7 @@ info(logger, "INSTANTIATE EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CA
 codelistExclusion <- CodelistGenerator::codesFromConceptSet(here::here("1_InstantiateCohorts", "Exclusion"), cdm)
 # add cancer concepts to exclusion concepts to make sure we capture all exclusions
 codelistExclusion <- list(unique(Reduce(union_all, c(cancer_concepts, codelistExclusion))))
+
 #rename list of concepts
 names(codelistExclusion) <- "anymalignancy"
 
@@ -63,6 +94,40 @@ cdm$outcome_trunc <- cdm$outcome_trunc %>%
     days = FALSE,
     window = list(c(-Inf, -1))
   )
+
+# remove any patients with other cancers on same date not in our list of cancers
+# get the any malignancy codelist
+codelistExclusion1 <- CodelistGenerator::codesFromConceptSet(here::here("1_InstantiateCohorts", "Exclusion"), cdm)
+
+# merge all concepts for all cancers together
+codes2remove <- list(unique(Reduce(union_all, c(cancer_concepts))))
+names(codes2remove) <- "allmalignancy"
+
+# remove lists from our cancers of interest from the any malignancy list
+codes2remove <- list(codelistExclusion1$cancerexcludnonmelaskincancer[!codelistExclusion1$cancerexcludnonmelaskincancer %in% codes2remove$allmalignancy])
+names(codes2remove) <- "allmalignancy"
+
+#instantiate any malignancy codes minus our cancers of interest
+cdm <- CDMConnector::generateConceptCohortSet(cdm = cdm,
+                                              conceptSet = codes2remove ,
+                                              name = "allmalignancy",
+                                              overwrite = TRUE)
+
+# create a flag of anyone with MALIGNANT NEOPLASTIC DISEASE (excluding skin cancer) ON cancer diagnosis date but removing our codes of interest
+# in doing so we are capturing people with other cancers on the same day and wont exclude everyone
+cdm$outcome_trunc <- cdm$outcome_trunc %>%
+  PatientProfiles::addCohortIntersect(
+    cdm = cdm,
+    targetCohortTable = "allmalignancy",
+    targetStartDate = "cohort_start_date",
+    targetEndDate = "cohort_end_date",
+    flag = TRUE,
+    count = FALSE,
+    date = FALSE,
+    days = FALSE,
+    window = list(c(0, 0))
+  )
+
 
 # get data variables
 cdm$outcome_trunc <- cdm$outcome_trunc %>%
@@ -100,9 +165,9 @@ cdm$outcome_trunc <- cdm$outcome_trunc %>%
   CDMConnector::computeQuery() %>%
   dplyr::filter(cohort_start_date >= startdate) %>%
   dplyr::filter(cohort_start_date <= '2019-12-31') %>%
-  dplyr::mutate(observation_period_end_date_2019 = ifelse(cohort_end_date >= '2019-12-31', '2019-12-31', NA)) %>%
+  dplyr::mutate(observation_period_end_date_2019 = ifelse(observation_period_end_date >= '2019-12-31', '2019-12-31', NA)) %>%
   dplyr::mutate(observation_period_end_date_2019 = as.Date(observation_period_end_date_2019) ) %>%
-  dplyr::mutate(observation_period_end_date_2019 = ifelse(is.na(observation_period_end_date_2019), cohort_end_date, observation_period_end_date_2019 )) %>%
+  dplyr::mutate(observation_period_end_date_2019 = ifelse(is.na(observation_period_end_date_2019), observation_period_end_date, observation_period_end_date_2019 )) %>%
   dplyr::mutate(status = death_date) %>%
   dplyr::mutate(status = ifelse(death_date > '2019-12-31', NA, status)) %>%
   dplyr::mutate(status = ifelse(death_date > observation_period_end_date_2019, NA, status)) %>%
@@ -130,6 +195,10 @@ if( "Prostate" %in% names(cancer_concepts) == TRUE){
     dplyr::filter(!(sex == "Female" & cohort_definition_id == prostateID))
 }
 
+#update the attrition after those outside the study period are removed
+cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_trunc,
+                                                   reason="Exclude patients outside study period" )
+
 # remove those with any a prior malignancy (apart from skin cancer in prior history)
 cdm$outcome_trunc <- cdm$outcome_trunc %>%
   dplyr::filter(anymalignancy != 1)
@@ -146,29 +215,12 @@ cdm$outcome_trunc <- cdm$outcome_trunc %>%
 cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_trunc,
                                                    reason="Exclude patients with death date same as cancer diagnosis date" )
 
-
-# remove any people who have multiple cancer diagnosis on the same day
+# removes any patients with multiple cancers on same date (just the cancers of interest at the moment)
 cdm$outcome_trunc <- cdm$outcome_trunc %>%
-  dplyr::group_by(subject_id, 
-                  cohort_definition_id,
-                  cohort_start_date,
-                  cohort_end_date,
-                  sex,
-                  prior_observation,
-                  future_observation,
-                  age_gr ,   
-                  age ,
-                  death_date,
-                  observation_period_end_date,  
-                  observation_period_end_date_2019,
-                  status,                          
-                  time_days,
-                  time_years,
-                  sex_age_gp) %>%
-  dplyr::summarise(count = max(1, na.rm = TRUE), .groups = "drop") %>%
-  dplyr::filter(count == 1) %>%
-  dplyr::ungroup() %>% 
-  dplyr::select(!c(count))
+  dplyr::distinct(subject_id, .keep_all = TRUE)
+
+cdm$outcome_trunc <- cdm$outcome_trunc %>%
+  dplyr::filter(flag_allmalignancy_0_to_0 != 1)
 
 cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_trunc,
                                                    reason="Exclude patients with multiple cancers on different sites diagnosed on same day" )
@@ -190,17 +242,17 @@ cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_tr
 # add bespoke code for ECI (Edinburgh cancer registry) to remove males from breast cancer cohort due to ethical approval
 if(db.name == "ECI"){
   
-  breastID <- CDMConnector::cohortSet(cdm$outcome) %>%
+  breastID <- CDMConnector::cohortSet(cdm$outcome_trunc) %>%
     dplyr::filter(cohort_name == "Breast") %>%
     dplyr::pull("cohort_definition_id") %>%
     as.numeric()
   
   # remove males from breast cancer cohort
-  cdm$outcome <- cdm$outcome %>% 
+  cdm$outcome_trunc <- cdm$ooutcome_trunc %>% 
     dplyr::filter(sex == "Female" & cohort_definition_id == breastID)
   
   
-  cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
+  cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_trunc,
                                                      reason="Removing male breast cancer patients" )
 }
 

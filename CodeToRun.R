@@ -44,12 +44,13 @@ user       <- "..."
 password   <- "..."
 port       <- "..." 
 host       <- "..." 
+dbms       <- "..."
 
 # Specify cdm_reference via DBI connection details -----
 # In this study we also use the DBI package to connect to the database
 # set up the dbConnect details below (see https://dbi.r-dbi.org/articles/dbi for more details)
 # you may need to install another package for this (although RPostgres is included with renv in case you are using postgres)
-db <- DBI::dbConnect("...",
+db <- DBI::dbConnect(dbms,
                 dbname = server_dbi,
                 port = port,
                 host = host, 
