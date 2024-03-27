@@ -47,18 +47,18 @@ cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_tr
                                                    reason="Excluded patients with less than 365 prior history" )
 
 # this step adds in a filter which only includes patients who are present in IMASIS's tumour registry
-if(db.name == "IMASIS"){
-  
-  cdm$outcome_trunc <- cdm$outcome_trunc %>% 
-    dplyr::left_join(cdm$condition_occurrence %>%
-                       select("person_id",  "condition_type_concept_id") %>%
-                       distinct(),
-                     by = c("subject_id"= "person_id")) %>% 
-    dplyr::filter(condition_type_concept_id == 32879 )
-  
-  cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_trunc,
-                                                     reason="Removing patients in registry" )
-}
+# if(db.name == "IMASIS"){
+#   
+#   cdm$outcome_trunc <- cdm$outcome_trunc %>% 
+#     dplyr::left_join(cdm$condition_occurrence %>%
+#                        select("person_id",  "condition_type_concept_id") %>%
+#                        distinct(),
+#                      by = c("subject_id"= "person_id")) %>% 
+#     dplyr::filter(condition_type_concept_id == 32879 )
+#   
+#   cdm$outcome_trunc <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome_trunc,
+#                                                      reason="Removing patients in registry" )
+# }
 
 info(logger, "SUBSETTING CDM")
 cdm <- CDMConnector::cdmSubsetCohort(cdm, "outcome_trunc")
