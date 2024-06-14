@@ -199,7 +199,7 @@ if( "Prostate" %in% names(cancer_concepts) == TRUE){
   
   # remove females from prostate cancer cohort (misdiagnosis)
   cdm$outcome <- cdm$outcome %>%
-    dplyr::filter(!(sex == "Female" | sex == "None" | sex == "none" & cohort_definition_id == prostateID))
+    dplyr::filter(!(sex == "Female" & cohort_definition_id == prostateID))
 }
 
 #update the attrition after those outside the study period are removed
@@ -231,6 +231,13 @@ cdm$outcome <- cdm$outcome %>%
 
 cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
                                                     reason="Exclude patients with multiple cancers on different sites diagnosed on same day" )
+
+# remove those with no sex
+cdm$outcome <- cdm$outcome %>%
+  dplyr::filter(!(sex == "None" | sex == "none"))
+
+cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
+                                                   reason="Exclude patients with no sex defined" )
 
 # only run analysis where we have counts more than 200 ----
 cancer_cohorts <- CDMConnector::cohortSet(cdm$outcome) %>%
