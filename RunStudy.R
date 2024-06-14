@@ -199,7 +199,7 @@ if( "Prostate" %in% names(cancer_concepts) == TRUE){
   
   # remove females from prostate cancer cohort (misdiagnosis)
   cdm$outcome <- cdm$outcome %>%
-    dplyr::filter(!(sex == "Female" & cohort_definition_id == prostateID))
+    dplyr::filter(!(sex == "Female" | sex == "None" | sex == "none" & cohort_definition_id == prostateID))
 }
 
 #update the attrition after those outside the study period are removed
