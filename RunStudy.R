@@ -888,6 +888,7 @@ readr::write_csv(tableone_final, paste0(here::here(output.folder),"/", cdm_name(
 readr::write_csv(snapshotcdm, paste0(here::here(output.folder),"/", cdm_name(cdm), "_cdm_snapshot.csv"))
 readr::write_csv(attritioncdm, paste0(here::here(output.folder),"/", cdm_name(cdm), "_cohort_attrition.csv"))
 
+
 # # Time taken
 x <- abs(as.numeric(Sys.time()-start, units="secs"))
 
