@@ -57,20 +57,6 @@ info(logger, "SUBSETTING CDM")
 cdm <- CDMConnector::cdmSubsetCohort(cdm, "outcome")
 info(logger, "SUBSETTED CDM")
 
-# # this step adds in a filter which only includes patients who are present in IMASIS's tumour registry
-# if(db.name == "IMASIS"){
-#   
-#   cdm$outcome <- cdm$outcome %>% 
-#     dplyr::left_join(cdm$condition_occurrence %>%
-#                        select("person_id",  "condition_type_concept_id") %>%
-#                        distinct(),
-#                      by = c("subject_id"= "person_id")) %>% 
-#     dplyr::filter(condition_type_concept_id == 32879 )
-# 
-#   cdm$outcome <- CDMConnector::recordCohortAttrition(cohort = cdm$outcome,
-#                                                      reason="Removing patients in registry" )
-# }
-
 # instantiate exclusion any prior history of malignancy
 info(logger, "INSTANTIATE EXCLUSION ANY MALIGNANT NEOPLASTIC DISEASE (EX SKIN CANCER)")
 
